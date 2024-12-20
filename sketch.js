@@ -27,14 +27,14 @@ let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of th
 let role = "MT"
 
 // positions: used for displaying (relative to center of arena)
-let MT = [0, -100]
-let OT = [100, 0]
-let H1 = [0, 100]
-let H2 = [-100, 0]
-let M1 = [-77, 77]
-let M2 = [77, 77]
-let R1 = [-77, -77]
-let R2 = [77, -77]
+let MT = [0, -50]
+let OT = [50, 0]
+let H1 = [0, 50]
+let H2 = [-50, 0]
+let M1 = [-35, 35]
+let M2 = [35, 35]
+let R1 = [-35, -35]
+let R2 = [35, -35]
 
 // Utopian Sky (FRU P1)
 let fruP1Image
@@ -42,7 +42,6 @@ let fruP1Image
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
 let currentlySelectedBackground = "FRU P1"
-let millisSinceMechStarted // advanced feature for timing how fast you did the mechanic TODO
 let stage = 0 // the current step you're on. always defaults to 0
 
 function preload() {
@@ -139,10 +138,17 @@ function draw() {
 
 function displayMainBodyContent() {
     // Futures Rewritten Ultimate phase 1 background
+    push()
+    translate(width/2,
+        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
     if (currentlySelectedBackground === "FRU P1") {
-        // background image
-        image(fruP1Image, 20, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3 + 20,
+        // background image (it's slightly tilted, I don't know why, but
+        // this should help)
+        push()
+        rotate(0.02)
+        image(fruP1Image, -width/2 + 20, -width/2 + 20,
             width - 40, width - 40)
+        pop()
 
 
         // death wall
@@ -150,13 +156,13 @@ function displayMainBodyContent() {
         fill(240, 100, 50)
         beginShape()
         for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
-            vertex(cos(i) * width / 2 + width / 2,
-                sin(i) * width / 2 + width / 2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+            vertex(cos(i) * width / 2,
+                sin(i) * width / 2)
         }
         beginContour()
         for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
-            vertex(cos(i) * (width / 2 - 20) + width / 2,
-                sin(i) * (width / 2 - 20) + width / 2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+            vertex(cos(i) * (width / 2 - 20),
+                sin(i) * (width / 2 - 20))
         }
         endContour()
         endShape(CLOSE)
@@ -165,22 +171,107 @@ function displayMainBodyContent() {
         // notches
         noStroke()
         fill(0, 0, 100)
-        for (let i = -0.02; i < TWO_PI; i += TWO_PI / 72) {
-            circle(cos(i) * (width / 2 - 20) + width / 2,
-                sin(i) * (width / 2 - 20) + width / 2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3,
-                5)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
+            circle(cos(i) * (width / 2 - 15),
+                sin(i) * (width / 2 - 15), 5)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
-        for (let i = -0.02; i < TWO_PI; i += TWO_PI / 8) {
-            circle(cos(i) * (width / 2 - 20) + width / 2,
-                sin(i) * (width / 2 - 20) + width / 2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3,
-                10)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
+            circle(cos(i) * (width / 2 - 15),
+                sin(i) * (width / 2 - 15), 10)
         }
 
-        // Utopian Sky TODO
+        displayCharacterPositions()
+
+        pop()
+
+        // Utopian Sky
+        if (currentlySelectedMechanic === "Utopian Sky") {
+            // stage 0: mechanic inactive
+            if (stage === 0) {
+                displayGreenDot(100, 100)
+            }
+        }
     }
+}
+
+// display a green dot for where to go
+function displayGreenDot(x, y) {
+    push()
+    translate(width/2,
+        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+    stroke(120, 100, 100)
+
+    // if you mouse over it, dim it
+    if (sqrt((mouseX - x - width/2)**2 +
+        (mouseY - y - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+        stroke(120, 100, 80)
+    }
+    noFill()
+    strokeWeight(2)
+    circle(x, y, 15)
+    pop()
+}
+
+function displayCharacterPositions() {
+    fill(220, 70, 80)
+    stroke(50, 100, 100)
+    strokeWeight(2)
+    circle(MT[0], MT[1], 30)
+    circle(OT[0], OT[1], 30)
+    fill(120, 70, 80)
+    circle(H1[0], H1[1], 30)
+    circle(H2[0], H2[1], 30)
+    fill(0, 70, 80)
+    circle(M1[0], M1[1], 30)
+    circle(M2[0], M2[1], 30)
+    circle(R1[0], R1[1], 30)
+    circle(R2[0], R2[1], 30)
+
+    // display your role
+    fill(50, 100, 60)
+    strokeWeight(3)
+    switch (role) {
+        case "MT":
+            circle(MT[0], MT[1], 30)
+            break
+        case "OT":
+            circle(OT[0], OT[1], 30)
+            break
+        case "H1":
+            circle(H1[0], H1[1], 30)
+            break
+        case "H2":
+            circle(H2[0], H2[1], 30)
+            break
+        case "M1":
+            circle(M1[0], M1[1], 30)
+            break
+        case "M2":
+            circle(M2[0], M2[1], 30)
+            break
+        case "R1":
+            circle(R1[0], R1[1], 30)
+            break
+        case "R2":
+            circle(R2[0], R2[1], 30)
+            break
+    }
+
+    fill(0, 0, 100)
+    noStroke()
+    textSize(20)
+    textAlign(CENTER, CENTER)
+    text("MT", MT[0], MT[1])
+    text("OT", OT[0], OT[1])
+    text("H1", H1[0], H1[1])
+    text("H2", H2[0], H2[1])
+    text("M1", M1[0], M1[1])
+    text("M2", M2[0], M2[1])
+    text("R1", R1[0], R1[1])
+    text("R2", R2[0], R2[1])
 }
 
 // since all the other things that display something on top of the separate
