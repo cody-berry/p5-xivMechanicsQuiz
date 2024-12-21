@@ -22,6 +22,8 @@ let bottomHeight = 150 // the height of the window at the bottom
 let holeSize = 20
 let cornerRounding = 10
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
+let textPadding = 10
+let mousePressedLastFrame = false // used sometimes
 
 // your role
 let role = "MT"
@@ -29,8 +31,8 @@ let role = "MT"
 // positions: used for displaying (relative to center of arena)
 let MT = [0, -50]
 let OT = [50, 0]
-let H1 = [0, 50]
-let H2 = [-50, 0]
+let H1 = [-50, 0]
+let H2 = [0, 50]
 let M1 = [-35, 35]
 let M2 = [35, 35]
 let R1 = [-35, -35]
@@ -80,12 +82,6 @@ function setup() {
 
 
 function draw() {
-    background(234, 34, 24)
-
-    // erase the background afterward
-    erase()
-    rect(0, 0, width, height)
-    noErase()
 
     // the green square at the top-left TODO
     fill(120, 80, 50)
@@ -97,6 +93,7 @@ function draw() {
     noStroke()
     rect(topSquareSize + holeSize, 0, width - topSquareSize - holeSize,
         topSquareSize, cornerRounding)
+    displayTopWindowContent()
 
     // the red square at the top-right TODO
     fill(350, 80, 50)
@@ -117,7 +114,7 @@ function draw() {
         width, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*2, cornerRounding)
 
     // the main body window
-    fill(234, 34, 24)
+    fill(234, 34, 24, 10)
     noStroke()
     rect(0, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*3,
         width, height - debugCornerSize - bottomHeight - holeSize*2, cornerRounding)
@@ -134,18 +131,106 @@ function draw() {
     noStroke()
     rect(0, height - debugCornerSize, width, height, cornerRounding)
     displayDebugCorner()
+
+    // make sure mousePressedLastFrame is updated
+    mousePressedLastFrame = mouseIsPressed
+}
+
+
+function displayTopWindowContent() {
+    noStroke()
+    fill(0, 0, 100)
+    text("Hi! I'm trying to make simulations for various mechanics." +
+        "\nI'll try not to delete any mechanic implementations if someone" +
+        "\nwants them again. Earliest mechanic: Utopian Sky from FRU." +
+        "\n\nReset mechanic           Purge data        Change role from " + role,
+        topSquareSize + holeSize + textPadding, textPadding + textAscent())
+
+    // since the buttons at the bottom are useful, just...make them useful XD
+    if (mouseY < topSquareSize && mouseY > textAscent()*4 + textDescent()*4 + textPadding) {
+        fill(0, 0, 0, 30)
+
+        if (mouseX > topSquareSize + holeSize && mouseX < topSquareSize + holeSize + topWidth/3) {
+            rect(topSquareSize + holeSize, textAscent() * 4 + textDescent() * 4 + textPadding, topSquareSize + holeSize + topWidth / 3, topSquareSize)
+
+            if (mouseIsPressed) {
+                // so long as the mouse wasn't held down, reset the mechanic
+                if (!mousePressedLastFrame) {
+                    stage = 0
+                    MT = [0, -50]
+                    OT = [50, 0]
+                    H1 = [-50, 0]
+                    H2 = [0, 50]
+                    M1 = [-35, 35]
+                    M2 = [35, 35]
+                    R1 = [-35, -35]
+                    R2 = [35, -35]
+                }
+            }
+        }
+
+        if (mouseX > topSquareSize + holeSize + topWidth/3 && mouseX < width - topSquareSize - holeSize - topWidth/3) {
+            rect(topSquareSize + holeSize + topWidth / 3, textAscent() * 4 + textDescent() * 4 + textPadding, width - topSquareSize - holeSize - topWidth / 3, topSquareSize)
+        }
+
+        if (mouseX > width - topSquareSize - holeSize - topWidth/3 && mouseX < width - topSquareSize - holeSize) {
+            rect(width - topSquareSize - holeSize - topWidth/3, textAscent()*4 + textDescent()*4 + textPadding, width - topSquareSize - holeSize, topSquareSize)
+            if (mouseIsPressed) {
+                // so long as the mouse wasn't held down, change roles
+                if (!mousePressedLastFrame) {
+                    switch (role) {
+                        case "MT":
+                            role = "OT"
+                            break
+                        case "OT":
+                            role = "H1"
+                            break
+                        case "H1":
+                            role = "H2"
+                            break
+                        case "H2":
+                            role = "M1"
+                            break
+                        case "M1":
+                            role = "M2"
+                            break
+                        case "M2":
+                            role = "R1"
+                            break
+                        case "R1":
+                            role = "R2"
+                            break
+                        case "R2":
+                            role = "MT"
+                            break
+                    }
+                    // you can't cheat by switching roles mid-mech!
+                    stage = 0
+                    MT = [0, -50]
+                    OT = [50, 0]
+                    H1 = [-50, 0]
+                    H2 = [0, 50]
+                    M1 = [-35, 35]
+                    M2 = [35, 35]
+                    R1 = [-35, -35]
+                    R2 = [35, -35]
+                }
+            }
+        }
+    }
 }
 
 function displayMainBodyContent() {
-    // Futures Rewritten Ultimate phase 1 background
     push()
     translate(width/2,
         width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+    // Futures Rewritten Ultimate phase 1 background
     if (currentlySelectedBackground === "FRU P1") {
         // background image (it's slightly tilted, I don't know why, but
-        // this should help)
+        // this rotation should help)
         push()
         rotate(0.02)
+        tint(0, 0, 100, 10)
         image(fruP1Image, -width/2 + 20, -width/2 + 20,
             width - 40, width - 40)
         pop()
@@ -191,7 +276,23 @@ function displayMainBodyContent() {
         if (currentlySelectedMechanic === "Utopian Sky") {
             // stage 0: mechanic inactive
             if (stage === 0) {
-                displayGreenDot(100, 100)
+                displayGreenDot(0, 0)
+
+                // clicking on the green dot will advance to the next stage
+                if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (sqrt((mouseX - width / 2) ** 2 +
+                        (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10) {
+                        stage = 1
+                        MT = [0, -(width/2 - 40)]
+                        OT = [(width/2 - 40)*0.707, -(width/2 - 40)*0.707]
+                        R2 = [(width/2 - 40), 0]
+                        M2 = [(width/2 - 40)*0.707, (width/2 - 40)*0.707]
+                        H2 = [0, (width/2 - 40)]
+                        M1 = [-(width/2 - 40)*0.707, (width/2 - 40)*0.707]
+                        H1 = [-(width/2 - 40), 0]
+                        R1 = [-(width/2 - 40)*0.707, -(width/2 - 40)*0.707]
+                    }
+                }
             }
         }
     }
