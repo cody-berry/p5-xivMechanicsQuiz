@@ -40,6 +40,8 @@ let R2 = [35, -35]
 
 // Utopian Sky (FRU P1)
 let fruP1Image
+let unsafeClones
+let spreadOrStack
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -78,6 +80,8 @@ function setup() {
         numpad 1 → freeze sketch</pre>`)
 
     debugCorner = new CanvasDebugCorner(5)
+
+    setupUtopianSky()
 }
 
 
@@ -157,14 +161,6 @@ function displayTopWindowContent() {
                 // so long as the mouse wasn't held down, reset the mechanic
                 if (!mousePressedLastFrame) {
                     stage = 0
-                    MT = [0, -50]
-                    OT = [50, 0]
-                    H1 = [-50, 0]
-                    H2 = [0, 50]
-                    M1 = [-35, 35]
-                    M2 = [35, 35]
-                    R1 = [-35, -35]
-                    R2 = [35, -35]
                 }
             }
         }
@@ -206,14 +202,6 @@ function displayTopWindowContent() {
                     }
                     // you can't cheat by switching roles mid-mech!
                     stage = 0
-                    MT = [0, -50]
-                    OT = [50, 0]
-                    H1 = [-50, 0]
-                    H2 = [0, 50]
-                    M1 = [-35, 35]
-                    M2 = [35, 35]
-                    R1 = [-35, -35]
-                    R2 = [35, -35]
                 }
             }
         }
@@ -278,25 +266,41 @@ function displayMainBodyContent() {
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
+                MT = [0, -50]
+                OT = [50, 0]
+                H1 = [-50, 0]
+                H2 = [0, 50]
+                M1 = [-35, 35]
+                M2 = [35, 35]
+                R1 = [-35, -35]
+                R2 = [35, -35]
+
                 // clicking on the green dot will advance to the next stage
                 if (mouseIsPressed && !mousePressedLastFrame) {
                     if (sqrt((mouseX - width / 2) ** 2 +
                         (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10) {
                         stage = 1
-                        MT = [0, -(width/2 - 40)]
-                        OT = [(width/2 - 40)*0.707, -(width/2 - 40)*0.707]
-                        R2 = [(width/2 - 40), 0]
-                        M2 = [(width/2 - 40)*0.707, (width/2 - 40)*0.707]
-                        H2 = [0, (width/2 - 40)]
-                        M1 = [-(width/2 - 40)*0.707, (width/2 - 40)*0.707]
-                        H1 = [-(width/2 - 40), 0]
-                        R1 = [-(width/2 - 40)*0.707, -(width/2 - 40)*0.707]
+
+                        // the distance everyone will go to get to their clock
+                        // spots
+                        let spreadRadius = width/2 - 100
+
+                        MT = [0, -spreadRadius]
+                        OT = [spreadRadius*0.707, -spreadRadius*0.707]
+                        R2 = [spreadRadius, 0]
+                        M2 = [spreadRadius*0.707, spreadRadius*0.707]
+                        H2 = [0, spreadRadius]
+                        M1 = [-spreadRadius*0.707, spreadRadius*0.707]
+                        H1 = [-spreadRadius, 0]
+                        R1 = [-spreadRadius*0.707, -spreadRadius*0.707]
                     }
                 }
             }
         }
     }
 }
+
+
 
 // display a green dot for where to go
 function displayGreenDot(x, y) {
@@ -395,6 +399,34 @@ function keyPressed() {
         debugCorner.visible = !debugCorner.visible
         console.log(`debugCorner visibility set to ${debugCorner.visible}`)
     }
+}
+
+
+
+//————————————below is a list of setup functions for each mechanic————————————\\
+
+function setupUtopianSky() {
+    stage = 0
+    currentlySelectedMechanic = "Utopian Sky"
+    currentlySelectedBackground = "FRU P1"
+
+    // now we'll have to set up which clones are unsafe
+    unsafeClones = []
+    // that'll start with which direction is safe, represented by which
+    // people will stay at the edge
+    let safeDirections = random(["MT H2", "R2 M1", "OT H1", "M2 R1"])
+    // then, from each unsafe direction, choose which side (or, rather,
+    // which person) has the unsafe clone
+    if (safeDirections === "MT H2") {
+        unsafeClones = [random(["R2", "M1"]), random(["OT", "H1"]), random(["M2", "R1"])]
+    } if (safeDirections === "R2 M1") {
+        unsafeClones = [random(["MT", "H2"]), random(["OT", "H1"]), random(["M2", "R1"])]
+    } if (safeDirections === "OT H1") {
+        unsafeClones = [random(["MT", "H2"]), random(["R2", "M1"]), random(["M2", "R1"])]
+    } if (safeDirections === "M2 R1") {
+        unsafeClones = [random(["MT", "H2"]), random(["R2", "M1"]), random(["OT", "H1"])]
+    }
+    print(unsafeClones)
 }
 
 
