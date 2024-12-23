@@ -18,7 +18,7 @@ let topWidth = 500  // the width of the window at the top, not including the top
 let mechanicSelectionRows = 4 // The number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*30 // each row should take...30 height? I'm not sure
 let middleTopHeight = 100 // the height of the window just above the main body
-let bottomHeight = 150 // the height of the window at the bottom
+let bottomHeight = 100 // the height of the window at the bottom
 let holeSize = 20
 let cornerRounding = 10
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
@@ -42,11 +42,14 @@ let R2 = [35, -35]
 let fruP1Image
 let unsafeClones
 let spreadOrStack
+let safeDirections
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
 let currentlySelectedBackground = "FRU P1"
 let stage = 0 // the current step you're on. always defaults to 0
+let textAtTop
+let textAtBottom
 
 function preload() {
     font = loadFont('data/consola.ttf')
@@ -82,11 +85,12 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
 
     setupUtopianSky()
+
+    textAlign(CENTER, CENTER)
 }
 
 
 function draw() {
-
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
@@ -111,24 +115,27 @@ function draw() {
     rect(0, topSquareSize + holeSize,
         width, topSquareSize + mechanicSelectionHeight + holeSize, cornerRounding)
 
-    // the middle-top window TODO
+    // the middle-top window
     fill(234, 34, 24)
     noStroke()
     rect(0, topSquareSize + mechanicSelectionHeight + holeSize*2,
         width, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*2, cornerRounding)
+    textAlign(LEFT, TOP)
+    displayMiddleTopWindowContent()
 
     // the main body window
-    fill(234, 34, 24, 10)
+    fill(234, 34, 24, 5)
     noStroke()
     rect(0, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*3,
         width, height - debugCornerSize - bottomHeight - holeSize*2, cornerRounding)
     displayMainBodyContent()
 
-    // the bottom window TODO
+    // the bottom window
     fill(234, 34, 24)
     noStroke()
     rect(0, height - debugCornerSize - bottomHeight - holeSize, width,
         height - debugCornerSize - holeSize, cornerRounding)
+    displayBottomWindowContent()
 
     // the debug corner window
     fill(0, 0, 0)
@@ -142,6 +149,7 @@ function draw() {
 
 
 function displayTopWindowContent() {
+    textAlign(LEFT, BASELINE)
     noStroke()
     fill(0, 0, 100)
     text("Hi! I'm trying to make simulations for various mechanics." +
@@ -160,7 +168,8 @@ function displayTopWindowContent() {
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, reset the mechanic
                 if (!mousePressedLastFrame) {
-                    stage = 0
+                    mousePressedLastFrame = true
+                    reset()
                 }
             }
         }
@@ -174,6 +183,7 @@ function displayTopWindowContent() {
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, change roles
                 if (!mousePressedLastFrame) {
+                    mousePressedLastFrame = true
                     switch (role) {
                         case "MT":
                             role = "OT"
@@ -201,17 +211,22 @@ function displayTopWindowContent() {
                             break
                     }
                     // you can't cheat by switching roles mid-mech!
-                    stage = 0
+                    reset()
                 }
             }
         }
     }
+    textAlign(CENTER, CENTER)
+}
+
+function displayMiddleTopWindowContent() {
+    fill(0, 0, 100)
+    text(textAtTop, textPadding, topSquareSize + mechanicSelectionHeight + holeSize*2 + textPadding)
 }
 
 function displayMainBodyContent() {
     push()
-    translate(width/2,
-        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+    translateToCenterOfBoard()
     // Futures Rewritten Ultimate phase 1 background
     if (currentlySelectedBackground === "FRU P1") {
         // background image (it's slightly tilted, I don't know why, but
@@ -266,33 +281,583 @@ function displayMainBodyContent() {
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
-                MT = [0, -50]
-                OT = [50, 0]
-                H1 = [-50, 0]
-                H2 = [0, 50]
-                M1 = [-35, 35]
-                M2 = [35, 35]
-                R1 = [-35, -35]
-                R2 = [35, -35]
-
                 // clicking on the green dot will advance to the next stage
                 if (mouseIsPressed && !mousePressedLastFrame) {
+                    mousePressedLastFrame = true
                     if (sqrt((mouseX - width / 2) ** 2 +
                         (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10) {
                         stage = 1
 
                         // the distance everyone will go to get to their clock
                         // spots
-                        let spreadRadius = width/2 - 100
+                        let spreadRadius = width*3/7
 
-                        MT = [0, -spreadRadius]
-                        OT = [spreadRadius*0.707, -spreadRadius*0.707]
+                        MT = [spreadRadius/15, -spreadRadius]
+                        OT = [spreadRadius*0.707, -spreadRadius*0.757]
                         R2 = [spreadRadius, 0]
                         M2 = [spreadRadius*0.707, spreadRadius*0.707]
                         H2 = [0, spreadRadius]
                         M1 = [-spreadRadius*0.707, spreadRadius*0.707]
                         H1 = [-spreadRadius, 0]
                         R1 = [-spreadRadius*0.707, -spreadRadius*0.707]
+                        MT = [0, -spreadRadius]
+                        OT = [spreadRadius*0.707, -spreadRadius*0.707]
+
+                        textAtTop = "You just went to your clock spot. Run" +
+                            " in or stay where you are. \n" +
+                            "Since your partners haven't moved yet, if your" +
+                            " clone has a lowered arm, don't move. Yet.\n\n" +
+                            "Clones actually appear at the edge of the" +
+                            " arena in-game."
+                        textAtBottom = "You went to your clock" +
+                            " spot.\n[PASS] — You remembered whether it was" +
+                            " stack or spread...right? Well, now it's foggy," +
+                            " so you \ncan't tell anymore."
+
+                        // make the arena foggy
+                        for (let j = 0; j < 10; j += 1) {
+                            background(0, 0, 50, 5)
+                            fill(0, 0, 60)
+                            stroke(0, 0, 100)
+                            for (let i = 0; i < height; i += 20) {
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
+                            }
+                            fill(0, 0, 70)
+                            noStroke()
+                            for (let i = 0; i < height; i += 20) {
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                            }
+                            fill(0, 0, 100)
+                            for (let i = 0; i < height; i += 20) {
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                            }
+                            fill(0, 0, 90)
+                            stroke(0, 0, 0)
+                            for (let i = 0; i < height; i += 20) {
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
+                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
+                            }
+                        }
+                    }
+                }
+            } if (stage === 1) { // stage 1: clones have just appeared
+                let raisedArm = unsafeClones.includes(role)
+                let cloneRadius = width/5
+                let innerGreenDotRadius = width*2/7
+                let outerGreenDotRadius = width*3/7
+                let innerGreenDotPosition
+                let outerGreenDotPosition
+
+                // where to display clone and dots?
+                switch (role) {
+                    case "MT":
+                        displayClone([0, -cloneRadius], raisedArm)
+                        displayGreenDot(0, -innerGreenDotRadius)
+                        displayGreenDot(0, -outerGreenDotRadius)
+                        innerGreenDotPosition = [0, -innerGreenDotRadius]
+                        outerGreenDotPosition = [0, -outerGreenDotRadius]
+                        break
+                    case "OT":
+                        displayClone([cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
+                        displayGreenDot(innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
+                        displayGreenDot(outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707]
+                        break
+                    case "R2":
+                        displayClone([cloneRadius, 0], raisedArm)
+                        displayGreenDot(innerGreenDotRadius, 0)
+                        displayGreenDot(outerGreenDotRadius, 0)
+                        innerGreenDotPosition = [innerGreenDotRadius, 0]
+                        outerGreenDotPosition = [outerGreenDotRadius, 0]
+                        break
+                    case "M2":
+                        displayClone([cloneRadius*0.707, cloneRadius*0.707], raisedArm)
+                        displayGreenDot(innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
+                        displayGreenDot(outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
+                        break
+                    case "H2":
+                        displayClone([0, cloneRadius], raisedArm)
+                        displayGreenDot(0, innerGreenDotRadius)
+                        displayGreenDot(0, outerGreenDotRadius)
+                        innerGreenDotPosition = [0, innerGreenDotRadius]
+                        outerGreenDotPosition = [0, outerGreenDotRadius]
+                        break
+                    case "M1":
+                        displayClone([-cloneRadius*0.707, cloneRadius*0.707], raisedArm)
+                        displayGreenDot(-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
+                        displayGreenDot(-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
+                        break
+                    case "H1":
+                        displayClone([-cloneRadius, 0], raisedArm)
+                        displayGreenDot(-innerGreenDotRadius, 0)
+                        displayGreenDot(-outerGreenDotRadius, 0)
+                        innerGreenDotPosition = [-innerGreenDotRadius, 0]
+                        outerGreenDotPosition = [-outerGreenDotRadius, 0]
+                        break
+                    case "R1":
+                        displayClone([-cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
+                        displayGreenDot(-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
+                        displayGreenDot(-outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [-outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707]
+                        break
+                }
+
+                let veryInnerRadius = width/7
+
+                // handle clicking on the green dots
+                if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
+                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        mousePressedLastFrame = true
+                        // this is the INNER green dot. this is only good if
+                        // your clone's arm is raised.
+                        if (unsafeClones.includes(role)) {
+                            // skip a stage because the second stage is
+                            // designed for moving in response to your partners
+                            textAtTop = "Move to your spread or stack spot" +
+                                " based on who remains on the wall."
+                            textAtBottom = "You ran in. \n[PASS] — Your" +
+                                " clone's arm is raised."
+                            stage = 3
+
+                            if (unsafeClones.includes("MT") || unsafeClones.includes("H2")) {
+                                MT = [0, -veryInnerRadius]
+                            } if (unsafeClones.includes("OT") || unsafeClones.includes("M1")) {
+                                OT = [veryInnerRadius*0.707, -veryInnerRadius*0.707]
+                            } if (unsafeClones.includes("R2") || unsafeClones.includes("H1")) {
+                                R2 = [veryInnerRadius, 0]
+                            } if (unsafeClones.includes("M2") || unsafeClones.includes("R1")) {
+                                M2 = [veryInnerRadius*0.707, veryInnerRadius*0.707]
+                            } if (unsafeClones.includes("H2") || unsafeClones.includes("MT")) {
+                                H2 = [0, veryInnerRadius]
+                            } if (unsafeClones.includes("M1") || unsafeClones.includes("OT")) {
+                                M1 = [-veryInnerRadius*0.707, veryInnerRadius*0.707]
+                            } if (unsafeClones.includes("H1") || unsafeClones.includes("R2")) {
+                                H1 = [-veryInnerRadius, 0]
+                            } if (unsafeClones.includes("R1") || unsafeClones.includes("M2")) {
+                                R1 = [-veryInnerRadius*0.707, -veryInnerRadius*0.707]
+                            }
+                        } else {
+                            // otherwise you failed
+                            textAtTop = "You ran in prematurely. While this" +
+                                " in and of itself may not cause a wipe, it" +
+                                " will confuse\nother people and it will" +
+                                " generally lead to a wipe. Please don't" +
+                                " take the risk."
+                            textAtBottom = "You ran in. \n[FAIL] — Your" +
+                                " clone's arm is lowered."
+                            stage = 100
+
+                            if (unsafeClones.includes("MT") || role === "MT") {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") || role === "OT") {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") || role === "R2") {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") || role === "M2") {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") || role === "H2") {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") || role === "M1") {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") || role === "H1") {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") || role === "R1") {
+                                R1 = [-innerGreenDotRadius * 0.707, -innerGreenDotRadius * 0.707]
+                            }
+                        }
+                    }
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
+                        (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        mousePressedLastFrame = true
+                        // this is the OUTER green dot. this is only good if
+                        // your clone's arm is lowered.
+                        if (unsafeClones.includes(role)) {
+                            // you failed
+                            textAtTop = "You ran in too late. This will" +
+                                " cause confusion for you, the person" +
+                                " opposite you, and everyone\nelse who ran" +
+                                " in. Try to move as soon as you can."
+                            textAtBottom = "You stayed where you are." +
+                                " \n[FAIL] — Your clone's arm is raised."
+                            stage = 100
+
+                            if (unsafeClones.includes("MT") && role !== "MT") {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") && role !== "OT") {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") && role !== "R2") {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") && role !== "M2") {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") && role !== "H2") {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") && role !== "M1") {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") && role !== "H1") {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") && role !== "R1") {
+                                R1 = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            }
+                        } else {
+                            // you passed for now
+                            textAtTop = "3 of your partners have just moved" +
+                                " in. Click on the spot you will go." +
+                                " \n(Though this is a trivial decision part," +
+                                " it helps to gain perspective. It may be" +
+                                " better to \nview your screen in a weird way" +
+                                " based on how you will orient your camera.)"
+                            textAtBottom = "You stayed where you are." +
+                                " \n[PASS] — Your clone's arm is lowered."
+                            stage = 2
+
+                            if (unsafeClones.includes("MT")) {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT")) {
+                                OT = [innerGreenDotRadius * 0.707, -innerGreenDotRadius * 0.707]
+                            } if (unsafeClones.includes("R2")) {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2")) {
+                                M2 = [innerGreenDotRadius * 0.707, innerGreenDotRadius * 0.707]
+                            } if (unsafeClones.includes("H2")) {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1")) {
+                                M1 = [-innerGreenDotRadius * 0.707, innerGreenDotRadius * 0.707]
+                            } if (unsafeClones.includes("H1")) {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1")) {
+                                R1 = [-innerGreenDotRadius * 0.707, -innerGreenDotRadius * 0.707]
+                            }
+                        }
+                    }
+                }
+            } if (stage === 2) {
+                let innerGreenDotRadius = width/7
+                let outerGreenDotRadius = width*3/7
+                let innerGreenDotPosition
+                let outerGreenDotPosition
+                let oppositeRole // we might as well calculate this now
+
+                // where to display dots?
+                switch (role) {
+                    case "MT":
+                        displayGreenDot(0, -innerGreenDotRadius)
+                        displayGreenDot(0, -outerGreenDotRadius)
+                        innerGreenDotPosition = [0, -innerGreenDotRadius]
+                        outerGreenDotPosition = [0, -outerGreenDotRadius]
+                        oppositeRole = "H2"
+                        break
+                    case "OT":
+                        displayGreenDot(innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
+                        displayGreenDot(outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707]
+                        oppositeRole = "M1"
+                        break
+                    case "R2":
+                        displayGreenDot(innerGreenDotRadius, 0)
+                        displayGreenDot(outerGreenDotRadius, 0)
+                        innerGreenDotPosition = [innerGreenDotRadius, 0]
+                        outerGreenDotPosition = [outerGreenDotRadius, 0]
+                        oppositeRole = "H1"
+                        break
+                    case "M2":
+                        displayGreenDot(innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
+                        displayGreenDot(outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
+                        oppositeRole = "R1"
+                        break
+                    case "H2":
+                        displayGreenDot(0, innerGreenDotRadius)
+                        displayGreenDot(0, outerGreenDotRadius)
+                        innerGreenDotPosition = [0, innerGreenDotRadius]
+                        outerGreenDotPosition = [0, outerGreenDotRadius]
+                        oppositeRole = "MT"
+                        break
+                    case "M1":
+                        displayGreenDot(-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
+                        displayGreenDot(-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
+                        oppositeRole = "OT"
+                        break
+                    case "H1":
+                        displayGreenDot(-innerGreenDotRadius, 0)
+                        displayGreenDot(-outerGreenDotRadius, 0)
+                        innerGreenDotPosition = [-innerGreenDotRadius, 0]
+                        outerGreenDotPosition = [-outerGreenDotRadius, 0]
+                        oppositeRole = "R2"
+                        break
+                    case "R1":
+                        displayGreenDot(-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
+                        displayGreenDot(-outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
+                        innerGreenDotPosition = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                        outerGreenDotPosition = [-outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707]
+                        oppositeRole = "M2"
+                        break
+                }
+                print(oppositeRole)
+
+                // handle clicking on the green dots
+                if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
+                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    // the INNER dot
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        mousePressedLastFrame = true
+                        if (unsafeClones.includes(oppositeRole)) {
+                            textAtTop = "Move to your spread or stack spot" +
+                                " based on who remains on the wall."
+                            textAtBottom = "You ran in. \n[PASS] — The" +
+                                " person opposite you moved in."
+                            stage = 3
+
+                            if (unsafeClones.includes("MT") || unsafeClones.includes("H2")) {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") || unsafeClones.includes("M1")) {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") || unsafeClones.includes("H1")) {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") || unsafeClones.includes("R1")) {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") || unsafeClones.includes("MT")) {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") || unsafeClones.includes("OT")) {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") || unsafeClones.includes("R2")) {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") || unsafeClones.includes("M2")) {
+                                R1 = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            }
+                        } else {
+                            // you failed
+                            textAtTop = "You ran in. People are confused" +
+                                " when there is only 1 person at the edge."
+                            textAtBottom = "You ran in." +
+                                " \n[FAIL] — The person opposite you stayed" +
+                                " out."
+                            stage = 100
+
+                            if (unsafeClones.includes("MT") || unsafeClones.includes("H2") || role === "MT") {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") || unsafeClones.includes("M1") || role === "OT") {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") || unsafeClones.includes("H1") || role === "R2") {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") || unsafeClones.includes("R1") || role === "M2") {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") || unsafeClones.includes("MT") || role === "H2") {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") || unsafeClones.includes("OT") || role === "M1") {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") || unsafeClones.includes("R2") || role === "H1") {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") || unsafeClones.includes("M2") || role === "R1") {
+                                R1 = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            }
+                        }
+                    }
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
+                    (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    // the OUTER dot
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        mousePressedLastFrame = true
+                        if (unsafeClones.includes(oppositeRole)) {
+                            // you failed
+                            textAtTop = "You ran in too late. This will" +
+                                " cause confusion for you, the person" +
+                                " opposite you, and everyone\nelse who ran" +
+                                " in. Try to move as soon as you can."
+                            textAtBottom = "You stayed where you are." +
+                                " \n[FAIL] — The person opposite you moved in."
+                            stage = 100
+
+                            if (unsafeClones.includes("MT") || unsafeClones.includes("H2") && role !== "MT") {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") || unsafeClones.includes("M1") && role !== "OT") {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") || unsafeClones.includes("H1") && role !== "R2") {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") || unsafeClones.includes("R1") && role !== "M2") {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") || unsafeClones.includes("MT") && role !== "H2") {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") || unsafeClones.includes("OT") && role !== "M1") {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") || unsafeClones.includes("R2") && role !== "H1") {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") || unsafeClones.includes("M2") && role !== "R1") {
+                                R1 = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            }
+                        } else {
+                            textAtTop = "Move to your spread or stack spot" +
+                                " based on who remains on the wall."
+                            textAtBottom = "You ran out. \n[PASS] — The" +
+                                " person opposite you stayed out."
+                            stage = 3
+
+                            if (unsafeClones.includes("MT") || unsafeClones.includes("H2")) {
+                                MT = [0, -innerGreenDotRadius]
+                            } if (unsafeClones.includes("OT") || unsafeClones.includes("M1")) {
+                                OT = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("R2") || unsafeClones.includes("H1")) {
+                                R2 = [innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("M2") || unsafeClones.includes("R1")) {
+                                M2 = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H2") || unsafeClones.includes("MT")) {
+                                H2 = [0, innerGreenDotRadius]
+                            } if (unsafeClones.includes("M1") || unsafeClones.includes("OT")) {
+                                M1 = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
+                            } if (unsafeClones.includes("H1") || unsafeClones.includes("R2")) {
+                                H1 = [-innerGreenDotRadius, 0]
+                            } if (unsafeClones.includes("R1") || unsafeClones.includes("M2")) {
+                                R1 = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
+                            }
+                        }
+                    }
+                }
+            } if (stage === 3) {
+                // final stage—just clear it already!!! XD
+                let stackSpot
+                let spreadSpot
+                let lightParty
+                let outerRadius = width/2 - 30 // where everyone will be when next to the death wall
+                let innerRadius = width/2 - 100 // where the tank will be
+                // when spreading
+                let angleDiffForDPS = 17.5 // how far the DPS go clockwise/counterclockwise away from the healer
+                let actualRadius // how far you will be
+
+                // find which light party you are on
+                if (role === "MT" || role === "M1" || role === "H1" || role === "R1") {
+                    lightParty = 1
+                } else lightParty = 2
+
+                // find which angle you'll want to go to
+                let angle
+                switch (safeDirections) {
+                    case "MT H2":
+                        if (lightParty === 1) angle = 270
+                        if (lightParty === 2) angle = 90
+                        break
+                    case "OT M1":
+                        if (lightParty === 1) angle = 135
+                        if (lightParty === 2) angle = 315
+                        break
+                    case "R2 H1":
+                        if (lightParty === 1) angle = 180
+                        if (lightParty === 2) angle = 0
+                        break
+                    case "M2 R1":
+                        if (lightParty === 1) angle = 225
+                        if (lightParty === 2) angle = 45
+                        break
+                }
+
+                stackSpot = [cos(radians(angle))*outerRadius, sin(radians(angle))*outerRadius]
+
+                // figure out the spread spot. slightly more nuianced, but
+                // not so much.
+                switch (role) {
+                    case "MT":
+                        actualRadius = innerRadius
+                        break
+                    case "OT":
+                        actualRadius = innerRadius
+                        break
+                    case "R2":
+                        actualRadius = outerRadius
+                        angle += angleDiffForDPS
+                        break
+                    case "M2":
+                        actualRadius = outerRadius
+                        angle -= angleDiffForDPS
+                        break
+                    case "H2":
+                        actualRadius = outerRadius
+                        break
+                    case "M1":
+                        actualRadius = outerRadius
+                        angle -= angleDiffForDPS
+                        break
+                    case "H1":
+                        actualRadius = outerRadius
+                        break
+                    case "R1":
+                        actualRadius = outerRadius
+                        angle += angleDiffForDPS
+                        break
+                }
+                spreadSpot = [cos(radians(angle))*actualRadius, sin(radians(angle))*actualRadius]
+
+                // display!
+                displayGreenDot(spreadSpot[0], spreadSpot[1])
+                displayGreenDot(stackSpot[0], stackSpot[1])
+
+                // also make sure that if you're a healer, you don't
+                // accidentally pick up both the spread and stack
+                if ((sqrt((mouseX - spreadSpot[0] - width/2)**2 +
+                    (mouseY - spreadSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10)
+                    && !(role === "H1" || role === "H2")) {
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        if (spreadOrStack === "spread") {
+                            textAtTop = "Congratulations! You made it" +
+                                " through everything, although this is one" +
+                                " of the easier mechanics \nto do when not" +
+                                " timed."
+                            textAtBottom = "You went to your spread spot." +
+                                " \n[PASS] It's spreads. [CLEARED]"
+                            stage = 99
+                        } else {
+                            textAtTop = "You went to the wrong position. If" +
+                                " you're having trouble, you might want to" +
+                                " be a healer. They\ndon't have to worry" +
+                                " about spread or stack. (joking)"
+                            textAtBottom = "You went to your spread spot." +
+                                " \n[FAIL] It's spreads."
+                            stage = 100
+                        }
+                    }
+                } if (sqrt((mouseX - stackSpot[0] - width/2)**2 +
+                    (mouseY - stackSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    if (mouseIsPressed && !mousePressedLastFrame) {
+                        if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
+                            textAtTop = "You went to the wrong position. If" +
+                                " you're having trouble, you might want to" +
+                                " be a healer. They\ndon't have to worry" +
+                                " about spread or stack. (joking)"
+                            textAtBottom = "You went to your stack spot." +
+                                " \n[FAIL] It's stacks."
+                            stage = 100
+                        } else {
+                            textAtTop = "Congratulations! You made it" +
+                                " through everything, although this is one" +
+                                " of the easier mechanics \nto do when not" +
+                                " timed."
+                            textAtBottom = "You went to your stack spot." +
+                                " \n[PASS] It's stacks. [CLEARED]"
+
+                            if (role === "H1" || role === "H2") {
+                                textAtTop += "\n\n\nHey, you're a healer." +
+                                    " Stop cheating by not having to worry" +
+                                    " about stack or spread."
+                            }
+
+                            stage = 99
+                        }
                     }
                 }
             }
@@ -300,13 +865,71 @@ function displayMainBodyContent() {
     }
 }
 
+function displayClone(position, raisedArm) {
+    push()
+    translateToCenterOfBoard()
+    let x = position[0]
+    let y = position[1]
+    stroke(0, 0, 80)
 
+    // now just display a person
+
+    // legs
+    strokeWeight(8)
+    line(x - 10, y + 30, x - 4, y)
+    line(x + 10, y + 30, x + 4, y)
+
+    // body
+    strokeWeight(15)
+    line(x, y - 30, x, y)
+
+    // arms
+    strokeWeight(6)
+    line(x - 20, y - 25, x, y - 30)
+    line(x - 10, y - 10, x - 20, y - 25)
+
+    // for the right arm, it could be raised and carrying a sword
+    line(x + 20, y - 25, x, y - 30)
+    if (!raisedArm) {
+        line(x + 10, y - 10, x + 20, y - 25)
+    } else {
+        line(x + 30, y - 40, x + 20, y - 25)
+
+        // sword
+        strokeWeight(3)
+        line(x + 30, y - 50, x + 30, y - 60)
+        triangle(x + 25, y - 60, x + 35, y - 60, x + 30, y - 80)
+    }
+
+    // head
+    strokeWeight(5)
+    circle(x, y - 50, 30)
+
+    // mouth
+    strokeWeight(3)
+    line(x - 5, y - 43, x + 5, y - 43)
+    if (raisedArm) {
+        line(x - 3, y - 43, x - 7, y - 45)
+        line(x + 3, y - 43, x + 7, y - 45)
+    }
+
+    // eyes
+    point(x - 5, y - 54)
+    point(x + 5, y - 54)
+
+    pop()
+}
+
+// encapsulation function. makes code less messy
+function translateToCenterOfBoard() {
+    translate(width/2,
+        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+}
 
 // display a green dot for where to go
 function displayGreenDot(x, y) {
     push()
-    translate(width/2,
-        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+    translateToCenterOfBoard()
     stroke(120, 100, 100)
 
     // if you mouse over it, dim it
@@ -379,12 +1002,31 @@ function displayCharacterPositions() {
     text("R2", R2[0], R2[1])
 }
 
+function displayBottomWindowContent() {
+    // before we display any text, we should set the background
+    if (stage < 99) { // stage < 99 indicates you're still on track
+        fill(120, 100, 50, 50)
+    } if (stage === 99) { // if stage is 99, you've completed the mechanic
+        fill(240, 100, 50, 50)
+    } if (stage > 99) { // if stage is greater than 99, you failed the mechanic in some way
+        fill(0, 100, 50, 50)
+    }
+    noStroke()
+    rect(0, height - debugCornerSize - bottomHeight - holeSize, width,
+        height - debugCornerSize - holeSize, cornerRounding)
+
+    fill(0, 0, 100)
+    text(textAtBottom, textPadding, height - debugCornerSize - bottomHeight - holeSize + textPadding)
+}
+
 // since all the other things that display something on top of the separate
 // sections are in functions, this should be in a function too for consistency
 function displayDebugCorner() {
+    textAlign(LEFT, BOTTOM)
     debugCorner.setText(`frameCount: ${frameCount}`, 2)
     debugCorner.setText(`fps: ${frameRate().toFixed(0)}`, 1)
     debugCorner.showBottom()
+    textAlign(CENTER, CENTER)
 }
 
 function keyPressed() {
@@ -405,28 +1047,67 @@ function keyPressed() {
 
 //————————————below is a list of setup functions for each mechanic————————————\\
 
+function reset() {
+    switch (currentlySelectedMechanic) {
+        case "Utopian Sky":
+            setupUtopianSky()
+            break
+    }
+}
+
 function setupUtopianSky() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
     stage = 0
     currentlySelectedMechanic = "Utopian Sky"
     currentlySelectedBackground = "FRU P1"
+
+    MT = [0, -50]
+    OT = [50, 0]
+    H1 = [-50, 0]
+    H2 = [0, 50]
+    M1 = [-35, 35]
+    M2 = [35, 35]
+    R1 = [-35, -35]
+    R2 = [35, -35]
 
     // now we'll have to set up which clones are unsafe
     unsafeClones = []
     // that'll start with which direction is safe, represented by which
     // people will stay at the edge
-    let safeDirections = random(["MT H2", "R2 M1", "OT H1", "M2 R1"])
+    safeDirections = random(["MT H2", "OT M1", "R2 H1", "M2 R1"])
     // then, from each unsafe direction, choose which side (or, rather,
     // which person) has the unsafe clone
     if (safeDirections === "MT H2") {
-        unsafeClones = [random(["R2", "M1"]), random(["OT", "H1"]), random(["M2", "R1"])]
-    } if (safeDirections === "R2 M1") {
-        unsafeClones = [random(["MT", "H2"]), random(["OT", "H1"]), random(["M2", "R1"])]
-    } if (safeDirections === "OT H1") {
-        unsafeClones = [random(["MT", "H2"]), random(["R2", "M1"]), random(["M2", "R1"])]
+        unsafeClones = [random(["OT", "M1"]), random(["R2", "H1"]), random(["M2", "R1"])]
+    } if (safeDirections === "OT M1") {
+        unsafeClones = [random(["MT", "H2"]), random(["R2", "H1"]), random(["M2", "R1"])]
+    } if (safeDirections === "R2 H1") {
+        unsafeClones = [random(["MT", "H2"]), random(["OT", "M1"]), random(["M2", "R1"])]
     } if (safeDirections === "M2 R1") {
-        unsafeClones = [random(["MT", "H2"]), random(["R2", "M1"]), random(["OT", "H1"])]
+        unsafeClones = [random(["MT", "H2"]), random(["OT", "M1"]), random(["R2", "H1"])]
     }
     print(unsafeClones)
+
+    spreadOrStack = random(["spread", "stack"])
+
+    // if it's spread, briefly make the background blue—if it's red, briefly
+    // make the background red
+    if (spreadOrStack === "spread") {
+        background(240, 100, 100)
+    } else {
+        background(0, 100, 100)
+    }
+
+    textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
+        " time to test just that.\nAlso, please do remember that it's " + spreadOrStack +
+        "s first.\n\nThe way the simulation works can be a bit confusing." +
+        " You'll get the hang of it eventually.\nReady? Click on the green" +
+        " dot in the center."
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
 }
 
 
