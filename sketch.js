@@ -12,31 +12,32 @@ let instructions
 let debugCorner /* output debug text in the bottom left corner of the canvas */
 
 // displaying the windows
-let topSquareSize = 100 // the size of the top corner squares
-let debugCornerSize = 61 // the height of the debug corner
-let topWidth = 500  // the width of the window at the top, not including the top corner squares
-let mechanicSelectionRows = 4 // The number of rows in "mechanic selection"
-let mechanicSelectionHeight = mechanicSelectionRows*30 // each row should take...30 height? I'm not sure
-let middleTopHeight = 100 // the height of the window just above the main body
-let bottomHeight = 100 // the height of the window at the bottom
-let holeSize = 20
-let cornerRounding = 10
+let scalingFactor = 4/3
+let topSquareSize = 50*scalingFactor // the size of the top corner squares
+let debugCornerSize = 30*scalingFactor // the height of the debug corner
+let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
+let mechanicSelectionRows = 4*scalingFactor // the number of rows in "mechanic selection"
+let mechanicSelectionHeight = mechanicSelectionRows*15*scalingFactor
+let middleTopHeight = 50*scalingFactor // the height of the window just above the main body
+let bottomHeight = 50*scalingFactor // the height of the window at the bottom
+let holeSize = 10*scalingFactor
+let cornerRounding = 10*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
-let textPadding = 10
+let textPadding = 5*scalingFactor
 let mousePressedLastFrame = false // used sometimes
 
 // your role
 let role = "MT"
 
 // positions: used for displaying (relative to center of arena)
-let MT = [0, -50]
-let OT = [50, 0]
-let H1 = [-50, 0]
-let H2 = [0, 50]
-let M1 = [-35, 35]
-let M2 = [35, 35]
-let R1 = [-35, -35]
-let R2 = [35, -35]
+let MT = [0, -50*scalingFactor]
+let OT = [50*scalingFactor, 0]
+let H1 = [-50*scalingFactor, 0]
+let H2 = [0, 50*scalingFactor]
+let M1 = [-35*scalingFactor, 35*scalingFactor]
+let M2 = [35*scalingFactor, 35*scalingFactor]
+let R1 = [-35*scalingFactor, -35*scalingFactor]
+let R2 = [35*scalingFactor, -35*scalingFactor]
 
 // Utopian Sky (FRU P1)
 let fruP1Image
@@ -64,7 +65,7 @@ function setup() {
         topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + debugCornerSize + holeSize*5)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
-    textFont(font, 14)
+    textFont(font, 7*scalingFactor)
 
     // by the time I realized I was using "rectMode(CORNERS)" I was too lazy
     // to change everything back
@@ -124,7 +125,7 @@ function draw() {
     displayMiddleTopWindowContent()
 
     // the main body window
-    fill(234, 34, 24, 5)
+    fill(234, 34, 24, 3)
     noStroke()
     rect(0, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*3,
         width, height - debugCornerSize - bottomHeight - holeSize*2, cornerRounding)
@@ -234,8 +235,8 @@ function displayMainBodyContent() {
         push()
         rotate(0.02)
         tint(0, 0, 100, 10)
-        image(fruP1Image, -width/2 + 20, -width/2 + 20,
-            width - 40, width - 40)
+        image(fruP1Image, -width/2 + 20*scalingFactor, -width/2 + 20*scalingFactor,
+            width - 40*scalingFactor, width - 40*scalingFactor)
         pop()
 
 
@@ -249,8 +250,8 @@ function displayMainBodyContent() {
         }
         beginContour()
         for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
-            vertex(cos(i) * (width / 2 - 20),
-                sin(i) * (width / 2 - 20))
+            vertex(cos(i) * (width / 2 - 20*scalingFactor),
+                sin(i) * (width / 2 - 20*scalingFactor))
         }
         endContour()
         endShape(CLOSE)
@@ -260,15 +261,15 @@ function displayMainBodyContent() {
         noStroke()
         fill(0, 0, 100)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
-            circle(cos(i) * (width / 2 - 15),
-                sin(i) * (width / 2 - 15), 5)
+            circle(cos(i) * (width / 2 - 15*scalingFactor),
+                sin(i) * (width / 2 - 15*scalingFactor), 5)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
-            circle(cos(i) * (width / 2 - 15),
-                sin(i) * (width / 2 - 15), 10)
+            circle(cos(i) * (width / 2 - 15*scalingFactor),
+                sin(i) * (width / 2 - 15*scalingFactor), 10)
         }
 
         displayCharacterPositions()
@@ -281,11 +282,15 @@ function displayMainBodyContent() {
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
+                if (spreadOrStack === "spread") stroke(240, 50, 100)
+                if (spreadOrStack === "stack") stroke(0, 50, 100)
+                displayClone([0, -width/4], false)
+
                 // clicking on the green dot will advance to the next stage
                 if (mouseIsPressed && !mousePressedLastFrame) {
                     mousePressedLastFrame = true
                     if (sqrt((mouseX - width / 2) ** 2 +
-                        (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10) {
+                        (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10*scalingFactor) {
                         stage = 1
 
                         // the distance everyone will go to get to their clock
@@ -319,42 +324,43 @@ function displayMainBodyContent() {
                             background(0, 0, 50, 5)
                             fill(0, 0, 60)
                             stroke(0, 0, 100)
-                            for (let i = 0; i < height; i += 20) {
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 90))
+                            for (let i = 0; i < height; i += 5*scalingFactor) {
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                             }
                             fill(0, 0, 70)
                             noStroke()
-                            for (let i = 0; i < height; i += 20) {
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                            for (let i = 0; i < height; i += 5*scalingFactor) {
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                             }
                             fill(0, 0, 100)
-                            for (let i = 0; i < height; i += 20) {
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
-                                rect(random(0, width / 2), random(i, i + 10), random(width / 2, width), random(i + 40, i + 50))
+                            for (let i = 0; i < height; i += 5*scalingFactor) {
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                             }
                             fill(0, 0, 90)
                             stroke(0, 0, 0)
-                            for (let i = 0; i < height; i += 20) {
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
-                                circle(random(0, width), random(i, i + 50), random(i / 50 + 50, i / 50 + 70))
+                            for (let i = 0; i < height; i += 5*scalingFactor) {
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                             }
                         }
                     }
                 }
             } if (stage === 1) { // stage 1: clones have just appeared
                 let raisedArm = unsafeClones.includes(role)
-                let cloneRadius = width/5
+                let cloneRadius = width*2/7
                 let innerGreenDotRadius = width*2/7
                 let outerGreenDotRadius = width*3/7
                 let innerGreenDotPosition
                 let outerGreenDotPosition
 
+                stroke(0, 0, 80)
                 // where to display clone and dots?
                 switch (role) {
                     case "MT":
@@ -419,7 +425,7 @@ function displayMainBodyContent() {
 
                 // handle clicking on the green dots
                 if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
                         // this is the INNER green dot. this is only good if
@@ -481,7 +487,7 @@ function displayMainBodyContent() {
                         }
                     }
                 } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
-                        (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                        (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
                         // this is the OUTER green dot. this is only good if
@@ -615,7 +621,7 @@ function displayMainBodyContent() {
 
                 // handle clicking on the green dots
                 if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
                     // the INNER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
@@ -672,7 +678,7 @@ function displayMainBodyContent() {
                         }
                     }
                 } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
                     // the OUTER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
@@ -735,8 +741,9 @@ function displayMainBodyContent() {
                 let stackSpot
                 let spreadSpot
                 let lightParty
-                let outerRadius = width/2 - 30 // where everyone will be when next to the death wall
-                let innerRadius = width/2 - 100 // where the tank will be
+                let outerRadius = width*3/7 // where everyone will be
+                // when next to the death wall
+                let innerRadius = width*2/7 // where the tank will be
                 // when spreading
                 let angleDiffForDPS = 17.5 // how far the DPS go clockwise/counterclockwise away from the healer
                 let actualRadius // how far you will be
@@ -810,7 +817,7 @@ function displayMainBodyContent() {
                 // also make sure that if you're a healer, you don't
                 // accidentally pick up both the spread and stack
                 if ((sqrt((mouseX - spreadSpot[0] - width/2)**2 +
-                    (mouseY - spreadSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10)
+                    (mouseY - spreadSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor)
                     && !(role === "H1" || role === "H2")) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         if (spreadOrStack === "spread") {
@@ -827,12 +834,12 @@ function displayMainBodyContent() {
                                 " be a healer. They\ndon't have to worry" +
                                 " about spread or stack. (joking)"
                             textAtBottom = "You went to your spread spot." +
-                                " \n[FAIL] It's spreads."
+                                " \n[FAIL] It's stacks."
                             stage = 100
                         }
                     }
                 } if (sqrt((mouseX - stackSpot[0] - width/2)**2 +
-                    (mouseY - stackSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+                    (mouseY - stackSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
                             textAtTop = "You went to the wrong position. If" +
@@ -840,7 +847,7 @@ function displayMainBodyContent() {
                                 " be a healer. They\ndon't have to worry" +
                                 " about spread or stack. (joking)"
                             textAtBottom = "You went to your stack spot." +
-                                " \n[FAIL] It's stacks."
+                                " \n[FAIL] It's spreads."
                             stage = 100
                         } else {
                             textAtTop = "Congratulations! You made it" +
@@ -854,6 +861,10 @@ function displayMainBodyContent() {
                                 textAtTop += "\n\n\nHey, you're a healer." +
                                     " Stop cheating by not having to worry" +
                                     " about stack or spread."
+                                textAtBottom = "You went to your stack spot." +
+                                    " \n[PASS] It's either stack or" +
+                                    " spread—who knows, you're a healer." +
+                                    " [CLEARED]"
                             }
 
                             stage = 99
@@ -870,52 +881,41 @@ function displayClone(position, raisedArm) {
     translateToCenterOfBoard()
     let x = position[0]
     let y = position[1]
-    stroke(0, 0, 80)
+    let sizeOfTorso = 15*scalingFactor
 
     // now just display a person
 
     // legs
-    strokeWeight(8)
-    line(x - 10, y + 30, x - 4, y)
-    line(x + 10, y + 30, x + 4, y)
+    strokeWeight(sizeOfTorso/4)
+    line(x - sizeOfTorso/3, y + sizeOfTorso, x - sizeOfTorso/8, y)
+    line(x + sizeOfTorso/3, y + sizeOfTorso, x + sizeOfTorso/8, y)
 
     // body
-    strokeWeight(15)
-    line(x, y - 30, x, y)
+    strokeWeight(sizeOfTorso/2)
+    line(x, y - sizeOfTorso, x, y)
 
     // arms
-    strokeWeight(6)
-    line(x - 20, y - 25, x, y - 30)
-    line(x - 10, y - 10, x - 20, y - 25)
+    strokeWeight(sizeOfTorso/5)
+    line(x - sizeOfTorso*2/3, y - sizeOfTorso*5/6, x, y - sizeOfTorso)
+    line(x - sizeOfTorso/3, y - sizeOfTorso/3, x - sizeOfTorso*2/3, y - sizeOfTorso*5/6)
 
     // for the right arm, it could be raised and carrying a sword
-    line(x + 20, y - 25, x, y - 30)
-    if (!raisedArm) {
-        line(x + 10, y - 10, x + 20, y - 25)
-    } else {
-        line(x + 30, y - 40, x + 20, y - 25)
+    if (raisedArm) {
+        line(x, y - sizeOfTorso, x + sizeOfTorso/2, y - sizeOfTorso)
+        line(x + sizeOfTorso/4, y - sizeOfTorso*19/16, x + sizeOfTorso/2, y - sizeOfTorso)
 
         // sword
-        strokeWeight(3)
-        line(x + 30, y - 50, x + 30, y - 60)
-        triangle(x + 25, y - 60, x + 35, y - 60, x + 30, y - 80)
+        strokeWeight(sizeOfTorso/10)
+        line(x, y - sizeOfTorso*6.5/3, x, y - sizeOfTorso*7/3)
+        triangle(x - sizeOfTorso/6, y - sizeOfTorso*7/3, x + sizeOfTorso/6, y - sizeOfTorso*7/3, x, y - sizeOfTorso*10/3)
+    } else {
+        line(x + sizeOfTorso*2/3, y - sizeOfTorso*5/6, x, y - sizeOfTorso)
+        line(x + sizeOfTorso/3, y - sizeOfTorso/3, x + sizeOfTorso*2/3, y - sizeOfTorso*5/6)
     }
 
     // head
-    strokeWeight(5)
-    circle(x, y - 50, 30)
-
-    // mouth
-    strokeWeight(3)
-    line(x - 5, y - 43, x + 5, y - 43)
-    if (raisedArm) {
-        line(x - 3, y - 43, x - 7, y - 45)
-        line(x + 3, y - 43, x + 7, y - 45)
-    }
-
-    // eyes
-    point(x - 5, y - 54)
-    point(x + 5, y - 54)
+    strokeWeight(sizeOfTorso/6)
+    circle(x, y - sizeOfTorso*5/3, sizeOfTorso)
 
     pop()
 }
@@ -934,63 +934,63 @@ function displayGreenDot(x, y) {
 
     // if you mouse over it, dim it
     if (sqrt((mouseX - x - width/2)**2 +
-        (mouseY - y - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10) {
+        (mouseY - y - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
         stroke(120, 100, 80)
     }
     noFill()
-    strokeWeight(2)
-    circle(x, y, 15)
+    strokeWeight(scalingFactor)
+    circle(x, y, 15*scalingFactor)
     pop()
 }
 
 function displayCharacterPositions() {
     fill(220, 70, 80)
     stroke(50, 100, 100)
-    strokeWeight(2)
-    circle(MT[0], MT[1], 30)
-    circle(OT[0], OT[1], 30)
+    strokeWeight(scalingFactor)
+    circle(MT[0], MT[1], 15*scalingFactor)
+    circle(OT[0], OT[1], 15*scalingFactor)
     fill(120, 70, 80)
-    circle(H1[0], H1[1], 30)
-    circle(H2[0], H2[1], 30)
+    circle(H1[0], H1[1], 15*scalingFactor)
+    circle(H2[0], H2[1], 15*scalingFactor)
     fill(0, 70, 80)
-    circle(M1[0], M1[1], 30)
-    circle(M2[0], M2[1], 30)
-    circle(R1[0], R1[1], 30)
-    circle(R2[0], R2[1], 30)
+    circle(M1[0], M1[1], 15*scalingFactor)
+    circle(M2[0], M2[1], 15*scalingFactor)
+    circle(R1[0], R1[1], 15*scalingFactor)
+    circle(R2[0], R2[1], 15*scalingFactor)
 
     // display your role
     fill(50, 100, 60)
-    strokeWeight(3)
+    strokeWeight(scalingFactor*1.5)
     switch (role) {
         case "MT":
-            circle(MT[0], MT[1], 30)
+            circle(MT[0], MT[1], 15*scalingFactor)
             break
         case "OT":
-            circle(OT[0], OT[1], 30)
+            circle(OT[0], OT[1], 15*scalingFactor)
             break
         case "H1":
-            circle(H1[0], H1[1], 30)
+            circle(H1[0], H1[1], 15*scalingFactor)
             break
         case "H2":
-            circle(H2[0], H2[1], 30)
+            circle(H2[0], H2[1], 15*scalingFactor)
             break
         case "M1":
-            circle(M1[0], M1[1], 30)
+            circle(M1[0], M1[1], 15*scalingFactor)
             break
         case "M2":
-            circle(M2[0], M2[1], 30)
+            circle(M2[0], M2[1], 15*scalingFactor)
             break
         case "R1":
-            circle(R1[0], R1[1], 30)
+            circle(R1[0], R1[1], 15*scalingFactor)
             break
         case "R2":
-            circle(R2[0], R2[1], 30)
+            circle(R2[0], R2[1], 15*scalingFactor)
             break
     }
 
     fill(0, 0, 100)
     noStroke()
-    textSize(20)
+    textSize(10*scalingFactor)
     textAlign(CENTER, CENTER)
     text("MT", MT[0], MT[1])
     text("OT", OT[0], OT[1])
@@ -1064,14 +1064,14 @@ function setupUtopianSky() {
     currentlySelectedMechanic = "Utopian Sky"
     currentlySelectedBackground = "FRU P1"
 
-    MT = [0, -50]
-    OT = [50, 0]
-    H1 = [-50, 0]
-    H2 = [0, 50]
-    M1 = [-35, 35]
-    M2 = [35, 35]
-    R1 = [-35, -35]
-    R2 = [35, -35]
+    MT = [0, -50*scalingFactor]
+    OT = [50*scalingFactor, 0]
+    H1 = [-50*scalingFactor, 0]
+    H2 = [0, 50*scalingFactor]
+    M1 = [-35*scalingFactor, 35*scalingFactor]
+    M2 = [35*scalingFactor, 35*scalingFactor]
+    R1 = [-35*scalingFactor, -35*scalingFactor]
+    R2 = [35*scalingFactor, -35*scalingFactor]
 
     // now we'll have to set up which clones are unsafe
     unsafeClones = []
@@ -1130,7 +1130,7 @@ class CanvasDebugCorner {
     showBottom() {
         if (this.visible) {
             noStroke()
-            textFont(fixedWidthFont, 14)
+            textFont(fixedWidthFont, 7*scalingFactor)
 
             const LEFT_MARGIN = 10
             const DEBUG_Y_OFFSET = height - 10 /* floor of debug corner */
@@ -1161,7 +1161,7 @@ class CanvasDebugCorner {
     showTop() {
         if (this.visible) {
             noStroke()
-            textFont(fixedWidthFont, 14)
+            textFont(fixedWidthFont, 7*scalingFactor)
 
             const LEFT_MARGIN = 10
             const TOP_PADDING = 3 /* extra padding on top of the 1st line */
