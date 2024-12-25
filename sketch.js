@@ -77,8 +77,8 @@ function preload() {
 
 
 function setup() {
-    let cnv = createCanvas(topSquareSize*2 + holeSize*2 + topWidth,
-        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + holeSize*4)
+    let cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth,
+        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + holeSize*6)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
     textFont(font, 7*scalingFactor)
@@ -104,20 +104,35 @@ function setup() {
 
     setupUtopianSky()
 
-    greenSquareX = 0
-    greenSquareY = 0
-    redSquareX = width - topSquareSize
-    redSquareY = 0
-    topWindowX = topSquareSize + holeSize
-    topWindowY = 0
-    selectionX = 0
-    selectionY = topWindowY + topSquareSize + holeSize
-    middleTopX = 0
-    middleTopY = selectionY + mechanicSelectionHeight + holeSize
-    mainBodyX = 0
+    greenSquareX = holeSize
+    greenSquareY = holeSize
+    redSquareX = width - topSquareSize - holeSize
+    redSquareY = holeSize
+    topWindowX = topSquareSize + holeSize*2
+    topWindowY = holeSize
+    middleTopX = holeSize
+    middleTopY = topWindowY + topSquareSize + holeSize
+    mainBodyX = holeSize
     mainBodyY = middleTopY + middleTopHeight + holeSize
-    bottomWindowX = 0
+    bottomWindowX = holeSize
     bottomWindowY = mainBodyY + mainBodyHeight + holeSize
+    selectionX = holeSize
+    selectionY = bottomWindowY + bottomHeight + holeSize
+
+    // greenSquareX = 0
+    // greenSquareY = 0
+    // redSquareX = width - topSquareSize
+    // redSquareY = 0
+    // topWindowX = topSquareSize + holeSize
+    // topWindowY = 0
+    // middleTopX = 0
+    // middleTopY = topWindowY + topSquareSize + holeSize
+    // mainBodyX = 0
+    // mainBodyY = middleTopY + middleTopHeight + holeSize
+    // bottomWindowX = 0
+    // bottomWindowY = mainBodyY + mainBodyHeight + holeSize
+    // selectionX = 0
+    // selectionY = bottomWindowY + bottomHeight + holeSize
 
     textAlign(CENTER, CENTER)
 }
@@ -161,8 +176,7 @@ function draw() {
     // the bottom window
     fill(234, 34, 24)
     noStroke()
-    rect(0, height - bottomHeight, width,
-        height, cornerRounding)
+    rect(bottomWindowX, bottomWindowY, bottomWindowX + windowWidth, bottomWindowY + bottomHeight, cornerRounding)
     displayBottomWindowContent()
 
 
@@ -261,8 +275,8 @@ function displayMainBodyContent() {
         push()
         rotate(0.02)
         tint(0, 0, 100, 10)
-        image(fruP1Image, -width/2 + 20*scalingFactor, -width/2 + 20*scalingFactor,
-            width - 40*scalingFactor, width - 40*scalingFactor)
+        image(fruP1Image, -windowWidth/2 + 20*scalingFactor, -windowWidth/2 + 20*scalingFactor,
+            windowWidth - 40*scalingFactor, windowWidth - 40*scalingFactor)
         pop()
 
 
@@ -271,13 +285,13 @@ function displayMainBodyContent() {
         fill(240, 100, 50)
         beginShape()
         for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
-            vertex(cos(i) * width / 2,
-                sin(i) * width / 2)
+            vertex(cos(i) * windowWidth / 2,
+                sin(i) * windowWidth / 2)
         }
         beginContour()
         for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
-            vertex(cos(i) * (width / 2 - 20*scalingFactor),
-                sin(i) * (width / 2 - 20*scalingFactor))
+            vertex(cos(i) * (windowWidth / 2 - 20*scalingFactor),
+                sin(i) * (windowWidth / 2 - 20*scalingFactor))
         }
         endContour()
         endShape(CLOSE)
@@ -287,15 +301,15 @@ function displayMainBodyContent() {
         noStroke()
         fill(0, 0, 100)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
-            circle(cos(i) * (width / 2 - 15*scalingFactor),
-                sin(i) * (width / 2 - 15*scalingFactor), 5)
+            circle(cos(i) * (windowWidth / 2 - 15*scalingFactor),
+                sin(i) * (windowWidth / 2 - 15*scalingFactor), 5)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
-            circle(cos(i) * (width / 2 - 15*scalingFactor),
-                sin(i) * (width / 2 - 15*scalingFactor), 10)
+            circle(cos(i) * (windowWidth / 2 - 15*scalingFactor),
+                sin(i) * (windowWidth / 2 - 15*scalingFactor), 10)
         }
 
         displayCharacterPositions()
@@ -310,18 +324,18 @@ function displayMainBodyContent() {
 
                 if (spreadOrStack === "spread") stroke(240, 50, 100)
                 if (spreadOrStack === "stack") stroke(0, 50, 100)
-                displayClone([0, -width/4], false)
+                displayClone([0, -windowWidth/4], false)
 
                 // clicking on the green dot will advance to the next stage
                 if (mouseIsPressed && !mousePressedLastFrame) {
                     mousePressedLastFrame = true
-                    if (sqrt((mouseX - width / 2) ** 2 +
-                        (mouseY - width / 2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3) ** 2) < 10*scalingFactor) {
+                    if (sqrt((mouseX - (mainBodyX + windowWidth/2))**2 +
+                        (mouseY - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                         stage = 1
 
                         // the distance everyone will go to get to their clock
                         // spots
-                        let spreadRadius = width*3/7
+                        let spreadRadius = windowWidth*3/7
 
                         MT = [spreadRadius/15, -spreadRadius]
                         OT = [spreadRadius*0.707, -spreadRadius*0.757]
@@ -346,28 +360,28 @@ function displayMainBodyContent() {
                             " so you \ncan't tell anymore."
 
                         // make the arena foggy
-                        background(0, 0, 50)
-                        for (let j = 0; j < 10; j += 1) {
-                            fill(0, 0, 60)
+                        background(0, 0, 100)
+                        for (let j = 0; j < 20; j += 1) {
+                            fill(0, 0, 60, 20)
                             noStroke()
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                             }
-                            fill(0, 0, 70)
+                            fill(0, 0, 70, 20)
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                             }
-                            fill(0, 0, 90)
+                            fill(0, 0, 90, 20)
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
                             }
-                            fill(0, 0, 100)
+                            fill(0, 0, 100, 20)
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
                                 rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
@@ -378,9 +392,9 @@ function displayMainBodyContent() {
                 }
             } if (stage === 1) { // stage 1: clones have just appeared
                 let raisedArm = unsafeClones.includes(role)
-                let cloneRadius = width*2/7
-                let innerGreenDotRadius = width*2/7
-                let outerGreenDotRadius = width*3/7
+                let cloneRadius = windowWidth*2/7
+                let innerGreenDotRadius = windowWidth*2/7
+                let outerGreenDotRadius = windowWidth*3/7
                 let innerGreenDotPosition
                 let outerGreenDotPosition
 
@@ -445,11 +459,11 @@ function displayMainBodyContent() {
                         break
                 }
 
-                let veryInnerRadius = width/7
+                let veryInnerRadius = windowWidth/7
 
                 // handle clicking on the green dots
-                if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
                         // this is the INNER green dot. this is only good if
@@ -510,8 +524,8 @@ function displayMainBodyContent() {
                             }
                         }
                     }
-                } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
-                        (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
                         // this is the OUTER green dot. this is only good if
@@ -576,8 +590,8 @@ function displayMainBodyContent() {
                     }
                 }
             } if (stage === 2) {
-                let innerGreenDotRadius = width/7
-                let outerGreenDotRadius = width*3/7
+                let innerGreenDotRadius = windowWidth/7
+                let outerGreenDotRadius = windowWidth*3/7
                 let innerGreenDotPosition
                 let outerGreenDotPosition
                 let oppositeRole // we might as well calculate this now
@@ -644,8 +658,8 @@ function displayMainBodyContent() {
                 print(oppositeRole)
 
                 // handle clicking on the green dots
-                if (sqrt((mouseX - innerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - innerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the INNER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
@@ -701,8 +715,8 @@ function displayMainBodyContent() {
                             }
                         }
                     }
-                } if (sqrt((mouseX - outerGreenDotPosition[0] - width/2)**2 +
-                    (mouseY - outerGreenDotPosition[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the OUTER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         mousePressedLastFrame = true
@@ -765,9 +779,9 @@ function displayMainBodyContent() {
                 let stackSpot
                 let spreadSpot
                 let lightParty
-                let outerRadius = width*3/7 // where everyone will be
+                let outerRadius = windowWidth*3/7 // where everyone will be
                 // when next to the death wall
-                let innerRadius = width*2/7 // where the tank will be
+                let innerRadius = windowWidth*2/7 // where the tank will be
                 // when spreading
                 let angleDiffForDPS = 17.5 // how far the DPS go clockwise/counterclockwise away from the healer
                 let actualRadius // how far you will be
@@ -840,8 +854,8 @@ function displayMainBodyContent() {
 
                 // also make sure that if you're a healer, you don't
                 // accidentally pick up both the spread and stack
-                if ((sqrt((mouseX - spreadSpot[0] - width/2)**2 +
-                    (mouseY - spreadSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor)
+                if ((sqrt((mouseX - spreadSpot[0] - (mainBodyX + windowWidth/2))**2 +
+                        (mouseY - spreadSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor)
                     && !(role === "H1" || role === "H2")) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         if (spreadOrStack === "spread") {
@@ -862,8 +876,8 @@ function displayMainBodyContent() {
                             stage = 100
                         }
                     }
-                } if (sqrt((mouseX - stackSpot[0] - width/2)**2 +
-                    (mouseY - stackSpot[1] - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+                } if (sqrt((mouseX - stackSpot[0] - (mainBodyX + windowWidth/2))**2 +
+                    (mouseY - stackSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
                             textAtTop = "You went to the wrong position. If" +
@@ -946,8 +960,7 @@ function displayClone(position, raisedArm) {
 
 // encapsulation function. makes code less messy
 function translateToCenterOfBoard() {
-    translate(width/2,
-        width/2 + topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize * 3)
+    translate(mainBodyX + windowWidth/2, mainBodyY + mainBodyHeight/2);
 }
 
 // display a green dot for where to go
@@ -957,8 +970,8 @@ function displayGreenDot(x, y) {
     stroke(120, 100, 100)
 
     // if you mouse over it, dim it
-    if (sqrt((mouseX - x - width/2)**2 +
-        (mouseY - y - width/2 - topSquareSize - mechanicSelectionHeight - middleTopHeight - holeSize * 3)**2) < 10*scalingFactor) {
+    if (sqrt((mouseX - x - (mainBodyX + windowWidth/2))**2 +
+        (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
         stroke(120, 100, 80)
     }
     noFill()
@@ -1036,11 +1049,10 @@ function displayBottomWindowContent() {
         fill(0, 100, 50, 50)
     }
     noStroke()
-    rect(0, height - bottomHeight, width,
-        height, cornerRounding)
+    rect(bottomWindowX, bottomWindowY, bottomWindowX + windowWidth, bottomWindowY + bottomHeight, cornerRounding)
 
     fill(0, 0, 100)
-    text(textAtBottom, textPadding, height - bottomHeight + textPadding)
+    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding)
 }
 
 // since all the other things that display something on top of the separate
@@ -1120,9 +1132,11 @@ function setupUtopianSky() {
     // if it's spread, briefly make the background blue—if it's red, briefly
     // make the background red
     if (spreadOrStack === "spread") {
-        background(240, 100, 100)
+        fill(240, 100, 100)
+        rect(0, 0, width, height, cornerRounding)
     } else {
-        background(0, 100, 100)
+        fill(0, 100, 100)
+        rect(0, 0, width, height, cornerRounding)
     }
 
     textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
