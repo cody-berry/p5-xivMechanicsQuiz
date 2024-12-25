@@ -14,7 +14,6 @@ let debugCorner /* output debug text in the bottom left corner of the canvas */
 // displaying the windows
 let scalingFactor = 4/3
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
-let debugCornerSize = 30*scalingFactor // the height of the debug corner
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
 let mechanicSelectionRows = 4*scalingFactor // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*15*scalingFactor
@@ -23,6 +22,7 @@ let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
+let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
 let textPadding = 5*scalingFactor
 let mousePressedLastFrame = false // used sometimes
 
@@ -38,6 +38,22 @@ let M1 = [-35*scalingFactor, 35*scalingFactor]
 let M2 = [35*scalingFactor, 35*scalingFactor]
 let R1 = [-35*scalingFactor, -35*scalingFactor]
 let R2 = [35*scalingFactor, -35*scalingFactor]
+
+// window positions
+let greenSquareX = 0
+let greenSquareY = 0
+let redSquareX = 0
+let redSquareY = 0
+let topWindowX = 0
+let topWindowY = 0
+let selectionX = 0
+let selectionY = 0
+let middleTopX = 0
+let middleTopY = 0
+let mainBodyX = 0
+let mainBodyY = 0
+let bottomWindowX = 0
+let bottomWindowY = 0
 
 // Utopian Sky (FRU P1)
 let fruP1Image
@@ -62,7 +78,7 @@ function preload() {
 
 function setup() {
     let cnv = createCanvas(topSquareSize*2 + holeSize*2 + topWidth,
-        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + debugCornerSize + holeSize*5)
+        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + holeSize*4)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
     textFont(font, 7*scalingFactor)
@@ -84,8 +100,24 @@ function setup() {
         numpad 1 → freeze sketch</pre>`)
 
     debugCorner = new CanvasDebugCorner(5)
+    debugCorner.visible = false
 
     setupUtopianSky()
+
+    greenSquareX = 0
+    greenSquareY = 0
+    redSquareX = width - topSquareSize
+    redSquareY = 0
+    topWindowX = topSquareSize + holeSize
+    topWindowY = 0
+    selectionX = 0
+    selectionY = topWindowY + topSquareSize + holeSize
+    middleTopX = 0
+    middleTopY = selectionY + mechanicSelectionHeight + holeSize
+    mainBodyX = 0
+    mainBodyY = middleTopY + middleTopHeight + holeSize
+    bottomWindowX = 0
+    bottomWindowY = mainBodyY + mainBodyHeight + holeSize
 
     textAlign(CENTER, CENTER)
 }
@@ -95,53 +127,47 @@ function draw() {
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
-    rect(0, 0, topSquareSize, topSquareSize, cornerRounding)
+    rect(greenSquareX, greenSquareY, greenSquareX + topSquareSize, greenSquareY + topSquareSize, cornerRounding)
 
-    // the top window TODO
+    // the top window
     fill(234, 34, 24)
     noStroke()
-    rect(topSquareSize + holeSize, 0, width - topSquareSize - holeSize,
-        topSquareSize, cornerRounding)
+    rect(topWindowX, topWindowY, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
     displayTopWindowContent()
 
     // the red square at the top-right TODO
     fill(350, 80, 50)
     noStroke()
-    rect(width - topSquareSize, 0,
-        width, topSquareSize, cornerRounding)
+    rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
 
     // the mechanic section window TODO
     fill(234, 34, 24)
     noStroke()
-    rect(0, topSquareSize + holeSize,
-        width, topSquareSize + mechanicSelectionHeight + holeSize, cornerRounding)
+    rect(selectionX, selectionY, selectionX + windowWidth, selectionY + mechanicSelectionHeight, cornerRounding)
 
     // the middle-top window
     fill(234, 34, 24)
     noStroke()
-    rect(0, topSquareSize + mechanicSelectionHeight + holeSize*2,
-        width, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*2, cornerRounding)
+    rect(middleTopX, middleTopY, middleTopX + windowWidth, middleTopY + middleTopHeight, cornerRounding)
     textAlign(LEFT, TOP)
     displayMiddleTopWindowContent()
 
     // the main body window
     fill(234, 34, 24, 3)
     noStroke()
-    rect(0, topSquareSize + mechanicSelectionHeight + middleTopHeight + holeSize*3,
-        width, height - debugCornerSize - bottomHeight - holeSize*2, cornerRounding)
+    rect(mainBodyX, mainBodyY, mainBodyX + windowWidth, mainBodyY + mainBodyHeight, cornerRounding)
     displayMainBodyContent()
 
     // the bottom window
     fill(234, 34, 24)
     noStroke()
-    rect(0, height - debugCornerSize - bottomHeight - holeSize, width,
-        height - debugCornerSize - holeSize, cornerRounding)
+    rect(0, height - bottomHeight, width,
+        height, cornerRounding)
     displayBottomWindowContent()
 
-    // the debug corner window
-    fill(0, 0, 0)
-    noStroke()
-    rect(0, height - debugCornerSize, width, height, cornerRounding)
+
+    // used in emergencies. also a nice treat for those who accidentally
+    // pressed backtick
     displayDebugCorner()
 
     // make sure mousePressedLastFrame is updated
@@ -157,14 +183,14 @@ function displayTopWindowContent() {
         "\nI'll try not to delete any mechanic implementations if someone" +
         "\nwants them again. Earliest mechanic: Utopian Sky from FRU." +
         "\n\nReset mechanic           Purge data        Change role from " + role,
-        topSquareSize + holeSize + textPadding, textPadding + textAscent())
+        topWindowX + textPadding, topWindowY + textPadding + textAscent())
 
     // since the buttons at the bottom are useful, just...make them useful XD
-    if (mouseY < topSquareSize && mouseY > textAscent()*4 + textDescent()*4 + textPadding) {
+    if (mouseY < topWindowY + topSquareSize && mouseY > topWindowY + textAscent()*4 + textDescent()*4 + textPadding) {
         fill(0, 0, 0, 30)
 
-        if (mouseX > topSquareSize + holeSize && mouseX < topSquareSize + holeSize + topWidth/3) {
-            rect(topSquareSize + holeSize, textAscent() * 4 + textDescent() * 4 + textPadding, topSquareSize + holeSize + topWidth / 3, topSquareSize)
+        if (mouseX > topWindowX && mouseX < topWindowX + topWidth/3) {
+            rect(topWindowX, topWindowY + textAscent() * 4 + textDescent() * 4 + textPadding, topSquareSize + holeSize + topWidth / 3, topWindowY + topSquareSize, cornerRounding)
 
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, reset the mechanic
@@ -175,12 +201,12 @@ function displayTopWindowContent() {
             }
         }
 
-        if (mouseX > topSquareSize + holeSize + topWidth/3 && mouseX < width - topSquareSize - holeSize - topWidth/3) {
-            rect(topSquareSize + holeSize + topWidth / 3, textAscent() * 4 + textDescent() * 4 + textPadding, width - topSquareSize - holeSize - topWidth / 3, topSquareSize)
+        if (mouseX > topWindowX + topWidth/3 && mouseX < topWindowX + 2*topWidth/3) {
+            rect(topWindowX + topWidth/3, topWindowY + textAscent() * 4 + textDescent() * 4 + textPadding, topWindowX + 2*topWidth/3, topWindowY + topSquareSize, cornerRounding)
         }
 
-        if (mouseX > width - topSquareSize - holeSize - topWidth/3 && mouseX < width - topSquareSize - holeSize) {
-            rect(width - topSquareSize - holeSize - topWidth/3, textAscent()*4 + textDescent()*4 + textPadding, width - topSquareSize - holeSize, topSquareSize)
+        if (mouseX > topWindowX + 2*topWidth/3 && mouseX < topWindowX + topWidth) {
+            rect(topWindowX + 2*topWidth/3, topWindowY + textAscent()*4 + textDescent()*4 + textPadding, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, change roles
                 if (!mousePressedLastFrame) {
@@ -222,7 +248,7 @@ function displayTopWindowContent() {
 
 function displayMiddleTopWindowContent() {
     fill(0, 0, 100)
-    text(textAtTop, textPadding, topSquareSize + mechanicSelectionHeight + holeSize*2 + textPadding)
+    text(textAtTop, middleTopX + textPadding, middleTopY + textPadding)
 }
 
 function displayMainBodyContent() {
@@ -320,34 +346,32 @@ function displayMainBodyContent() {
                             " so you \ncan't tell anymore."
 
                         // make the arena foggy
+                        background(0, 0, 50)
                         for (let j = 0; j < 10; j += 1) {
-                            background(0, 0, 50, 5)
                             fill(0, 0, 60)
-                            stroke(0, 0, 100)
+                            noStroke()
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                                 circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
                             }
                             fill(0, 0, 70)
-                            noStroke()
-                            for (let i = 0; i < height; i += 5*scalingFactor) {
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                            }
-                            fill(0, 0, 100)
                             for (let i = 0; i < height; i += 5*scalingFactor) {
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                                 rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
                             }
                             fill(0, 0, 90)
-                            stroke(0, 0, 0)
                             for (let i = 0; i < height; i += 5*scalingFactor) {
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                            }
+                            fill(0, 0, 100)
+                            for (let i = 0; i < height; i += 5*scalingFactor) {
+                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
+                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
                             }
                         }
                     }
@@ -1012,11 +1036,11 @@ function displayBottomWindowContent() {
         fill(0, 100, 50, 50)
     }
     noStroke()
-    rect(0, height - debugCornerSize - bottomHeight - holeSize, width,
-        height - debugCornerSize - holeSize, cornerRounding)
+    rect(0, height - bottomHeight, width,
+        height, cornerRounding)
 
     fill(0, 0, 100)
-    text(textAtBottom, textPadding, height - debugCornerSize - bottomHeight - holeSize + textPadding)
+    text(textAtBottom, textPadding, height - bottomHeight + textPadding)
 }
 
 // since all the other things that display something on top of the separate
