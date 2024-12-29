@@ -23,7 +23,7 @@ let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
-let textPadding = 5*scalingFactor
+let textPadding = 3.5*scalingFactor
 let mousePressedLastFrame = false // used sometimes
 
 // your role
@@ -57,6 +57,8 @@ let bottomWindowY = 0
 
 // Utopian Sky (FRU P1)
 let fruP1Image
+let fruP1ImageComplete
+let utopianSkyFog
 let unsafeClones
 let spreadOrStack
 let safeDirections
@@ -69,10 +71,12 @@ let textAtTop
 let textAtBottom
 
 function preload() {
-    font = loadFont('data/consola.ttf')
+    font = loadFont('data/meiryo.ttf')
     fixedWidthFont = loadFont('data/consola.ttf')
     variableWidthFont = loadFont('data/meiryo.ttf')
     fruP1Image = loadImage('data/FRU P1 Floor.png')
+    fruP1ImageComplete = loadImage('data/FRU P1 BG.png')
+    utopianSkyFog = loadImage('data/fogGrain2.jpg')
 }
 
 
@@ -104,6 +108,10 @@ function setup() {
 
     setupUtopianSky()
 
+    // there is a padding of holeSize on the left and top. To remove this padding,
+    // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
+    // topWindowY, middleTopX, mainBodyX, bottomWindowX, and selectionX; add holeSize
+    // to redSquareX; and remove holeSize*2 from the width and height.
     greenSquareX = holeSize
     greenSquareY = holeSize
     redSquareX = width - topSquareSize - holeSize
@@ -139,6 +147,14 @@ function setup() {
 
 
 function draw() {
+    frameRate(60)
+
+    // the main body window. display first
+    fill(234, 34, 24, 3)
+    noStroke()
+    rect(mainBodyX, mainBodyY, mainBodyX + windowWidth, mainBodyY + mainBodyHeight, cornerRounding)
+    displayMainBodyContent()
+
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
@@ -167,12 +183,6 @@ function draw() {
     textAlign(LEFT, TOP)
     displayMiddleTopWindowContent()
 
-    // the main body window
-    fill(234, 34, 24, 3)
-    noStroke()
-    rect(mainBodyX, mainBodyY, mainBodyX + windowWidth, mainBodyY + mainBodyHeight, cornerRounding)
-    displayMainBodyContent()
-
     // the bottom window
     fill(234, 34, 24)
     noStroke()
@@ -196,15 +206,16 @@ function displayTopWindowContent() {
     text("Hi! I'm trying to make simulations for various mechanics." +
         "\nI'll try not to delete any mechanic implementations if someone" +
         "\nwants them again. Earliest mechanic: Utopian Sky from FRU." +
-        "\n\nReset mechanic           Purge data        Change role from " + role,
+        "\n\n    Reset mechanic                Purge data            Change" +
+        " role from " + role,
         topWindowX + textPadding, topWindowY + textPadding + textAscent())
 
     // since the buttons at the bottom are useful, just...make them useful XD
-    if (mouseY < topWindowY + topSquareSize && mouseY > topWindowY + textAscent()*4 + textDescent()*4 + textPadding) {
+    if (mouseY < topWindowY + topSquareSize && mouseY > topWindowY + textAscent()*3 + textDescent()*3 + textPadding) {
         fill(0, 0, 0, 30)
 
         if (mouseX > topWindowX && mouseX < topWindowX + topWidth/3) {
-            rect(topWindowX, topWindowY + textAscent() * 4 + textDescent() * 4 + textPadding, topSquareSize + holeSize + topWidth / 3, topWindowY + topSquareSize, cornerRounding)
+            rect(topWindowX, topWindowY + textAscent() * 3 + textDescent() * 3 + textPadding, topWindowX + topWidth / 3, topWindowY + topSquareSize, cornerRounding)
 
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, reset the mechanic
@@ -216,11 +227,11 @@ function displayTopWindowContent() {
         }
 
         if (mouseX > topWindowX + topWidth/3 && mouseX < topWindowX + 2*topWidth/3) {
-            rect(topWindowX + topWidth/3, topWindowY + textAscent() * 4 + textDescent() * 4 + textPadding, topWindowX + 2*topWidth/3, topWindowY + topSquareSize, cornerRounding)
+            rect(topWindowX + topWidth/3, topWindowY + textAscent() * 3 + textDescent() * 3 + textPadding, topWindowX + 2*topWidth/3, topWindowY + topSquareSize, cornerRounding)
         }
 
         if (mouseX > topWindowX + 2*topWidth/3 && mouseX < topWindowX + topWidth) {
-            rect(topWindowX + 2*topWidth/3, topWindowY + textAscent()*4 + textDescent()*4 + textPadding, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
+            rect(topWindowX + 2*topWidth/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, change roles
                 if (!mousePressedLastFrame) {
@@ -357,37 +368,51 @@ function displayMainBodyContent() {
                         textAtBottom = "You went to your clock" +
                             " spot.\n[PASS] — You remembered whether it was" +
                             " stack or spread...right? Well, now it's foggy," +
-                            " so you \ncan't tell anymore."
+                            " so you can't \ntell anymore."
 
                         // make the arena foggy
-                        background(0, 0, 100)
-                        for (let j = 0; j < 20; j += 1) {
-                            fill(0, 0, 60, 20)
-                            noStroke()
-                            for (let i = 0; i < height; i += 5*scalingFactor) {
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
-                            }
-                            fill(0, 0, 70, 20)
-                            for (let i = 0; i < height; i += 5*scalingFactor) {
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
-                            }
-                            fill(0, 0, 90, 20)
-                            for (let i = 0; i < height; i += 5*scalingFactor) {
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
-                                circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
-                            }
-                            fill(0, 0, 100, 20)
-                            for (let i = 0; i < height; i += 5*scalingFactor) {
-                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
-                                rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
-                            }
-                        }
+                        erase()
+                        rect(0, 0, width, height)
+                        noErase()
+                        let css = select("body")
+                        css.style("background-image",
+                            "url(\"data/fogGrain2.jpg\")")
+                        // background(0, 0, 100)
+                        // for (let j = 0; j < 20; j += 1) {
+                        //     fill(0, 0, 60, 20)
+                        //     noStroke()
+                        //     for (let i = 0; i < height; i += 2*scalingFactor) {
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 25*scalingFactor, i / 50 + 50*scalingFactor))
+                        //     }
+                        //     fill(0, 0, 70, 20)
+                        //     for (let i = 0; i < height; i += 2*scalingFactor) {
+                        //         rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                        //         rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                        //         rect(random(0, width*2/3), random(i, i + 10*scalingFactor), random(width/3, width), random(i + 40*scalingFactor, i + 50*scalingFactor))
+                        //     }
+                        //     fill(0, 0, 90, 20)
+                        //     for (let i = 0; i < height; i += 2*scalingFactor) {
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                        //         circle(random(0, width), random(i, i + 25*scalingFactor), random(i / 50 + 10*scalingFactor, i / 50 + 30*scalingFactor))
+                        //     }
+                        //     fill(0, 0, 80, 20)
+                        //     for (let i = 0; i < height; i += 2*scalingFactor) {
+                        //         rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
+                        //         rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
+                        //         rect(random(0, width*2/3), random(i, i + 40*scalingFactor), random(width/3, width), random(i + 20*scalingFactor, i + 50*scalingFactor))
+                        //     }
+                        // }
+                        // imageMode(CENTER)
+                        // for (let y = 0; y <= height; y += width/3) {
+                        //     image(utopianSkyFog, width / 6, width / 6 + y, width/3 + 5, width/3 + 5)
+                        //     image(utopianSkyFog, width / 2, width / 6 + y, width/3 + 5, width/3 + 5)
+                        //     image(utopianSkyFog, 5*width / 6, width / 6 + y, width/3 + 5, width/3 + 5)
+                        // }
+                        // imageMode(CORNER)
+                        // noLoop()
                     }
                 }
             } if (stage === 1) { // stage 1: clones have just appeared
@@ -899,7 +924,9 @@ function displayMainBodyContent() {
                                 textAtTop += "\n\n\nHey, you're a healer." +
                                     " Stop cheating by not having to worry" +
                                     " about stack or spread."
-                                textAtBottom = "You went to your stack spot." +
+                                textAtBottom = "You went to your" +
+                                    " stack—I mean, spread—wait, there" +
+                                    " isn't even a difference—spot." +
                                     " \n[PASS] It's either stack or" +
                                     " spread—who knows, you're a healer." +
                                     " [CLEARED]"
@@ -1026,17 +1053,18 @@ function displayCharacterPositions() {
     }
 
     fill(0, 0, 100)
-    noStroke()
-    textSize(10*scalingFactor)
+    stroke(0, 0, 100)
+    strokeWeight(0.5*scalingFactor)
+    textSize(8*scalingFactor)
     textAlign(CENTER, CENTER)
-    text("MT", MT[0], MT[1])
-    text("OT", OT[0], OT[1])
-    text("H1", H1[0], H1[1])
-    text("H2", H2[0], H2[1])
-    text("M1", M1[0], M1[1])
-    text("M2", M2[0], M2[1])
-    text("R1", R1[0], R1[1])
-    text("R2", R2[0], R2[1])
+    text("MT", MT[0], MT[1] - scalingFactor)
+    text("OT", OT[0], OT[1] - scalingFactor)
+    text("H1", H1[0], H1[1] - scalingFactor)
+    text("H2", H2[0], H2[1] - scalingFactor)
+    text("M1", M1[0], M1[1] - scalingFactor)
+    text("M2", M2[0], M2[1] - scalingFactor)
+    text("R1", R1[0], R1[1] - scalingFactor)
+    text("R2", R2[0], R2[1] - scalingFactor)
 }
 
 function displayBottomWindowContent() {
@@ -1129,15 +1157,22 @@ function setupUtopianSky() {
 
     spreadOrStack = random(["spread", "stack"])
 
-    // if it's spread, briefly make the background blue—if it's red, briefly
-    // make the background red
-    if (spreadOrStack === "spread") {
-        fill(240, 100, 100)
-        rect(0, 0, width, height, cornerRounding)
-    } else {
-        fill(0, 100, 100)
-        rect(0, 0, width, height, cornerRounding)
-    }
+    // make the background. color it ever so slightly to blue or red
+    let css = select("body")
+    css.style("background-image", "linear-gradient(\n" +
+        "rgba(13, 13, 40, 0.3), \n" +
+        "rgba(13, 13, 40, 0.5)), \n" +
+        "url(\"data/FRU P1 BG.png\")")
+    // if (spreadOrStack === "spread") tint(240, 10, 100, 100)
+    // else tint(0, 10, 100, 100)
+    //
+    // imageMode(CENTER)
+    // for (let y = 0; y <= height; y += width) {
+    //     image(fruP1ImageComplete, width / 2, width / 2 + y, width, width)
+    // }
+    // imageMode(CORNER)
+    // tint(0, 0, 100)
+    // noLoop()
 
     textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
         " time to test just that.\nAlso, please do remember that it's " + spreadOrStack +
@@ -1146,6 +1181,14 @@ function setupUtopianSky() {
         " dot in the center."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+You are currently on the mechanic Utopian Sky.
+    Click on any green dot to move to that location. Clicking on the green
+     dot in the center at the start will automatically move you to your clock spot.
+    There isn't a timing feature on this mechanic——yet, that is.</pre>`)
 }
 
 

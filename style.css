@@ -1,5 +1,10 @@
 html, body {
-    background-color: rgb(32, 33, 51);
+    /*background-color: rgb(32, 33, 51);*/
+    /*color: gainsboro;*/
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: top;
+    background-size: cover;
     color: gainsboro;
 }
 
