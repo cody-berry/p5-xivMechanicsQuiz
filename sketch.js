@@ -1,8 +1,28 @@
 /**
- *  @author
- *  @date 2024.
+ *  @author Cody
+ *  @date 2025.01.06
+ *  earliest mechanic: Utopian Sky from FRU P1
+ *  latest mechanic: Diamond Dust from FRU P2 (in-progress)
+ *  Some encapsulations might not be included in certain places, making the code
+ *   messier than it can be.
  *
+ *  The below shows the start of that section, not where it is. It simply
+ *  provides a range.
+ *  preload(): line 90-100
+ *  setup(): line 100-110
+ *  draw(): line 150-200
+ *  displayMechanicSelection(): line 200-250
+ *  displayTopWindowContent(): line 250-300
+ *  displayMainBodyContent(): line 340-380
+ *  FRU P1: line 350-390
+ *      Utopian Sky: 390-410, 480-500, 680-700, 860-900
+ *  FRU P2: line 1000-1100
+ *      Diamond Dust: 1060-1160
+ *  Initializations: line 1300-1400
+ *
+ *  subject to change. last update to this: 2025.01.06 1:17pm
  */
+
 
 // initial variables from template
 let font
@@ -13,17 +33,21 @@ let debugCorner /* output debug text in the bottom left corner of the canvas */
 
 // displaying the windows
 let scalingFactor = 4/3
+let textPadding = 3.5*scalingFactor
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
-let mechanicSelectionRows = 4*scalingFactor // the number of rows in "mechanic selection"
-let mechanicSelectionHeight = mechanicSelectionRows*15*scalingFactor
+let mechanicSelectionRows = 7 // the number of rows in "mechanic selection"
+let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
 let middleTopHeight = 50*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
-let textPadding = 3.5*scalingFactor
+let mainBodyWidth = windowWidth
+let middleTopWidth = windowWidth
+let bottomWidth = windowWidth
+let selectionWidth = windowWidth
 let mousePressedLastFrame = false // used sometimes
 
 // your role
@@ -57,11 +81,19 @@ let bottomWindowY = 0
 
 // Utopian Sky (FRU P1)
 let fruP1Image
-let fruP1ImageComplete
 let utopianSkyFog
 let unsafeClones
 let spreadOrStack
 let safeDirections
+
+// Diamond Dust (FRU P2)
+let fruP2Image
+let firstCircles
+let secondCircles
+let thirdCircles
+let fourthCircles
+let markedPlayers
+let silenceOrStillness
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -75,8 +107,8 @@ function preload() {
     fixedWidthFont = loadFont('data/consola.ttf')
     variableWidthFont = loadFont('data/meiryo.ttf')
     fruP1Image = loadImage('data/FRU P1 Floor.png')
-    fruP1ImageComplete = loadImage('data/FRU P1 BG.png')
     utopianSkyFog = loadImage('data/fogGrain2.jpg')
+    fruP2Image = loadImage('data/FRU P2 Floor.webp')
 }
 
 
@@ -106,7 +138,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupUtopianSky()
+    setupDiamondDust()
 
     // there is a padding of holeSize on the left and top. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -149,12 +181,6 @@ function setup() {
 function draw() {
     frameRate(60)
 
-    // the main body window. display first
-    fill(234, 34, 24, 3)
-    noStroke()
-    rect(mainBodyX, mainBodyY, mainBodyX + windowWidth, mainBodyY + mainBodyHeight, cornerRounding)
-    displayMainBodyContent()
-
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
@@ -171,22 +197,29 @@ function draw() {
     noStroke()
     rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
 
-    // the mechanic section window TODO
+    // the main body window.
+    fill(234, 34, 24, 3)
+    noStroke()
+    rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
+    displayMainBodyContent()
+
+    // the mechanic section window
     fill(234, 34, 24)
     noStroke()
-    rect(selectionX, selectionY, selectionX + windowWidth, selectionY + mechanicSelectionHeight, cornerRounding)
+    rect(selectionX, selectionY, selectionX + selectionWidth, selectionY + mechanicSelectionHeight, cornerRounding)
+    displayMechanicSelection()
 
     // the middle-top window
     fill(234, 34, 24)
     noStroke()
-    rect(middleTopX, middleTopY, middleTopX + windowWidth, middleTopY + middleTopHeight, cornerRounding)
+    rect(middleTopX, middleTopY, middleTopX + middleTopWidth, middleTopY + middleTopHeight, cornerRounding)
     textAlign(LEFT, TOP)
     displayMiddleTopWindowContent()
 
     // the bottom window
     fill(234, 34, 24)
     noStroke()
-    rect(bottomWindowX, bottomWindowY, bottomWindowX + windowWidth, bottomWindowY + bottomHeight, cornerRounding)
+    rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
     displayBottomWindowContent()
 
 
@@ -198,6 +231,53 @@ function draw() {
     mousePressedLastFrame = mouseIsPressed
 }
 
+function displayMechanicSelection() {
+    fill(0, 0, 100)
+    noStroke()
+    textAlign(LEFT, TOP)
+    textSize(10*scalingFactor)
+    text("FRU: Utopian Sky | Diamond Dust | |\n" +
+        "\n" +
+        "Who knows, maybe there'll be other mechanics soon.",
+        selectionX + textPadding, selectionY + textPadding)
+
+    fill(0, 0, 0, 30)
+    if (mouseX > selectionX + textPadding && mouseX < selectionX + selectionWidth - textPadding) {
+        // row 1
+        if (mouseY > selectionY + textPadding && mouseY < selectionY + 13*scalingFactor + textPadding) {
+            if (mouseX > selectionX + textPadding + textWidth("FRU:") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky ")) {
+                rect(selectionX + textPadding + textWidth("FRU:"), selectionY + textPadding,
+                     selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + 13*scalingFactor + textPadding)
+                if (mouseIsPressed && !mousePressedLastFrame) {
+                    setupUtopianSky()
+                }
+            } if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky |") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky |"), selectionY + textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + 13*scalingFactor + textPadding)
+                if (mouseIsPressed && !mousePressedLastFrame) {
+                    setupDiamondDust()
+                }
+            }
+        }
+        // row 2
+        if (mouseY > selectionY + 13*scalingFactor + textPadding && mouseY < selectionY + 26*scalingFactor + textPadding) {
+            // rect(0, selectionY + 13*scalingFactor + textPadding, width, selectionY + 26*scalingFactor + textPadding)
+        }
+        // row 3
+        if (mouseY > selectionY + 26*scalingFactor + textPadding && mouseY < selectionY + 39*scalingFactor + textPadding) {
+            // rect(0, selectionY + 26*scalingFactor + textPadding, width, selectionY + 39*scalingFactor + textPadding)
+        }
+        // row 4
+        if (mouseY > selectionY + 39*scalingFactor + textPadding && mouseY < selectionY + 52*scalingFactor + textPadding) {
+            // rect(0, selectionY + 39*scalingFactor + textPadding, width, selectionY + 52*scalingFactor + textPadding)
+        }
+    }
+
+
+    textSize(7*scalingFactor)
+}
 
 function displayTopWindowContent() {
     textAlign(LEFT, BASELINE)
@@ -220,10 +300,10 @@ function displayTopWindowContent() {
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, reset the mechanic
                 if (!mousePressedLastFrame) {
-                    mousePressedLastFrame = true
                     reset()
                 }
             }
+            return
         }
 
         if (mouseX > topWindowX + topWidth/3 && mouseX < topWindowX + 2*topWidth/3) {
@@ -235,7 +315,6 @@ function displayTopWindowContent() {
             if (mouseIsPressed) {
                 // so long as the mouse wasn't held down, change roles
                 if (!mousePressedLastFrame) {
-                    mousePressedLastFrame = true
                     switch (role) {
                         case "MT":
                             role = "OT"
@@ -264,6 +343,7 @@ function displayTopWindowContent() {
                     }
                     // you can't cheat by switching roles mid-mech!
                     reset()
+                    return
                 }
             }
         }
@@ -286,8 +366,8 @@ function displayMainBodyContent() {
         push()
         rotate(0.02)
         tint(0, 0, 100, 10)
-        image(fruP1Image, -windowWidth/2 + 20*scalingFactor, -windowWidth/2 + 20*scalingFactor,
-            windowWidth - 40*scalingFactor, windowWidth - 40*scalingFactor)
+        image(fruP1Image, -mainBodyWidth/2 + 20*scalingFactor, -mainBodyWidth/2 + 20*scalingFactor,
+            mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
         pop()
 
 
@@ -296,13 +376,13 @@ function displayMainBodyContent() {
         fill(240, 100, 50)
         beginShape()
         for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
-            vertex(cos(i) * windowWidth / 2,
-                sin(i) * windowWidth / 2)
+            vertex(cos(i) * mainBodyWidth / 2,
+                sin(i) * mainBodyWidth / 2)
         }
         beginContour()
         for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
-            vertex(cos(i) * (windowWidth / 2 - 20*scalingFactor),
-                sin(i) * (windowWidth / 2 - 20*scalingFactor))
+            vertex(cos(i) * (mainBodyWidth / 2 - 20*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 20*scalingFactor))
         }
         endContour()
         endShape(CLOSE)
@@ -312,15 +392,15 @@ function displayMainBodyContent() {
         noStroke()
         fill(0, 0, 100)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
-            circle(cos(i) * (windowWidth / 2 - 15*scalingFactor),
-                sin(i) * (windowWidth / 2 - 15*scalingFactor), 5)
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 5)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
-            circle(cos(i) * (windowWidth / 2 - 15*scalingFactor),
-                sin(i) * (windowWidth / 2 - 15*scalingFactor), 10)
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 10)
         }
 
         displayCharacterPositions()
@@ -335,18 +415,17 @@ function displayMainBodyContent() {
 
                 if (spreadOrStack === "spread") stroke(240, 50, 100)
                 if (spreadOrStack === "stack") stroke(0, 50, 100)
-                displayClone([0, -windowWidth/4], false)
+                displayClone([0, -mainBodyWidth/4], false)
 
                 // clicking on the green dot will advance to the next stage
                 if (mouseIsPressed && !mousePressedLastFrame) {
-                    mousePressedLastFrame = true
-                    if (sqrt((mouseX - (mainBodyX + windowWidth/2))**2 +
+                    if (sqrt((mouseX - (mainBodyX + mainBodyWidth/2))**2 +
                         (mouseY - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                         stage = 1
 
                         // the distance everyone will go to get to their clock
                         // spots
-                        let spreadRadius = windowWidth*3/7
+                        let spreadRadius = mainBodyWidth*3/7
 
                         MT = [spreadRadius/15, -spreadRadius]
                         OT = [spreadRadius*0.707, -spreadRadius*0.757]
@@ -376,7 +455,7 @@ function displayMainBodyContent() {
                         noErase()
                         let css = select("body")
                         css.style("background-image",
-                            "url(\"data/fogGrain2.jpg\")")
+                            "url(\"data/fogGrain3.jpg\")")
                         // background(0, 0, 100)
                         // for (let j = 0; j < 20; j += 1) {
                         //     fill(0, 0, 60, 20)
@@ -414,12 +493,13 @@ function displayMainBodyContent() {
                         // imageMode(CORNER)
                         // noLoop()
                     }
+                    return
                 }
             } if (stage === 1) { // stage 1: clones have just appeared
                 let raisedArm = unsafeClones.includes(role)
-                let cloneRadius = windowWidth*2/7
-                let innerGreenDotRadius = windowWidth*2/7
-                let outerGreenDotRadius = windowWidth*3/7
+                let cloneRadius = mainBodyWidth*2/7
+                let innerGreenDotRadius = mainBodyWidth*2/7
+                let outerGreenDotRadius = mainBodyWidth*3/7
                 let innerGreenDotPosition
                 let outerGreenDotPosition
 
@@ -484,13 +564,12 @@ function displayMainBodyContent() {
                         break
                 }
 
-                let veryInnerRadius = windowWidth/7
+                let veryInnerRadius = mainBodyWidth/7
 
                 // handle clicking on the green dots
-                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
-                        mousePressedLastFrame = true
                         // this is the INNER green dot. this is only good if
                         // your clone's arm is raised.
                         if (unsafeClones.includes(role)) {
@@ -549,10 +628,10 @@ function displayMainBodyContent() {
                             }
                         }
                     }
-                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    return
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
-                        mousePressedLastFrame = true
                         // this is the OUTER green dot. this is only good if
                         // your clone's arm is lowered.
                         if (unsafeClones.includes(role)) {
@@ -613,10 +692,11 @@ function displayMainBodyContent() {
                             }
                         }
                     }
+                    return
                 }
             } if (stage === 2) {
-                let innerGreenDotRadius = windowWidth/7
-                let outerGreenDotRadius = windowWidth*3/7
+                let innerGreenDotRadius = mainBodyWidth/7
+                let outerGreenDotRadius = mainBodyWidth*3/7
                 let innerGreenDotPosition
                 let outerGreenDotPosition
                 let oppositeRole // we might as well calculate this now
@@ -683,11 +763,10 @@ function displayMainBodyContent() {
                 print(oppositeRole)
 
                 // handle clicking on the green dots
-                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the INNER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
-                        mousePressedLastFrame = true
                         if (unsafeClones.includes(oppositeRole)) {
                             textAtTop = "Move to your spread or stack spot" +
                                 " based on who remains on the wall."
@@ -740,11 +819,11 @@ function displayMainBodyContent() {
                             }
                         }
                     }
-                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + windowWidth/2))**2 +
+                    return
+                } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the OUTER dot
                     if (mouseIsPressed && !mousePressedLastFrame) {
-                        mousePressedLastFrame = true
                         if (unsafeClones.includes(oppositeRole)) {
                             // you failed
                             textAtTop = "You ran in too late. This will" +
@@ -798,15 +877,16 @@ function displayMainBodyContent() {
                             }
                         }
                     }
+                    return
                 }
             } if (stage === 3) {
                 // final stage—just clear it already!!! XD
                 let stackSpot
                 let spreadSpot
                 let lightParty
-                let outerRadius = windowWidth*3/7 // where everyone will be
+                let outerRadius = mainBodyWidth*3/7 // where everyone will be
                 // when next to the death wall
-                let innerRadius = windowWidth*2/7 // where the tank will be
+                let innerRadius = mainBodyWidth*2/7 // where the tank will be
                 // when spreading
                 let angleDiffForDPS = 17.5 // how far the DPS go clockwise/counterclockwise away from the healer
                 let actualRadius // how far you will be
@@ -879,7 +959,7 @@ function displayMainBodyContent() {
 
                 // also make sure that if you're a healer, you don't
                 // accidentally pick up both the spread and stack
-                if ((sqrt((mouseX - spreadSpot[0] - (mainBodyX + windowWidth/2))**2 +
+                if ((sqrt((mouseX - spreadSpot[0] - (mainBodyX + mainBodyWidth/2))**2 +
                         (mouseY - spreadSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor)
                     && !(role === "H1" || role === "H2")) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
@@ -901,7 +981,8 @@ function displayMainBodyContent() {
                             stage = 100
                         }
                     }
-                } if (sqrt((mouseX - stackSpot[0] - (mainBodyX + windowWidth/2))**2 +
+                    return
+                } if (sqrt((mouseX - stackSpot[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - stackSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     if (mouseIsPressed && !mousePressedLastFrame) {
                         if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
@@ -927,15 +1008,65 @@ function displayMainBodyContent() {
                                 textAtBottom = "You went to your" +
                                     " stack—I mean, spread—wait, there" +
                                     " isn't even a difference—spot." +
-                                    " \n[PASS] It's either stack or" +
-                                    " spread—who knows, you're a healer." +
-                                    " [CLEARED]"
+                                    " \n[PASS] You're a healer. [CLEARED]"
                             }
 
                             stage = 99
                         }
+                        return
                     }
                 }
+            }
+        }
+    }
+    // Futures Rewritten Ultimate phase 2 background
+    if (currentlySelectedBackground === "FRU P2") {
+        // background image. also rotated for some reason, but not as much
+        push()
+        rotate(0.01)
+        tint(0, 0, 100, 10)
+        image(fruP2Image, -mainBodyWidth/2 + 20*scalingFactor, -mainBodyWidth/2 + 20*scalingFactor,
+            mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+        pop()
+
+        // death wall
+        noStroke()
+        fill(240, 100, 50)
+        beginShape()
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
+            vertex(cos(i) * mainBodyWidth / 2,
+                sin(i) * mainBodyWidth / 2)
+        }
+        beginContour()
+        for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
+            vertex(cos(i) * (mainBodyWidth / 2 - 20*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 20*scalingFactor))
+        }
+        endContour()
+        endShape(CLOSE)
+
+
+        // notches
+        noStroke()
+        fill(0, 0, 100)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 5)
+        }
+
+        // big notches on cardinals and intercardinals
+        fill(120, 100, 50)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 10)
+        }
+
+        displayCharacterPositions()
+        pop()
+
+        if (currentlySelectedMechanic === "Diamond Dust") {
+            if (stage === 0) {
+                displayGreenDot(0, 0)
             }
         }
     }
@@ -987,7 +1118,7 @@ function displayClone(position, raisedArm) {
 
 // encapsulation function. makes code less messy
 function translateToCenterOfBoard() {
-    translate(mainBodyX + windowWidth/2, mainBodyY + mainBodyHeight/2);
+    translate(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2);
 }
 
 // display a green dot for where to go
@@ -997,7 +1128,7 @@ function displayGreenDot(x, y) {
     stroke(120, 100, 100)
 
     // if you mouse over it, dim it
-    if (sqrt((mouseX - x - (mainBodyX + windowWidth/2))**2 +
+    if (sqrt((mouseX - x - (mainBodyX + mainBodyWidth/2))**2 +
         (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
         stroke(120, 100, 80)
     }
@@ -1077,7 +1208,7 @@ function displayBottomWindowContent() {
         fill(0, 100, 50, 50)
     }
     noStroke()
-    rect(bottomWindowX, bottomWindowY, bottomWindowX + windowWidth, bottomWindowY + bottomHeight, cornerRounding)
+    rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
 
     fill(0, 0, 100)
     text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding)
@@ -1107,14 +1238,50 @@ function keyPressed() {
     }
 }
 
-
-
+//————————————below is a list of setup functions for each mechanic————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
+//————————————————————————————————————————————————————————————————————————————\\
 //————————————below is a list of setup functions for each mechanic————————————\\
 
 function reset() {
     switch (currentlySelectedMechanic) {
         case "Utopian Sky":
             setupUtopianSky()
+            break
+        case "Diamond Dust":
+            setupDiamondDust()
             break
     }
 }
@@ -1163,16 +1330,6 @@ function setupUtopianSky() {
         "rgba(13, 13, 40, 0.3), \n" +
         "rgba(13, 13, 40, 0.5)), \n" +
         "url(\"data/FRU P1 BG.png\")")
-    // if (spreadOrStack === "spread") tint(240, 10, 100, 100)
-    // else tint(0, 10, 100, 100)
-    //
-    // imageMode(CENTER)
-    // for (let y = 0; y <= height; y += width) {
-    //     image(fruP1ImageComplete, width / 2, width / 2 + y, width, width)
-    // }
-    // imageMode(CORNER)
-    // tint(0, 0, 100)
-    // noLoop()
 
     textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
         " time to test just that.\nAlso, please do remember that it's " + spreadOrStack +
@@ -1184,11 +1341,78 @@ function setupUtopianSky() {
 
     instructions.html(`<pre>
 numpad 1 → freeze sketch
+
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+        Warning: not implemented.
         
 You are currently on the mechanic Utopian Sky.
-    Click on any green dot to move to that location. Clicking on the green
-     dot in the center at the start will automatically move you to your clock spot.
-    There isn't a timing feature on this mechanic——yet, that is.</pre>`)
+Click on any green dot to move to that location. Clicking on the green
+ dot in the center at the start will automatically move you to your clock spot.
+There isn't a timing feature on this mechanic——yet, that is. There will be soon.
+You cannot track wins and losses yet. Once there is a system, wins and losses 
+ from separate mechanics will be saved to local storage but counted separately.
+This is a quiz, so make sure you've studied.</pre>`)
+}
+
+function setupDiamondDust() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
+    MT = [0, -70*scalingFactor]
+    OT = [70*scalingFactor, 0]
+    H1 = [-70*scalingFactor, 0]
+    H2 = [0, 70*scalingFactor]
+    M1 = [-49*scalingFactor, 49*scalingFactor]
+    M2 = [49*scalingFactor, 49*scalingFactor]
+    R1 = [-49*scalingFactor, -49*scalingFactor]
+    R2 = [49*scalingFactor, -49*scalingFactor]
+
+    stage = 0
+    currentlySelectedMechanic = "Diamond Dust"
+    currentlySelectedBackground = "FRU P2"
+
+    let randomNumber = random()
+    if (randomNumber < 0.25) {
+        firstCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+    } if (randomNumber >= 0.25 && randomNumber < 0.5) {
+        firstCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+    } if (randomNumber >= 0.5 && randomNumber < 0.75) {
+        firstCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+    } if (randomNumber >= 0.75) {
+        firstCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+    }
+
+    let css = select("body")
+    css.style("background-image", "linear-gradient(\n" +
+        "rgba(13, 13, 40, 0.3), \n" +
+        "rgba(13, 13, 40, 0.5)), \n" +
+        "url(\"data/FRU P2 Floor.webp\")")
+
+    textAtTop = "It's time for the first mechanic of P2—Diamond Dust. Do you" +
+        " actually understand the mechanic or not?\n\n(CupNoodles has" +
+        " implemented Fall of Faith already, and you can easily simulate" +
+        " Burnt Strike towers.)"
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+        Warning: not implemented.
+        
+You are currently on the mechanic Diamond Dust.
+Click on any green dot to move to that location. Clicking on the green
+ dot in the center at the start will automatically move you to your clock spot.
+There isn't a timing feature on this mechanic——yet, that is. There will be soon.
+You cannot track wins and losses yet. Once there is a system, wins and losses 
+ from separate mechanics will be saved to local storage but counted separately.
+This is a quiz, so make sure you've studied.</pre>`)
 }
 
 
