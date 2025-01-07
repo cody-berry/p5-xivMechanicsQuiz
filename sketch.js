@@ -5,22 +5,6 @@
  *  latest mechanic: Diamond Dust from FRU P2 (in-progress)
  *  Some encapsulations might not be included in certain places, making the code
  *   messier than it can be.
- *
- *  The below shows the start of that section, not where it is. It simply
- *  provides a range.
- *  preload(): line 90-100
- *  setup(): line 100-110
- *  draw(): line 150-200
- *  displayMechanicSelection(): line 200-250
- *  displayTopWindowContent(): line 250-300
- *  displayMainBodyContent(): line 340-380
- *  FRU P1: line 350-390
- *      Utopian Sky: 390-410, 480-500, 680-700, 860-900
- *  FRU P2: line 1000-1100
- *      Diamond Dust: 1060-1160
- *  Initializations: line 1300-1400
- *
- *  subject to change. last update to this: 2025.01.06 1:17pm
  */
 
 
@@ -94,6 +78,7 @@ let thirdCircles
 let fourthCircles
 let markedPlayers
 let silenceOrStillness
+let inOrOut
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -101,6 +86,7 @@ let currentlySelectedBackground = "FRU P1"
 let stage = 0 // the current step you're on. always defaults to 0
 let textAtTop
 let textAtBottom
+let centerOfBoard
 
 function preload() {
     font = loadFont('data/meiryo.ttf')
@@ -173,6 +159,8 @@ function setup() {
     // bottomWindowY = mainBodyY + mainBodyHeight + holeSize
     // selectionX = 0
     // selectionY = bottomWindowY + bottomHeight + holeSize
+
+    centerOfBoard = [mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2]
 
     textAlign(CENTER, CENTER)
 }
@@ -249,14 +237,14 @@ function displayMechanicSelection() {
                 mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky ")) {
                 rect(selectionX + textPadding + textWidth("FRU:"), selectionY + textPadding,
                      selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + 13*scalingFactor + textPadding)
-                if (mouseIsPressed && !mousePressedLastFrame) {
+                if (mousePressedButNotHeldDown()) {
                     setupUtopianSky()
                 }
             } if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky |") &&
                 mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust ")) {
                 rect(selectionX + textPadding + textWidth("FRU: Utopian Sky |"), selectionY + textPadding,
                     selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + 13*scalingFactor + textPadding)
-                if (mouseIsPressed && !mousePressedLastFrame) {
+                if (mousePressedButNotHeldDown()) {
                     setupDiamondDust()
                 }
             }
@@ -373,7 +361,7 @@ function displayMainBodyContent() {
 
         // death wall
         noStroke()
-        fill(240, 100, 50)
+        fill(240, 100, 50, 10)
         beginShape()
         for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
             vertex(cos(i) * mainBodyWidth / 2,
@@ -415,10 +403,10 @@ function displayMainBodyContent() {
 
                 if (spreadOrStack === "spread") stroke(240, 50, 100)
                 if (spreadOrStack === "stack") stroke(0, 50, 100)
-                displayClone([0, -mainBodyWidth/4], false)
+                displayFatebreaker([0, -mainBodyWidth/4], false)
 
                 // clicking on the green dot will advance to the next stage
-                if (mouseIsPressed && !mousePressedLastFrame) {
+                if (mousePressedButNotHeldDown()) {
                     if (sqrt((mouseX - (mainBodyX + mainBodyWidth/2))**2 +
                         (mouseY - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                         stage = 1
@@ -507,56 +495,56 @@ function displayMainBodyContent() {
                 // where to display clone and dots?
                 switch (role) {
                     case "MT":
-                        displayClone([0, -cloneRadius], raisedArm)
+                        displayFatebreaker([0, -cloneRadius], raisedArm)
                         displayGreenDot(0, -innerGreenDotRadius)
                         displayGreenDot(0, -outerGreenDotRadius)
                         innerGreenDotPosition = [0, -innerGreenDotRadius]
                         outerGreenDotPosition = [0, -outerGreenDotRadius]
                         break
                     case "OT":
-                        displayClone([cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
+                        displayFatebreaker([cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
                         displayGreenDot(innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
                         displayGreenDot(outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
                         innerGreenDotPosition = [innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
                         outerGreenDotPosition = [outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707]
                         break
                     case "R2":
-                        displayClone([cloneRadius, 0], raisedArm)
+                        displayFatebreaker([cloneRadius, 0], raisedArm)
                         displayGreenDot(innerGreenDotRadius, 0)
                         displayGreenDot(outerGreenDotRadius, 0)
                         innerGreenDotPosition = [innerGreenDotRadius, 0]
                         outerGreenDotPosition = [outerGreenDotRadius, 0]
                         break
                     case "M2":
-                        displayClone([cloneRadius*0.707, cloneRadius*0.707], raisedArm)
+                        displayFatebreaker([cloneRadius*0.707, cloneRadius*0.707], raisedArm)
                         displayGreenDot(innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
                         displayGreenDot(outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
                         innerGreenDotPosition = [innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
                         outerGreenDotPosition = [outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
                         break
                     case "H2":
-                        displayClone([0, cloneRadius], raisedArm)
+                        displayFatebreaker([0, cloneRadius], raisedArm)
                         displayGreenDot(0, innerGreenDotRadius)
                         displayGreenDot(0, outerGreenDotRadius)
                         innerGreenDotPosition = [0, innerGreenDotRadius]
                         outerGreenDotPosition = [0, outerGreenDotRadius]
                         break
                     case "M1":
-                        displayClone([-cloneRadius*0.707, cloneRadius*0.707], raisedArm)
+                        displayFatebreaker([-cloneRadius*0.707, cloneRadius*0.707], raisedArm)
                         displayGreenDot(-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707)
                         displayGreenDot(-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707)
                         innerGreenDotPosition = [-innerGreenDotRadius*0.707, innerGreenDotRadius*0.707]
                         outerGreenDotPosition = [-outerGreenDotRadius*0.707, outerGreenDotRadius*0.707]
                         break
                     case "H1":
-                        displayClone([-cloneRadius, 0], raisedArm)
+                        displayFatebreaker([-cloneRadius, 0], raisedArm)
                         displayGreenDot(-innerGreenDotRadius, 0)
                         displayGreenDot(-outerGreenDotRadius, 0)
                         innerGreenDotPosition = [-innerGreenDotRadius, 0]
                         outerGreenDotPosition = [-outerGreenDotRadius, 0]
                         break
                     case "R1":
-                        displayClone([-cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
+                        displayFatebreaker([-cloneRadius*0.707, -cloneRadius*0.707], raisedArm)
                         displayGreenDot(-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707)
                         displayGreenDot(-outerGreenDotRadius*0.707, -outerGreenDotRadius*0.707)
                         innerGreenDotPosition = [-innerGreenDotRadius*0.707, -innerGreenDotRadius*0.707]
@@ -569,7 +557,7 @@ function displayMainBodyContent() {
                 // handle clicking on the green dots
                 if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         // this is the INNER green dot. this is only good if
                         // your clone's arm is raised.
                         if (unsafeClones.includes(role)) {
@@ -631,7 +619,7 @@ function displayMainBodyContent() {
                     return
                 } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         // this is the OUTER green dot. this is only good if
                         // your clone's arm is lowered.
                         if (unsafeClones.includes(role)) {
@@ -766,7 +754,7 @@ function displayMainBodyContent() {
                 if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - innerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the INNER dot
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         if (unsafeClones.includes(oppositeRole)) {
                             textAtTop = "Move to your spread or stack spot" +
                                 " based on who remains on the wall."
@@ -823,7 +811,7 @@ function displayMainBodyContent() {
                 } if (sqrt((mouseX - outerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - outerGreenDotPosition[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
                     // the OUTER dot
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         if (unsafeClones.includes(oppositeRole)) {
                             // you failed
                             textAtTop = "You ran in too late. This will" +
@@ -962,7 +950,7 @@ function displayMainBodyContent() {
                 if ((sqrt((mouseX - spreadSpot[0] - (mainBodyX + mainBodyWidth/2))**2 +
                         (mouseY - spreadSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor)
                     && !(role === "H1" || role === "H2")) {
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         if (spreadOrStack === "spread") {
                             textAtTop = "Congratulations! You made it" +
                                 " through everything, although this is one" +
@@ -984,7 +972,7 @@ function displayMainBodyContent() {
                     return
                 } if (sqrt((mouseX - stackSpot[0] - (mainBodyX + mainBodyWidth/2))**2 +
                     (mouseY - stackSpot[1] - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
-                    if (mouseIsPressed && !mousePressedLastFrame) {
+                    if (mousePressedButNotHeldDown()) {
                         if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
                             textAtTop = "You went to the wrong position. If" +
                                 " you're having trouble, you might want to" +
@@ -1031,7 +1019,7 @@ function displayMainBodyContent() {
 
         // death wall
         noStroke()
-        fill(240, 100, 50)
+        fill(240, 100, 50, 10)
         beginShape()
         for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
             vertex(cos(i) * mainBodyWidth / 2,
@@ -1067,12 +1055,123 @@ function displayMainBodyContent() {
         if (currentlySelectedMechanic === "Diamond Dust") {
             if (stage === 0) {
                 displayGreenDot(0, 0)
+
+                displayShiva([-20*scalingFactor, 0], "clone", null)
+                displayShiva([20*scalingFactor, 0], "boss", null)
+
+                if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    stage = 1
+                    textAtTop = "The AoEs have just appeared. Go in or out" +
+                        " according to the castbar and whether you got" +
+                        " marked, and \nmake sure to go the correct" +
+                        " direction. All directions are included for ease of" +
+                        " implementation.\nThe green dots are made smaller" +
+                        " so that you can't click on two."
+                    textAtBottom = "[PASS] — You are waiting in your spot."
+                    return
+                }
+            } if (stage === 1) {
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(200, 50, 100, 10)
+                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+
+                noStroke()
+                fill(200, 50, 100, 5)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+
+                let radii = [mainBodyWidth/24, mainBodyWidth/12, mainBodyWidth*3/8, mainBodyWidth*3/7]
+
+                let innerDonutPositions = []
+                let outerDonutPositions = []
+                let innerCirclePositions = []
+                let outerCirclePositions = []
+                for (let i = 0; i < TWO_PI; i += TWO_PI/8) {
+                    innerDonutPositions.push([cos(i)*radii[0] + centerOfBoard[0], sin(i)*radii[0] + centerOfBoard[0]])
+                    outerDonutPositions.push([cos(i)*radii[1] + centerOfBoard[0], sin(i)*radii[1] + centerOfBoard[0]])
+                    innerCirclePositions.push([cos(i)*radii[2] + centerOfBoard[0], sin(i)*radii[2] + centerOfBoard[0]])
+                    outerCirclePositions.push([cos(i)*radii[3] + centerOfBoard[0], sin(i)*radii[3] + centerOfBoard[0]])
+                    displaySmallGreenDot(cos(i)*radii[0], sin(i)*radii[0])
+                    displaySmallGreenDot(cos(i)*radii[1], sin(i)*radii[1])
+                    displaySmallGreenDot(cos(i)*radii[2], sin(i)*radii[2])
+                    displaySmallGreenDot(cos(i)*radii[3], sin(i)*radii[3])
+                }
             }
         }
     }
 }
 
-function displayClone(position, raisedArm) {
+// in range of clicking something (circle radius)
+function inClickingRange(position, range) {
+    return (sqrt((mouseX - position[0])**2 +
+        (mouseY - position[1])**2) < range)
+}
+
+// in range of clicking multiple things (circle radius)
+function inClickingRanges(positions, range) {
+    for (let position in positions) {
+        if (inClickingRange(position, range)) return position
+    }
+    return false
+}
+
+function mousePressedButNotHeldDown() {
+    return mouseIsPressed && !mousePressedLastFrame
+}
+
+function displayShiva(position, type, messageBox) {
+    push()
+    translateToCenterOfBoard()
+    let x = position[0]
+    let y = position[1]
+    let sizeOfTorso = 10*scalingFactor
+    if (type === "clone") {
+        stroke(0, 0, 80)
+    } else {
+        stroke(220, 50, 100)
+    }
+
+    strokeWeight(sizeOfTorso/2)
+    // torso
+    line(x, y - sizeOfTorso, x, y)
+
+    strokeWeight(sizeOfTorso/4)
+    // legs
+    line(x - sizeOfTorso/3, y + sizeOfTorso, x - sizeOfTorso/8, y)
+    line(x + sizeOfTorso/3, y + sizeOfTorso, x + sizeOfTorso/8, y)
+
+
+    // head
+    circle(x, y - sizeOfTorso*5/3, sizeOfTorso)
+
+    // arms
+    line(x - sizeOfTorso*2/3, y - sizeOfTorso*2/3, x, y - sizeOfTorso)
+    line(x - sizeOfTorso/3, y - sizeOfTorso/3, x - sizeOfTorso*2/3, y - sizeOfTorso*2/3)
+    line(x + sizeOfTorso*2/3, y - sizeOfTorso*2/3, x, y - sizeOfTorso)
+    line(x + sizeOfTorso/3, y - sizeOfTorso/3, x + sizeOfTorso*2/3, y - sizeOfTorso*2/3)
+
+
+    // message box
+    strokeWeight(sizeOfTorso/5)
+    if (messageBox) {
+        fill(0, 0, 100)
+        rect(x - textWidth("   " + messageBox)/2, y - sizeOfTorso*15/4, x + textWidth("   " + messageBox)/2, y - sizeOfTorso*5/2)
+
+        noStroke()
+        fill(0, 0, 0)
+        textAlign(CENTER, CENTER)
+        text(messageBox, x, y - sizeOfTorso*13/4)
+        textAlign(LEFT, BOTTOM)
+    }
+
+
+
+    pop()
+}
+
+function displayFatebreaker(position, raisedArm) {
     push()
     translateToCenterOfBoard()
     let x = position[0]
@@ -1135,6 +1234,23 @@ function displayGreenDot(x, y) {
     noFill()
     strokeWeight(scalingFactor)
     circle(x, y, 15*scalingFactor)
+    pop()
+}
+
+// displays a smaller green dot if you're in a tight spot
+function displaySmallGreenDot (x, y) {
+    push()
+    translateToCenterOfBoard()
+    stroke(120, 100, 100)
+
+    // if you mouse over it, dim it
+    if (sqrt((mouseX - x - (mainBodyX + mainBodyWidth/2))**2 +
+        (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < 5*scalingFactor) {
+        stroke(120, 100, 80)
+    }
+    noFill()
+    strokeWeight(scalingFactor)
+    circle(x, y, 10*scalingFactor)
     pop()
 }
 
@@ -1239,41 +1355,6 @@ function keyPressed() {
 }
 
 //————————————below is a list of setup functions for each mechanic————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————————————————————————————————————————————————————————————————————\\
-//————————————below is a list of setup functions for each mechanic————————————\\
 
 function reset() {
     switch (currentlySelectedMechanic) {
@@ -1361,6 +1442,10 @@ function setupDiamondDust() {
     rect(0, 0, width, height)
     noErase()
 
+    inOrOut = random(["in", "out"])
+    markedPlayers = random(["supports", "DPS"])
+    silenceOrStillness = random(["silence", "stillness"])
+
     MT = [0, -70*scalingFactor]
     OT = [70*scalingFactor, 0]
     H1 = [-70*scalingFactor, 0]
@@ -1377,12 +1462,48 @@ function setupDiamondDust() {
     let randomNumber = random()
     if (randomNumber < 0.25) {
         firstCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+        if (randomNumber < 0.125) {
+            secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            fourthCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+        } else {
+            secondCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+        }
     } if (randomNumber >= 0.25 && randomNumber < 0.5) {
         firstCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+        if (randomNumber < 0.375) {
+            secondCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            thirdCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+        } else {
+            secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            thirdCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+        }
     } if (randomNumber >= 0.5 && randomNumber < 0.75) {
         firstCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+        if (randomNumber < 0.625) {
+            secondCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+        } else {
+            secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            fourthCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+        }
     } if (randomNumber >= 0.75) {
         firstCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+        if (randomNumber < 0.875) {
+            secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            thirdCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+        } else {
+            secondCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            thirdCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+        }
     }
 
     let css = select("body")
