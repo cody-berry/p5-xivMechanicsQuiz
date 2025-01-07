@@ -186,7 +186,7 @@ function draw() {
     rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
 
     // the main body window.
-    fill(234, 34, 24, 3)
+    fill(234, 34, 24, 0.5)
     noStroke()
     rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
     displayMainBodyContent()
@@ -1012,7 +1012,7 @@ function displayMainBodyContent() {
         // background image. also rotated for some reason, but not as much
         push()
         rotate(0.01)
-        tint(0, 0, 100, 10)
+        tint(0, 0, 100, 5)
         image(fruP2Image, -mainBodyWidth/2 + 20*scalingFactor, -mainBodyWidth/2 + 20*scalingFactor,
             mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
         pop()
@@ -1066,7 +1066,8 @@ function displayMainBodyContent() {
                         " marked, and \nmake sure to go the correct" +
                         " direction. All directions are included for ease of" +
                         " implementation.\nThe green dots are made smaller" +
-                        " so that you can't click on two."
+                        " so that you can't click on two.\n\nThis time, " + markedPlayers +
+                        " have been targetted."
                     textAtBottom = "[PASS] — You are waiting in your spot."
                     return
                 }
@@ -1077,10 +1078,11 @@ function displayMainBodyContent() {
                 circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
                 circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
 
-                noStroke()
-                fill(200, 50, 100, 5)
-                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                if (inOrOut === "in") {
+                    displayShiva([0, -mainBodyWidth/5], "boss", "Reap!")
+                } if (inOrOut === "out") {
+                    displayShiva([0, -mainBodyWidth/5], "boss", "Cleave!")
+                }
 
                 let radii = [mainBodyWidth/24, mainBodyWidth/12, mainBodyWidth*3/8, mainBodyWidth*3/7]
 
@@ -1089,18 +1091,431 @@ function displayMainBodyContent() {
                 let innerCirclePositions = []
                 let outerCirclePositions = []
                 for (let i = 0; i < TWO_PI; i += TWO_PI/8) {
-                    innerDonutPositions.push([cos(i)*radii[0] + centerOfBoard[0], sin(i)*radii[0] + centerOfBoard[0]])
-                    outerDonutPositions.push([cos(i)*radii[1] + centerOfBoard[0], sin(i)*radii[1] + centerOfBoard[0]])
-                    innerCirclePositions.push([cos(i)*radii[2] + centerOfBoard[0], sin(i)*radii[2] + centerOfBoard[0]])
-                    outerCirclePositions.push([cos(i)*radii[3] + centerOfBoard[0], sin(i)*radii[3] + centerOfBoard[0]])
+                    innerDonutPositions.push([cos(i)*radii[0] + centerOfBoard[0], sin(i)*radii[0] + centerOfBoard[1]])
+                    outerDonutPositions.push([cos(i)*radii[1] + centerOfBoard[0], sin(i)*radii[1] + centerOfBoard[1]])
+                    innerCirclePositions.push([cos(i)*radii[2] + centerOfBoard[0], sin(i)*radii[2] + centerOfBoard[1]])
+                    outerCirclePositions.push([cos(i)*radii[3] + centerOfBoard[0], sin(i)*radii[3] + centerOfBoard[1]])
                     displaySmallGreenDot(cos(i)*radii[0], sin(i)*radii[0])
                     displaySmallGreenDot(cos(i)*radii[1], sin(i)*radii[1])
                     displaySmallGreenDot(cos(i)*radii[2], sin(i)*radii[2])
                     displaySmallGreenDot(cos(i)*radii[3], sin(i)*radii[3])
                 }
+
+                // make sure we know if we got targetted. we'll have a
+                // caramel brown circle around us if we are
+                stroke(30, 100, 70)
+                strokeWeight(2)
+                if (markedPlayers === "DPS") {
+                    displayTargetSymbol(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1])
+                    displayTargetSymbol(M2[0] + centerOfBoard[0], M2[1] + centerOfBoard[1])
+                    displayTargetSymbol(R1[0] + centerOfBoard[0], R1[1] + centerOfBoard[1])
+                    displayTargetSymbol(R2[0] + centerOfBoard[0], R2[1] + centerOfBoard[1])
+                } else {
+                    displayTargetSymbol(H1[0] + centerOfBoard[0], H1[1] + centerOfBoard[1])
+                    displayTargetSymbol(H2[0] + centerOfBoard[0], H2[1] + centerOfBoard[1])
+                    displayTargetSymbol(OT[0] + centerOfBoard[0], OT[1] + centerOfBoard[1])
+                    displayTargetSymbol(MT[0] + centerOfBoard[0], MT[1] + centerOfBoard[1])
+                }
+
+                // click check time!
+                if (mousePressedButNotHeldDown() &&
+                    (inClickingRanges(innerCirclePositions, 5 * scalingFactor) ||
+                        inClickingRanges(outerCirclePositions, 5 * scalingFactor) ||
+                        inClickingRanges(innerDonutPositions, 5 * scalingFactor) ||
+                        inClickingRanges(outerDonutPositions, 5 * scalingFactor))) {
+                    if (inOrOut === "in") {
+                        if (inClickingRanges(innerCirclePositions, 5 * scalingFactor)) {
+                            textAtTop = "You didn't dodge the cleave properly." +
+                                " The message box is located near the north of" +
+                                " the arena for display \npurposes. "
+                            textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
+                            stage = 100
+                            return
+                        }
+                        if (inClickingRanges(outerCirclePositions, 5 * scalingFactor)) {
+                            textAtTop = "You didn't dodge the cleave properly." +
+                                " The message box is located near the north of" +
+                                " the arena for display \npurposes. "
+                            textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom = "[PASS] — \"Reap\" is a donut. You went in."
+                    }
+                    if (inOrOut === "out") {
+                        if (inClickingRanges(innerDonutPositions, 5 * scalingFactor)) {
+                            textAtTop = "You didn't dodge the cleave properly." +
+                                " The message box is located near the north of" +
+                                " the arena for display \npurposes. "
+                            textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
+                            stage = 100
+                            return
+                        }
+                        if (inClickingRanges(outerDonutPositions, 5 * scalingFactor)) {
+                            textAtTop = "You didn't dodge the cleave properly." +
+                                " The message box is located near the north of" +
+                                " the arena for display \npurposes. "
+                            textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom = "[PASS] — \"Cleave\" is a circle. You went out."
+                    }
+
+                    let DPSOrSupport = "supports"
+                    switch (role) {
+                        case "M1":
+                            DPSOrSupport = "DPS"
+                            break
+                        case "M2":
+                            DPSOrSupport = "DPS"
+                            break
+                        case "R1":
+                            DPSOrSupport = "DPS"
+                            break
+                        case "R2":
+                            DPSOrSupport = "DPS"
+                            break
+                    }
+                    if (markedPlayers !== DPSOrSupport) { // move in
+                        if (inClickingRanges(outerCirclePositions, 5 * scalingFactor)) {
+                            textAtTop = "You were supposed to bait a protean."
+                            textAtBottom = "You went into your AoE dropping" +
+                                " position.\n" + textAtBottom + "\n[FAIL] —" +
+                                " You were not marked."
+                            stage = 100
+                            return
+                        }
+                        if (inClickingRanges(outerDonutPositions, 5 * scalingFactor)) {
+                            textAtTop = "You were supposed to bait a protean."
+                            textAtBottom = "You went into your AoE dropping" +
+                                " position.\n" + textAtBottom + "\n[FAIL] —" +
+                                " You were not marked."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom += "\n[PASS] — You went in and you were not marked."
+                    } else { // move out
+                        if (inClickingRanges(innerCirclePositions, 5 * scalingFactor)) {
+                            textAtTop = "You were not supposed to bait a protean."
+                            textAtBottom = "You went into your protean bait" +
+                                " position.\n" + textAtBottom + "\n[FAIL] —" +
+                                " You were marked."
+                            stage = 100
+                            return
+                        }
+                        if (inClickingRanges(innerDonutPositions, 5 * scalingFactor)) {
+                            textAtTop = "You were not supposed to bait a protean."
+                            textAtBottom = "You went into your protean bait" +
+                                " position.\n" + textAtBottom + "\n[FAIL] —" +
+                                " You were marked."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom += "\n[PASS] — You went out and you were marked."
+                    }
+
+                    // account for whether you clicked on a cardinal or
+                    // intercardinal
+                    let AoEsSpawnedOn = "cardinal"
+                    if (abs(firstCircles[0][0]) > scalingFactor &&
+                        abs(firstCircles[0][1]) > scalingFactor) {
+                        AoEsSpawnedOn = "intercardinal"
+                    }
+
+                    let youClickedOn = "cardinal"
+                    // inClickingRanges returns the position of the dot you
+                    // clicked on.
+                    let position = inClickingRanges(innerCirclePositions, 5 * scalingFactor)
+                    if (!position) position = inClickingRanges(outerCirclePositions, 5 * scalingFactor)
+                    if (!position) position = inClickingRanges(innerDonutPositions, 5 * scalingFactor)
+                    if (!position) position = inClickingRanges(outerDonutPositions, 5 * scalingFactor)
+                    if (abs(position[0] - centerOfBoard[0]) > scalingFactor &&
+                        abs(position[1] - centerOfBoard[1]) > scalingFactor) {
+                        youClickedOn = "intercardinal"
+                    }
+
+
+                    if (markedPlayers === DPSOrSupport) { // move opposite the AoEs
+                        if (youClickedOn === AoEsSpawnedOn) {
+                            textAtTop = `Marked players are supposed to go ` +
+                                `opposite the AoEs. If AoEs spawned on two ` +
+                                `intercardinals, you will \nwant to go to cardinals ` +
+                                `if you're marked, and if AoEs spawned on two cardinals, ` +
+                                `you will want to go to the \nintercardinals.`
+                            textAtBottom = "You went to a(n) " + youClickedOn +
+                                ".\n" + textAtBottom + "\n[FAIL] — AoEs" +
+                                " spawned on the " + AoEsSpawnedOn + "s."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom += "\n[PASS] — AoEs spawned on " + AoEsSpawnedOn +
+                            ". You went to a(n) " + youClickedOn + "."
+                    } else { // move with the AoEs
+                        if (youClickedOn !== AoEsSpawnedOn) {
+                            textAtTop = `Unmarked players are supposed to go with the AoEs. If AoEs spawned on two cardinals, you will 
+want to go to cardinals if you're unmarked, and if AoEs spawned on two intercardinals, you will want to go to the 
+intercardinals.`
+                            textAtBottom = "You went to a(n) " + youClickedOn +
+                                ".\n" + textAtBottom + "\n[FAIL] — AoEs" +
+                                " spawned on the " + AoEsSpawnedOn + "s."
+                            stage = 100
+                            return
+                        }
+                        textAtBottom += "\n[PASS] — AoEs spawned on " + AoEsSpawnedOn +
+                            ". You went to a(n) " + youClickedOn + "."
+                    }
+
+                    // the most intuitive but also the hardest check awaits:
+                    // are you in your clock spot?
+                    let correctColor = "red"
+                    switch (role) {
+                        case "MT":
+                            correctColor = "red"
+                            break
+                        case "OT":
+                            correctColor = "yellow"
+                            break
+                        case "H1":
+                            correctColor = "purple"
+                            break
+                        case "H2":
+                            correctColor = "blue"
+                            break
+                        case "M1":
+                            correctColor = "purple"
+                            break
+                        case "M2":
+                            correctColor = "blue"
+                            break
+                        case "R1":
+                            correctColor = "red"
+                            break
+                        case "R2":
+                            correctColor = "yellow"
+                            break
+                    }
+
+                    // it's easier for me to interpret this when I put it
+                    // in terms of a scale from 0 to 360 rather than -180 to
+                    // 180, which is why we add and then modulo 360
+                    let clickedAngle = (degrees(atan2(position[1] - centerOfBoard[1], position[0] - centerOfBoard[0])) + 360) % 360
+                    let clickedColor = "red"
+                    switch (true) { // a nifty trick for multiple if statements
+                        case (clickedAngle < 10 || clickedAngle > 350):
+                            clickedColor = "yellow"
+                            break
+                        case (clickedAngle > 40 && clickedAngle < 50):
+                            clickedColor = "blue"
+                            break
+                        case (clickedAngle > 80 && clickedAngle < 100):
+                            clickedColor = "blue"
+                            break
+                        case (clickedAngle > 130 && clickedAngle < 140):
+                            clickedColor = "purple"
+                            break
+                        case (clickedAngle > 170 && clickedAngle < 190):
+                            clickedColor = "purple"
+                            break
+                        case (clickedAngle > 220 && clickedAngle < 230):
+                            clickedColor = "red"
+                            break
+                        case (clickedAngle > 260 && clickedAngle < 280):
+                            clickedColor = "red"
+                            break
+                        case (clickedAngle > 310 && clickedAngle < 320):
+                            clickedColor = "yellow"
+                            break
+                    }
+                    if (clickedColor === correctColor) {
+                        textAtTop = "The next circles have appeared. Move to" +
+                            " your spot to dodge AoEs & drop puddles."
+                        textAtBottom = "You went to the correct spot. \n" +
+                            textAtBottom + "\n[PASS] — You went to the " + clickedColor +
+                            " waymarks."
+                        stage = 2
+                        // set player positions
+                        // each one of these is how far we will be and what
+                        // angle we'll be at
+                        let MTPosition
+                        let R2Position
+                        let OTPosition
+                        let M2Position
+                        let H1Position
+                        let M1Position
+                        let H2Position
+                        let R1Position
+                        if (AoEsSpawnedOn === "cardinal") {
+                            MTPosition = [1, 270]
+                            R2Position = [1, 0]
+                            OTPosition = [1, 0]
+                            M2Position = [1, 90]
+                            H1Position = [1, 90]
+                            M1Position = [1, 180]
+                            H2Position = [1, 180]
+                            R1Position = [1, 270]
+                            if (markedPlayers === "supports") {
+                                MTPosition[1] -= 45
+                                MTPosition[0] = 2
+                                OTPosition[1] += 315
+                                OTPosition[0] = 2
+                                H2Position[1] -= 45
+                                H2Position[0] = 2
+                                H1Position[1] -= 45
+                                H1Position[0] = 2
+                            } else {
+                                R2Position[1] -= 45
+                                R2Position[0] = 2
+                                M2Position[1] += 315
+                                M2Position[0] = 2
+                                M1Position[1] -= 45
+                                M1Position[0] = 2
+                                R1Position[1] -= 45
+                                R1Position[0] = 2
+                            }
+                        } else {
+                            MTPosition = [1, 225]
+                            R2Position = [1, 315]
+                            OTPosition = [1, 315]
+                            M2Position = [1, 45]
+                            H1Position = [1, 45]
+                            M1Position = [1, 135]
+                            H2Position = [1, 135]
+                            R1Position = [1, 225]
+                            if (markedPlayers === "supports") {
+                                MTPosition[1] += 45
+                                MTPosition[0] = 2
+                                OTPosition[1] += 45
+                                OTPosition[0] = 2
+                                H2Position[1] += 45
+                                H2Position[0] = 2
+                                H1Position[1] += 45
+                                H1Position[0] = 2
+                            } else {
+                                R2Position[1] += 45
+                                R2Position[0] = 2
+                                M2Position[1] += 45
+                                M2Position[0] = 2
+                                M1Position[1] += 45
+                                M1Position[0] = 2
+                                R1Position[1] += 45
+                                R1Position[0] = 2
+                            }
+                        } if (inOrOut === "out") {
+                            MTPosition[0] += 2
+                            R2Position[0] += 2
+                            OTPosition[0] += 2
+                            M2Position[0] += 2
+                            H2Position[0] += 2
+                            M1Position[0] += 2
+                            H1Position[0] += 2
+                            R1Position[0] += 2
+                        }
+                        let realPositionList = []
+                        for (let position of [MTPosition, R2Position, OTPosition, M2Position, H2Position, M1Position, H1Position, R1Position]) {
+                            let r = 0
+                            switch (position[0]) {
+                                case 1:
+                                    r = mainBodyWidth/24
+                                    break
+                                case 2:
+                                    r = mainBodyWidth/12
+                                    break
+                                case 3:
+                                    r = 3*mainBodyWidth/8
+                                    break
+                                case 4:
+                                    r = 3*mainBodyWidth/7
+                                    break
+                            }
+                            let x = cos(radians(position[1]))*r
+                            let y = sin(radians(position[1]))*r
+                            realPositionList.push([x, y])
+                        }
+                        MT = realPositionList[0]
+                        R2 = realPositionList[1]
+                        OT = realPositionList[2]
+                        M2 = realPositionList[3]
+                        H2 = realPositionList[4]
+                        M1 = realPositionList[5]
+                        H1 = realPositionList[6]
+                        R1 = realPositionList[7]
+
+
+                        // display proteans
+                        fill(60, 100, 100, 100)
+                        stroke(0, 0, 100, 100)
+                        strokeWeight(5*scalingFactor)
+                        if (AoEsSpawnedOn === "cardinal") {
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, -PI/8, PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 3*PI/8, 5*PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 7*PI/8, 9*PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 11*PI/8, 13*PI/8, PIE)
+                        } if (AoEsSpawnedOn === "intercardinal") {
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, PI/8, 3*PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 5*PI/8, 7*PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 9*PI/8, 11*PI/8, PIE)
+                            arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                                mainBodyWidth, mainBodyHeight, 13*PI/8, 15*PI/8, PIE)
+                        }
+
+                        // display donut or circle
+                        if (inOrOut === "out") { // circle
+                            circle(centerOfBoard[0], centerOfBoard[1], 23*mainBodyWidth/32)
+                        } if (inOrOut === "in") { // donut
+                            beginShape()
+                            for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                                let x = cos(i)*mainBodyWidth/2 + centerOfBoard[0]
+                                let y = sin(i)*mainBodyWidth/2 + centerOfBoard[1]
+                                vertex(x, y)
+                            }
+                            beginContour()
+                            for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                                let x = cos(i)*mainBodyWidth/10 + centerOfBoard[0]
+                                let y = sin(i)*mainBodyWidth/10 + centerOfBoard[1]
+                                vertex(x, y)
+                            }
+                            endContour()
+                            endShape(CLOSE)
+                        }
+                        return
+                    } else {
+                        textAtTop = "You went to the wrong waymark color." +
+                            " You're supposed to go to the " + correctColor + " ones."
+                        textAtBottom = "You went to the wrong waymark color. \n" +
+                            textAtBottom + "\n[FAIL] — You went to the " + clickedColor +
+                            " waymarks instead of the " + correctColor + " ones."
+                        stage = 100
+                        return
+                    }
+                }
             }
         }
     }
+}
+
+// target symbol is orange circle around player for display purposes. that
+// isn't prominent enough so we add some lines as well.
+function displayTargetSymbol(x, y) {
+    stroke(30, 100, 70)
+    strokeWeight(2)
+    noFill()
+    circle(x, y, 20*scalingFactor)
+    line(x - 10*scalingFactor, y, x - 15*scalingFactor, y)
+    line(x - 7*scalingFactor, y - 7*scalingFactor, x - 11*scalingFactor, y - 11*scalingFactor)
+    line(x, y - 10*scalingFactor, x, y - 15*scalingFactor)
+    line(x + 7*scalingFactor, y - 7*scalingFactor, x + 11*scalingFactor, y - 11*scalingFactor)
+    line(x + 10*scalingFactor, y, x + 15*scalingFactor, y)
+    line(x + 7*scalingFactor, y + 7*scalingFactor, x + 11*scalingFactor, y + 11*scalingFactor)
+    line(x, y + 10*scalingFactor, x, y + 15*scalingFactor)
+    line(x - 7*scalingFactor, y + 7*scalingFactor, x - 11*scalingFactor, y + 11*scalingFactor)
 }
 
 // in range of clicking something (circle radius)
@@ -1111,7 +1526,7 @@ function inClickingRange(position, range) {
 
 // in range of clicking multiple things (circle radius)
 function inClickingRanges(positions, range) {
-    for (let position in positions) {
+    for (let position of positions) {
         if (inClickingRange(position, range)) return position
     }
     return false
@@ -1124,6 +1539,7 @@ function mousePressedButNotHeldDown() {
 function displayShiva(position, type, messageBox) {
     push()
     translateToCenterOfBoard()
+    noFill()
     let x = position[0]
     let y = position[1]
     let sizeOfTorso = 10*scalingFactor
@@ -1174,6 +1590,7 @@ function displayShiva(position, type, messageBox) {
 function displayFatebreaker(position, raisedArm) {
     push()
     translateToCenterOfBoard()
+    noFill()
     let x = position[0]
     let y = position[1]
     let sizeOfTorso = 15*scalingFactor
@@ -1401,12 +1818,16 @@ function setupUtopianSky() {
     } if (safeDirections === "M2 R1") {
         unsafeClones = [random(["MT", "H2"]), random(["OT", "M1"]), random(["R2", "H1"])]
     }
-    print(unsafeClones)
 
     spreadOrStack = random(["spread", "stack"])
 
-    // make the background. color it ever so slightly to blue or red
-    let css = select("body")
+    // make the background.
+    let css = select("html")
+    css.style("background-image", "linear-gradient(\n" +
+        "rgba(13, 13, 40, 0.3), \n" +
+        "rgba(13, 13, 40, 0.5)), \n" +
+        "url(\"data/FRU P1 BG.png\")")
+    css = select("body")
     css.style("background-image", "linear-gradient(\n" +
         "rgba(13, 13, 40, 0.3), \n" +
         "rgba(13, 13, 40, 0.5)), \n" +
@@ -1506,7 +1927,12 @@ function setupDiamondDust() {
         }
     }
 
-    let css = select("body")
+    let css = select("html")
+    css.style("background-image", "linear-gradient(\n" +
+        "rgba(13, 13, 40, 0.3), \n" +
+        "rgba(13, 13, 40, 0.5)), \n" +
+        "url(\"data/FRU P2 Floor.webp\")")
+    css = select("body")
     css.style("background-image", "linear-gradient(\n" +
         "rgba(13, 13, 40, 0.3), \n" +
         "rgba(13, 13, 40, 0.5)), \n" +
