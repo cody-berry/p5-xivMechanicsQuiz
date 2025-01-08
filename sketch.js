@@ -177,7 +177,7 @@ function setup() {
     topWindowY = holeSize
     middleTopX = holeSize
     middleTopY = topWindowY + topSquareSize + holeSize
-    mainBodyX = holeSize
+    mainBodyX = 0
     mainBodyY = middleTopY + middleTopHeight + holeSize
     bottomWindowX = holeSize
     bottomWindowY = mainBodyY + mainBodyHeight + holeSize
@@ -282,15 +282,6 @@ function draw() {
     // pressed backtick
     displayDebugCorner()
 
-    // also make sure users know to look at the bottom.
-    stroke(0, 0, 100)
-    strokeWeight(3*scalingFactor)
-    for (let i = holeSize + 5*scalingFactor; i < width - holeSize - 5*scalingFactor; i += 10*scalingFactor) {
-        let y = frameCount/100 + height/scalingFactor - holeSize*6
-        line(i, y*scalingFactor - 5*scalingFactor, i, y*scalingFactor + 3*scalingFactor)
-        line(i - 3*scalingFactor, y*scalingFactor, i, y*scalingFactor + scalingFactor*3)
-        line(i + 3*scalingFactor, y*scalingFactor, i, y*scalingFactor + scalingFactor*3)
-    }
 
     // make sure mousePressedLastFrame is updated
     mousePressedLastFrame = mouseIsPressed
