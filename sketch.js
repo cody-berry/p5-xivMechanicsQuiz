@@ -7,6 +7,36 @@
  *   messier than it can be.
  */
 
+// arriving 2D variable
+class ArrivingVector {
+    constructor(x, y, targetX, targetY, speed, slowdown) {
+        this.x = x;
+        this.y = y;
+        this.targetX = targetX
+        this.targetY = targetY
+        this.speed = speed
+        this.slowdown = slowdown
+    }
+
+    // update x and y.
+    update() {
+        if (this.x > this.targetX) {
+            let diffX = this.x - this.targetX
+            this.x -= map(diffX, 0, this.slowdown, 0, this.speed, true)
+        } if (this.x < this.targetX) { // simply reverse the code earlier
+            let diffX = this.targetX - this.x
+            this.x += map(diffX, 0, this.slowdown, 0, this.speed, true)
+        }
+
+        if (this.y > this.targetY) {
+            let diffY = this.y - this.targetY
+            this.y -= map(diffY, 0, this.slowdown, 0, this.speed, true)
+        } if (this.y < this.targetY) { // simply reverse the code earlier
+            let diffY = this.targetY - this.y
+            this.y += map(diffY, 0, this.slowdown, 0, this.speed, true)
+        }
+    }
+}
 
 // initial variables from template
 let font
@@ -26,9 +56,9 @@ let middleTopHeight = 50*scalingFactor // the height of the window just above th
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
-let mainBodyHeight = topSquareSize*2 + holeSize*2 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
+let mainBodyHeight = topSquareSize*2 + holeSize*4 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
-let mainBodyWidth = windowWidth
+let mainBodyWidth = windowWidth + holeSize*2
 let middleTopWidth = windowWidth
 let bottomWidth = windowWidth
 let selectionWidth = windowWidth
@@ -38,14 +68,22 @@ let mousePressedLastFrame = false // used sometimes
 let role = "MT"
 
 // positions: used for displaying (relative to center of arena)
-let MT = [0, -50*scalingFactor]
-let OT = [50*scalingFactor, 0]
-let H1 = [-50*scalingFactor, 0]
-let H2 = [0, 50*scalingFactor]
-let M1 = [-35*scalingFactor, 35*scalingFactor]
-let M2 = [35*scalingFactor, 35*scalingFactor]
-let R1 = [-35*scalingFactor, -35*scalingFactor]
-let R2 = [35*scalingFactor, -35*scalingFactor]
+let MT = [-570*scalingFactor, -50*scalingFactor]
+let OT = [-510*scalingFactor, 0]
+let H1 = [-600*scalingFactor, 0]
+let H2 = [-540*scalingFactor, 50*scalingFactor]
+let M1 = [-565*scalingFactor, 35*scalingFactor]
+let M2 = [-485*scalingFactor, 35*scalingFactor]
+let R1 = [-545*scalingFactor, -35*scalingFactor]
+let R2 = [-465*scalingFactor, -35*scalingFactor]
+let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor)
+let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor)
+let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor)
+let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor)
+let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor)
+let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor)
+let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor)
+let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor)
 
 // window positions
 let greenSquareX = 0
@@ -84,6 +122,7 @@ let inOrOut
 let currentlySelectedMechanic = "Utopian Sky"
 let currentlySelectedBackground = "FRU P1"
 let stage = 0 // the current step you're on. always defaults to 0
+let mechanicStarted = 0
 let textAtTop
 let textAtBottom
 let centerOfBoard
@@ -124,7 +163,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupDiamondDust()
+    setupUtopianSky()
 
     // there is a padding of holeSize on the left and top. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -165,9 +204,37 @@ function setup() {
     textAlign(CENTER, CENTER)
 }
 
+function updateVectors() {
+    realMT.targetX = MT[0]
+    realMT.targetY = MT[1]
+    realMT.update()
+    realOT.targetX = OT[0]
+    realOT.targetY = OT[1]
+    realOT.update()
+    realH1.targetX = H1[0]
+    realH1.targetY = H1[1]
+    realH1.update()
+    realH2.targetX = H2[0]
+    realH2.targetY = H2[1]
+    realH2.update()
+    realM1.targetX = M1[0]
+    realM1.targetY = M1[1]
+    realM1.update()
+    realM2.targetX = M2[0]
+    realM2.targetY = M2[1]
+    realM2.update()
+    realR1.targetX = R1[0]
+    realR1.targetY = R1[1]
+    realR1.update()
+    realR2.targetX = R2[0]
+    realR2.targetY = R2[1]
+    realR2.update()
+}
 
 function draw() {
     frameRate(60)
+
+    updateVectors()
 
     // the green square at the top-left TODO
     fill(120, 80, 50)
@@ -188,7 +255,7 @@ function draw() {
     // the main body window.
     fill(234, 34, 24, 0.5)
     noStroke()
-    rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
+    // rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
     displayMainBodyContent()
 
     // the mechanic section window
@@ -214,6 +281,16 @@ function draw() {
     // used in emergencies. also a nice treat for those who accidentally
     // pressed backtick
     displayDebugCorner()
+
+    // also make sure users know to look at the bottom.
+    stroke(0, 0, 100)
+    strokeWeight(3*scalingFactor)
+    for (let i = holeSize + 5*scalingFactor; i < width - holeSize - 5*scalingFactor; i += 10*scalingFactor) {
+        let y = frameCount/100 + height/scalingFactor - holeSize*6
+        line(i, y*scalingFactor - 5*scalingFactor, i, y*scalingFactor + 3*scalingFactor)
+        line(i - 3*scalingFactor, y*scalingFactor, i, y*scalingFactor + scalingFactor*3)
+        line(i + 3*scalingFactor, y*scalingFactor, i, y*scalingFactor + scalingFactor*3)
+    }
 
     // make sure mousePressedLastFrame is updated
     mousePressedLastFrame = mouseIsPressed
@@ -381,14 +458,14 @@ function displayMainBodyContent() {
         fill(0, 0, 100)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
             circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
-                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 5)
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 3*scalingFactor)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
             circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
-                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 10)
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 7*scalingFactor)
         }
 
         displayCharacterPositions()
@@ -1039,14 +1116,14 @@ function displayMainBodyContent() {
         fill(0, 0, 100)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
             circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
-                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 5)
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 3*scalingFactor)
         }
 
         // big notches on cardinals and intercardinals
         fill(120, 100, 50)
         for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
             circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
-                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 10)
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 7*scalingFactor)
         }
 
         displayCharacterPositions()
@@ -1350,9 +1427,9 @@ intercardinals.`
                             R2Position = [1, 0]
                             OTPosition = [1, 0]
                             M2Position = [1, 90]
-                            H1Position = [1, 90]
+                            H2Position = [1, 90]
                             M1Position = [1, 180]
-                            H2Position = [1, 180]
+                            H1Position = [1, 180]
                             R1Position = [1, 270]
                             if (markedPlayers === "supports") {
                                 MTPosition[1] -= 45
@@ -1378,9 +1455,9 @@ intercardinals.`
                             R2Position = [1, 315]
                             OTPosition = [1, 315]
                             M2Position = [1, 45]
-                            H1Position = [1, 45]
+                            H2Position = [1, 45]
                             M1Position = [1, 135]
-                            H2Position = [1, 135]
+                            H1Position = [1, 135]
                             R1Position = [1, 225]
                             if (markedPlayers === "supports") {
                                 MTPosition[1] += 45
@@ -1441,9 +1518,41 @@ intercardinals.`
                         H1 = realPositionList[6]
                         R1 = realPositionList[7]
 
+                        // get the people in the correct place before you
+                        // display proteans
+                        for (let i = 0; i < 1000; i++) {
+                            updateVectors()
+                            push()
+                            translateToCenterOfBoard()
+                            displayCharacterPositions()
+                            pop()
+                        }
+
+                        // display donut or circle
+                        fill(200, 70, 100, 100)
+                        stroke(0, 0, 100, 100)
+                        if (inOrOut === "out") { // circle
+                            circle(centerOfBoard[0], centerOfBoard[1], 23*mainBodyWidth/32)
+                        } if (inOrOut === "in") { // donut
+                            beginShape()
+                            for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                                let x = cos(i)*mainBodyWidth/2 + centerOfBoard[0]
+                                let y = sin(i)*mainBodyWidth/2 + centerOfBoard[1]
+                                vertex(x, y)
+                            }
+                            beginContour()
+                            for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                                let x = cos(i)*mainBodyWidth/10 + centerOfBoard[0]
+                                let y = sin(i)*mainBodyWidth/10 + centerOfBoard[1]
+                                vertex(x, y)
+                            }
+                            endContour()
+                            endShape(CLOSE)
+                        }
+                        frameRate(1)
 
                         // display proteans
-                        fill(60, 100, 100, 100)
+                        fill(60, 100, 100, 60)
                         stroke(0, 0, 100, 100)
                         strokeWeight(5*scalingFactor)
                         if (AoEsSpawnedOn === "cardinal") {
@@ -1466,25 +1575,11 @@ intercardinals.`
                                 mainBodyWidth, mainBodyHeight, 13*PI/8, 15*PI/8, PIE)
                         }
 
-                        // display donut or circle
-                        if (inOrOut === "out") { // circle
-                            circle(centerOfBoard[0], centerOfBoard[1], 23*mainBodyWidth/32)
-                        } if (inOrOut === "in") { // donut
-                            beginShape()
-                            for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
-                                let x = cos(i)*mainBodyWidth/2 + centerOfBoard[0]
-                                let y = sin(i)*mainBodyWidth/2 + centerOfBoard[1]
-                                vertex(x, y)
-                            }
-                            beginContour()
-                            for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
-                                let x = cos(i)*mainBodyWidth/10 + centerOfBoard[0]
-                                let y = sin(i)*mainBodyWidth/10 + centerOfBoard[1]
-                                vertex(x, y)
-                            }
-                            endContour()
-                            endShape(CLOSE)
-                        }
+                        push()
+                        translateToCenterOfBoard()
+                        displayCharacterPositions()
+                        pop()
+
                         return
                     } else {
                         textAtTop = "You went to the wrong waymark color." +
@@ -1501,21 +1596,14 @@ intercardinals.`
     }
 }
 
-// target symbol is orange circle around player for display purposes. that
-// isn't prominent enough so we add some lines as well.
+// target symbol is orange plus above player.
 function displayTargetSymbol(x, y) {
     stroke(30, 100, 70)
-    strokeWeight(2)
+    strokeWeight(2*scalingFactor)
     noFill()
-    circle(x, y, 20*scalingFactor)
-    line(x - 10*scalingFactor, y, x - 15*scalingFactor, y)
-    line(x - 7*scalingFactor, y - 7*scalingFactor, x - 11*scalingFactor, y - 11*scalingFactor)
-    line(x, y - 10*scalingFactor, x, y - 15*scalingFactor)
-    line(x + 7*scalingFactor, y - 7*scalingFactor, x + 11*scalingFactor, y - 11*scalingFactor)
-    line(x + 10*scalingFactor, y, x + 15*scalingFactor, y)
-    line(x + 7*scalingFactor, y + 7*scalingFactor, x + 11*scalingFactor, y + 11*scalingFactor)
-    line(x, y + 10*scalingFactor, x, y + 15*scalingFactor)
-    line(x - 7*scalingFactor, y + 7*scalingFactor, x - 11*scalingFactor, y + 11*scalingFactor)
+    line(x, y - 10*scalingFactor, x, y - 20*scalingFactor)
+    line(x - 3*scalingFactor, y - 15*scalingFactor, x + 3*scalingFactor, y - 15*scalingFactor)
+    arc(x, y - 24*scalingFactor, 8*scalingFactor, 8*scalingFactor, -PI/8, 9*PI/8)
 }
 
 // in range of clicking something (circle radius)
@@ -1673,62 +1761,63 @@ function displaySmallGreenDot (x, y) {
 
 function displayCharacterPositions() {
     fill(220, 70, 80)
-    stroke(50, 100, 100)
-    strokeWeight(scalingFactor)
-    circle(MT[0], MT[1], 15*scalingFactor)
-    circle(OT[0], OT[1], 15*scalingFactor)
+    noStroke()
+    let size = 16*scalingFactor
+    circle(realMT.x, realMT.y, size)
+    circle(realOT.x, realOT.y, size)
     fill(120, 70, 80)
-    circle(H1[0], H1[1], 15*scalingFactor)
-    circle(H2[0], H2[1], 15*scalingFactor)
+    circle(realH1.x, realH1.y, size)
+    circle(realH2.x, realH2.y, size)
     fill(0, 70, 80)
-    circle(M1[0], M1[1], 15*scalingFactor)
-    circle(M2[0], M2[1], 15*scalingFactor)
-    circle(R1[0], R1[1], 15*scalingFactor)
-    circle(R2[0], R2[1], 15*scalingFactor)
+    circle(realM1.x, realM1.y, size)
+    circle(realM2.x, realM2.y, size)
+    circle(realR1.x, realR1.y, size)
+    circle(realR2.x, realR2.y, size)
 
     // display your role
     fill(50, 100, 60)
+    stroke(0, 0, 100)
     strokeWeight(scalingFactor*1.5)
     switch (role) {
         case "MT":
-            circle(MT[0], MT[1], 15*scalingFactor)
+            circle(realMT.x, realMT.y, size)
             break
         case "OT":
-            circle(OT[0], OT[1], 15*scalingFactor)
+            circle(realOT.x, realOT.y, size)
             break
         case "H1":
-            circle(H1[0], H1[1], 15*scalingFactor)
+            circle(realH1.x, realH1.y, size)
             break
         case "H2":
-            circle(H2[0], H2[1], 15*scalingFactor)
+            circle(realH2.x, realH2.y, size)
             break
         case "M1":
-            circle(M1[0], M1[1], 15*scalingFactor)
+            circle(realM1.x, realM1.y, size)
             break
         case "M2":
-            circle(M2[0], M2[1], 15*scalingFactor)
+            circle(realM2.x, realM2.y, size)
             break
         case "R1":
-            circle(R1[0], R1[1], 15*scalingFactor)
+            circle(realR1.x, realR1.y, size)
             break
         case "R2":
-            circle(R2[0], R2[1], 15*scalingFactor)
+            circle(realR2.x, realR2.y, size)
             break
     }
 
     fill(0, 0, 100)
     stroke(0, 0, 100)
-    strokeWeight(0.5*scalingFactor)
-    textSize(8*scalingFactor)
+    strokeWeight(size/30)
+    textSize(size/2)
     textAlign(CENTER, CENTER)
-    text("MT", MT[0], MT[1] - scalingFactor)
-    text("OT", OT[0], OT[1] - scalingFactor)
-    text("H1", H1[0], H1[1] - scalingFactor)
-    text("H2", H2[0], H2[1] - scalingFactor)
-    text("M1", M1[0], M1[1] - scalingFactor)
-    text("M2", M2[0], M2[1] - scalingFactor)
-    text("R1", R1[0], R1[1] - scalingFactor)
-    text("R2", R2[0], R2[1] - scalingFactor)
+    text("MT", realMT.x, realMT.y - scalingFactor)
+    text("OT", realOT.x, realOT.y - scalingFactor)
+    text("H1", realH1.x, realH1.y - scalingFactor)
+    text("H2", realH2.x, realH2.y - scalingFactor)
+    text("M1", realM1.x, realM1.y - scalingFactor)
+    text("M2", realM2.x, realM2.y - scalingFactor)
+    text("R1", realR1.x, realR1.y - scalingFactor)
+    text("R2", realR2.x, realR2.y - scalingFactor)
 }
 
 function displayBottomWindowContent() {
@@ -1788,6 +1877,8 @@ function setupUtopianSky() {
     erase()
     rect(0, 0, width, height)
     noErase()
+
+    mechanicStarted = frameCount
 
     stage = 0
     currentlySelectedMechanic = "Utopian Sky"
@@ -1862,6 +1953,8 @@ function setupDiamondDust() {
     erase()
     rect(0, 0, width, height)
     noErase()
+
+    mechanicStarted = frameCount
 
     inOrOut = random(["in", "out"])
     markedPlayers = random(["supports", "DPS"])
@@ -1961,7 +2054,6 @@ You cannot track wins and losses yet. Once there is a system, wins and losses
  from separate mechanics will be saved to local storage but counted separately.
 This is a quiz, so make sure you've studied.</pre>`)
 }
-
 
 /** 🧹 shows debugging info using text() 🧹 */
 class CanvasDebugCorner {
