@@ -46,7 +46,15 @@ let instructions
 let debugCorner /* output debug text in the bottom left corner of the canvas */
 
 // displaying the windows
-let scalingFactor = 4/3
+let scalingFactor = 1.33
+let scalingFactorFetch = localStorage.getItem("scalingFactor")
+if (!scalingFactorFetch) {
+    localStorage.setItem("scalingFactor", "1.33")
+    scalingFactorFetch = "1.33"
+}
+scalingFactor = parseFloat(scalingFactorFetch)
+scalingFactorFetch = parseFloat(scalingFactorFetch)
+
 let textPadding = 3.5*scalingFactor
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
@@ -57,11 +65,13 @@ let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*4 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
+let scalingAdjustHeight = 50*scalingFactor
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
 let mainBodyWidth = windowWidth + holeSize*2
 let middleTopWidth = windowWidth
 let bottomWidth = windowWidth
 let selectionWidth = windowWidth
+let scalingAdjustWidth = windowWidth
 let mousePressedLastFrame = false // used sometimes
 
 // your role
@@ -100,6 +110,8 @@ let mainBodyX = 0
 let mainBodyY = 0
 let bottomWindowX = 0
 let bottomWindowY = 0
+let scalingAdjustX = 0
+let scalingAdjustY = 0
 
 // Utopian Sky (FRU P1)
 let fruP1Image
@@ -138,8 +150,9 @@ function preload() {
 
 
 function setup() {
-    let cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth,
-        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + holeSize*6)
+    let bonusWidth = 200*scalingFactor
+    let cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth + bonusWidth,
+        topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + scalingAdjustHeight + holeSize*7)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
     textFont(font, 7*scalingFactor)
@@ -165,24 +178,36 @@ function setup() {
 
     setupUtopianSky()
 
-    // there is a padding of holeSize on the left and top. To remove this padding,
+    // there is a padding of holeSize on the sides. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
     // topWindowY, middleTopX, mainBodyX, bottomWindowX, and selectionX; add holeSize
     // to redSquareX; and remove holeSize*2 from the width and height.
-    greenSquareX = holeSize
+
+    // there is a padding of bonusWidth/2 on the left and right. To remove
+    // this padding, remove all instances of bonusWidth and bonusWidth/2.
+    // to add back the padding, add bonusWidth to the width, initialize
+    // bonusWidth as 200*scalingFactor, and add bonusWidth/2 to
+    // greenSquareX, topWindowX, middleTopX, mainBodyX, bottomWindowX,
+    // selectionX, and scalingAdjustX. Also subtract bonusWidth/2 from
+    // redSquareX.
+
+
+    greenSquareX = holeSize + bonusWidth/2
     greenSquareY = holeSize
-    redSquareX = width - topSquareSize - holeSize
+    redSquareX = width - topSquareSize - holeSize - bonusWidth/2
     redSquareY = holeSize
-    topWindowX = topSquareSize + holeSize*2
+    topWindowX = topSquareSize + holeSize*2 + bonusWidth/2
     topWindowY = holeSize
-    middleTopX = holeSize
+    middleTopX = holeSize + bonusWidth/2
     middleTopY = topWindowY + topSquareSize + holeSize
-    mainBodyX = 0
+    mainBodyX = bonusWidth/2
     mainBodyY = middleTopY + middleTopHeight + holeSize
-    bottomWindowX = holeSize
+    bottomWindowX = holeSize + bonusWidth/2
     bottomWindowY = mainBodyY + mainBodyHeight + holeSize
-    selectionX = holeSize
+    selectionX = holeSize + bonusWidth/2
     selectionY = bottomWindowY + bottomHeight + holeSize
+    scalingAdjustX = holeSize + bonusWidth/2
+    scalingAdjustY = selectionY + mechanicSelectionHeight + holeSize
 
     // greenSquareX = 0
     // greenSquareY = 0
@@ -236,6 +261,13 @@ function draw() {
 
     updateVectors()
 
+    // erase the trail from everyone sliding in
+    if (frameCount === 420) {
+        erase()
+        rect(0, 0, width, height)
+        noErase()
+    }
+
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
@@ -277,6 +309,11 @@ function draw() {
     rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
     displayBottomWindowContent()
 
+    // the scaling adjustment window
+    fill(234, 34, 24)
+    noStroke()
+    rect(scalingAdjustX, scalingAdjustY, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + scalingAdjustHeight, cornerRounding)
+    displayScalingAdjustContent()
 
     // used in emergencies. also a nice treat for those who accidentally
     // pressed backtick
@@ -285,6 +322,114 @@ function draw() {
 
     // make sure mousePressedLastFrame is updated
     mousePressedLastFrame = mouseIsPressed
+}
+
+function displayScalingAdjustContent() {
+    // display whatever the current scaling factor is
+    textAlign(CENTER, CENTER)
+    fill(0, 0, 100)
+    noStroke()
+    textSize(10*scalingFactor)
+    text("Scaling Factor\nAdjust\nCurrent: " + parseInt(scalingFactorFetch*100) + "%",
+        scalingAdjustX + scalingAdjustWidth/2, scalingAdjustY + scalingAdjustHeight/3)
+    textAlign(LEFT, CENTER)
+    text("     -50%             -25%  " +
+         "                                  +25%          +50%\n" +
+         "     -10%              -1%           " +
+         "                           +1%          +10%\n\n" +
+         "Changes to scaling will take effect on next reload via local storage.",
+        scalingAdjustX, scalingAdjustY + scalingAdjustHeight/2)
+    textAlign(LEFT, BOTTOM)
+    textSize(7*scalingFactor)
+
+    // now that we're done with the text, display the buttons
+    // row 1: "-50%", "-25%", "+25%", "+50%"
+    fill(0, 0, 0, 50)
+    if (mouseY > scalingAdjustY && mouseY < scalingAdjustY + 13*scalingFactor) {
+        // -50%
+        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
+            rect(scalingAdjustX, scalingAdjustY, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.5
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // -25%
+        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.25
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +25%
+        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.25
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +50%
+        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
+            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.5
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+    }
+    // row 2: "-10%", "-1%", "+1%", "+10%"
+    if (mouseY > scalingAdjustY + 13*scalingFactor && mouseY < scalingAdjustY + 26*scalingFactor) {
+        // -10%
+        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
+            rect(scalingAdjustX, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.1
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // -1%
+        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.01
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +1%
+        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.01
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +10%
+        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
+            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.1
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+    }
 }
 
 function displayMechanicSelection() {
