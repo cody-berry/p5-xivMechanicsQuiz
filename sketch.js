@@ -74,18 +74,30 @@ let selectionWidth = windowWidth
 let scalingAdjustWidth = windowWidth
 let mousePressedLastFrame = false // used sometimes
 
+// used in initialization of mechanics. also a great thing for me to refer
+// back to for version changes
+let updates = `<strong>Updates:</strong>
+    +Scaling factor adjust window
+    +Smoother character position changes
+    +<strong>FRU P2 background & Diamond Dust setup</strong>
+    +Background image through CSS
+    +Customization through code
+    +Resizing through code\n
+    +<strong>Utopian Sky</strong>
+    <strong>Initialization</strong>`
+
 // your role
 let role = "MT"
 
 // positions: used for displaying (relative to center of arena)
-let MT = [-570*scalingFactor, -50*scalingFactor]
-let OT = [-510*scalingFactor, 0]
-let H1 = [-600*scalingFactor, 0]
-let H2 = [-540*scalingFactor, 50*scalingFactor]
-let M1 = [-565*scalingFactor, 35*scalingFactor]
-let M2 = [-485*scalingFactor, 35*scalingFactor]
-let R1 = [-545*scalingFactor, -35*scalingFactor]
-let R2 = [-465*scalingFactor, -35*scalingFactor]
+let MT = [0, 0]
+let OT = [0, 0]
+let H1 = [0, 0]
+let H2 = [0, 0]
+let M1 = [0, 0]
+let M2 = [0, 0]
+let R1 = [0, 0]
+let R2 = [0, 0]
 let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor)
 let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor)
 let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor)
@@ -176,7 +188,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupUtopianSky()
+    setupDiamondDust()
 
     // there is a padding of holeSize on the sides. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -260,13 +272,6 @@ function draw() {
     frameRate(60)
 
     updateVectors()
-
-    // erase the trail from everyone sliding in
-    if (frameCount === 420) {
-        erase()
-        rect(0, 0, width, height)
-        noErase()
-    }
 
     // the green square at the top-left TODO
     fill(120, 80, 50)
@@ -1285,6 +1290,7 @@ function displayMainBodyContent() {
                     return
                 }
             } if (stage === 1) {
+                // display AoEs
                 stroke(0, 0, 100)
                 strokeWeight(2*scalingFactor)
                 fill(200, 50, 100, 10)
@@ -1315,7 +1321,7 @@ function displayMainBodyContent() {
                 }
 
                 // make sure we know if we got targetted. we'll have a
-                // caramel brown circle around us if we are
+                // target marker if we are
                 stroke(30, 100, 70)
                 strokeWeight(2)
                 if (markedPlayers === "DPS") {
@@ -1542,7 +1548,7 @@ intercardinals.`
                     }
                     if (clickedColor === correctColor) {
                         textAtTop = "The next circles have appeared. Move to" +
-                            " your spot to dodge AoEs & drop puddles."
+                            " your spot to dodge AoEs and/or drop star AoEs."
                         textAtBottom = "You went to the correct spot. \n" +
                             textAtBottom + "\n[PASS] — You went to the " + clickedColor +
                             " waymarks."
@@ -1654,8 +1660,7 @@ intercardinals.`
                         H1 = realPositionList[6]
                         R1 = realPositionList[7]
 
-                        // get the people in the correct place before you
-                        // display proteans
+                        // get the people in the correct place
                         for (let i = 0; i < 1000; i++) {
                             updateVectors()
                             push()
@@ -1711,10 +1716,59 @@ intercardinals.`
                                 mainBodyWidth, mainBodyHeight, 13*PI/8, 15*PI/8, PIE)
                         }
 
-                        push()
-                        translateToCenterOfBoard()
-                        displayCharacterPositions()
-                        pop()
+                        // now, there's a small niche case where we skip
+                        // immediately to step 3. if you're not a marked
+                        // player and you're going in, then you don't have
+                        // to do anything.
+                        if (markedPlayers !== DPSOrSupport && inOrOut === "in") {
+                            textAtTop = "The rest of the circles have appeared. " +
+                                "Move to your spot to get knocked back into the " +
+                                "correct location."
+                            stage = 3
+                            if (markedPlayers === "supports") {
+                                MTPosition[0] = 2.5
+                                OTPosition[0] = 2.5
+                                H2Position[0] = 2.5
+                                H1Position[0] = 2.5
+                            } else {
+                                R2Position[0] = 2.5
+                                M2Position[0] = 2.5
+                                M1Position[0] = 2.5
+                                R1Position[0] = 2.5
+                            }
+                            realPositionList = []
+                            for (let position of [MTPosition, R2Position, OTPosition, M2Position, H2Position, M1Position, H1Position, R1Position]) {
+                                let r = 0
+                                switch (position[0]) {
+                                    case 1:
+                                        r = mainBodyWidth/24
+                                        break
+                                    case 2:
+                                        r = mainBodyWidth/12
+                                        break
+                                    case 2.5:
+                                        r = mainBodyWidth/6
+                                        break
+                                    case 3:
+                                        r = 3*mainBodyWidth/8
+                                        break
+                                    case 4:
+                                        r = 3*mainBodyWidth/7
+                                        break
+                                }
+                                let x = cos(radians(position[1]))*r
+                                let y = sin(radians(position[1]))*r
+                                realPositionList.push([x, y])
+                            }
+                            MT = realPositionList[0]
+                            R2 = realPositionList[1]
+                            OT = realPositionList[2]
+                            M2 = realPositionList[3]
+                            H2 = realPositionList[4]
+                            M1 = realPositionList[5]
+                            H1 = realPositionList[6]
+                            R1 = realPositionList[7]
+                        }
 
                         return
                     } else {
@@ -1727,8 +1781,77 @@ intercardinals.`
                         return
                     }
                 }
+            } if (stage === 2) {
+                // display AoEs
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(200, 50, 100, 5)
+                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                fill(205, 50, 100, 7.5)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                fill(210, 50, 100, 10)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+
+                // make sure we know if we got targetted. we'll have a
+                // target marker if we are
+                if (markedPlayers === "DPS") {
+                    displayTargetSymbol(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1])
+                    displayTargetSymbol(M2[0] + centerOfBoard[0], M2[1] + centerOfBoard[1])
+                    displayTargetSymbol(R1[0] + centerOfBoard[0], R1[1] + centerOfBoard[1])
+                    displayTargetSymbol(R2[0] + centerOfBoard[0], R2[1] + centerOfBoard[1])
+                } else {
+                    displayTargetSymbol(H1[0] + centerOfBoard[0], H1[1] + centerOfBoard[1])
+                    displayTargetSymbol(H2[0] + centerOfBoard[0], H2[1] + centerOfBoard[1])
+                    displayTargetSymbol(OT[0] + centerOfBoard[0], OT[1] + centerOfBoard[1])
+                    displayTargetSymbol(MT[0] + centerOfBoard[0], MT[1] + centerOfBoard[1])
+                }
+
+                // if we're in, we can go out all the way, to the
+                // inner ring, or to the center. bandity options indeed,
+                // but...you know. the correct option is the inner ring.
+                if (inOrOut === "in") {
+                    // we know the inner ring will always be 2 times as far
+                    // as we are, the center will be the center, and the
+                    // outer ring will be the 4.5 times as far as we are.
+                    // the far outer will be 5.15 times as far as we are.
+                    let yourposition = yourPosition()
+
+                    let farOuterPosition = [5.15*yourposition[0] + centerOfBoard[0], 5.15*yourposition[1] + centerOfBoard[1]]
+                    let outerRingPosition = [4.3*yourposition[0] + centerOfBoard[0], 4.3*yourposition[1] + centerOfBoard[1]]
+                    let innerRingPosition = [2.1*yourposition[0] + centerOfBoard[0], 2.1*yourposition[1] + centerOfBoard[1]]
+                    let centerPosition = [centerOfBoard[0], centerOfBoard[1]]
+
+                    displayGreenDot(farOuterPosition[0] - centerOfBoard[0], farOuterPosition[1] - centerOfBoard[1])
+                    displayGreenDot(outerRingPosition[0] - centerOfBoard[0], outerRingPosition[1] - centerOfBoard[1])
+                    displayGreenDot(innerRingPosition[0] - centerOfBoard[0], innerRingPosition[1] - centerOfBoard[1])
+                    displayGreenDot(centerPosition[0] - centerOfBoard[0], centerPosition[1] - centerOfBoard[1])
+                }
             }
         }
+    }
+}
+
+function yourPosition() {
+    switch (role) {
+        case "MT":
+            return MT
+        case "OT":
+            return OT
+        case "M1":
+            return M1
+        case "M2":
+            return M2
+        case "R1":
+            return R1
+        case "R2":
+            return R2
+        case "H1":
+            return H1
+        case "H2":
+            return H2
     }
 }
 
@@ -1878,7 +2001,7 @@ function displayGreenDot(x, y) {
     pop()
 }
 
-// displays a smaller green dot if you're in a tight spot
+// displays- a smaller green dot if you're in a tight spot
 function displaySmallGreenDot (x, y) {
     push()
     translateToCenterOfBoard()
@@ -2050,15 +2173,9 @@ function setupUtopianSky() {
 
     // make the background.
     let css = select("html")
-    css.style("background-image", "linear-gradient(\n" +
-        "rgba(13, 13, 40, 0.3), \n" +
-        "rgba(13, 13, 40, 0.5)), \n" +
-        "url(\"data/FRU P1 BG.png\")")
+    css.style("background-image", "url(\"data/FRU P1 BG.png\")")
     css = select("body")
-    css.style("background-image", "linear-gradient(\n" +
-        "rgba(13, 13, 40, 0.3), \n" +
-        "rgba(13, 13, 40, 0.5)), \n" +
-        "url(\"data/FRU P1 BG.png\")")
+    css.style("background-image", "url(\"data/FRU P1 BG.png\")")
 
     textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
         " time to test just that.\nAlso, please do remember that it's " + spreadOrStack +
@@ -2082,7 +2199,10 @@ Click on any green dot to move to that location. Clicking on the green
 There isn't a timing feature on this mechanic——yet, that is. There will be soon.
 You cannot track wins and losses yet. Once there is a system, wins and losses 
  from separate mechanics will be saved to local storage but counted separately.
-This is a quiz, so make sure you've studied.</pre>`)
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
 }
 
 function setupDiamondDust() {
@@ -2092,8 +2212,10 @@ function setupDiamondDust() {
 
     mechanicStarted = frameCount
 
-    inOrOut = random(["in", "out"])
-    markedPlayers = random(["supports", "DPS"])
+    // inOrOut = random(["in", "out"])
+    // markedPlayers = random(["supports", "DPS"])
+    inOrOut = "in"
+    markedPlayers = "supports"
     silenceOrStillness = random(["silence", "stillness"])
 
     MT = [0, -70*scalingFactor]
@@ -2157,15 +2279,9 @@ function setupDiamondDust() {
     }
 
     let css = select("html")
-    css.style("background-image", "linear-gradient(\n" +
-        "rgba(13, 13, 40, 0.3), \n" +
-        "rgba(13, 13, 40, 0.5)), \n" +
-        "url(\"data/FRU P2 Floor.webp\")")
+    css.style("background-image", "url(\"data/FRU P2 Floor.webp\")")
     css = select("body")
-    css.style("background-image", "linear-gradient(\n" +
-        "rgba(13, 13, 40, 0.3), \n" +
-        "rgba(13, 13, 40, 0.5)), \n" +
-        "url(\"data/FRU P2 Floor.webp\")")
+    css.style("background-image", "url(\"data/FRU P2 Floor.webp\")")
 
     textAtTop = "It's time for the first mechanic of P2—Diamond Dust. Do you" +
         " actually understand the mechanic or not?\n\n(CupNoodles has" +
@@ -2188,7 +2304,10 @@ Click on any green dot to move to that location. Clicking on the green
 There isn't a timing feature on this mechanic——yet, that is. There will be soon.
 You cannot track wins and losses yet. Once there is a system, wins and losses 
  from separate mechanics will be saved to local storage but counted separately.
-This is a quiz, so make sure you've studied.</pre>`)
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
 }
 
 /** 🧹 shows debugging info using text() 🧹 */
