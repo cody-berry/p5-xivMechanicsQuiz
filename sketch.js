@@ -76,7 +76,7 @@ let mousePressedLastFrame = false // used sometimes
 
 // used in initialization of mechanics. also a great thing for me to refer
 // back to for version changes
-let updates = `<strong>Updates:</strong>
+let updates = `<strong>Updates</strong>:
     +Scaling factor adjust window
     +Smoother character position changes
     +<strong>FRU P2 background & Diamond Dust setup</strong>
@@ -141,6 +141,7 @@ let fourthCircles
 let markedPlayers
 let silenceOrStillness
 let inOrOut
+let ice
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -158,6 +159,7 @@ function preload() {
     fruP1Image = loadImage('data/FRU P1 Floor.png')
     utopianSkyFog = loadImage('data/fogGrain2.jpg')
     fruP2Image = loadImage('data/FRU P2 Floor.webp')
+    ice = loadImage('data/Ice.jpg')
 }
 
 
@@ -1298,9 +1300,9 @@ function displayMainBodyContent() {
                 circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
 
                 if (inOrOut === "in") {
-                    displayShiva([0, -mainBodyWidth/5], "boss", "Reap!")
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Reap!")
                 } if (inOrOut === "out") {
-                    displayShiva([0, -mainBodyWidth/5], "boss", "Cleave!")
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Cleave!")
                 }
 
                 let radii = [mainBodyWidth/24, mainBodyWidth/12, mainBodyWidth*3/8, mainBodyWidth*3/7]
@@ -1716,60 +1718,6 @@ intercardinals.`
                                 mainBodyWidth, mainBodyHeight, 13*PI/8, 15*PI/8, PIE)
                         }
 
-                        // now, there's a small niche case where we skip
-                        // immediately to step 3. if you're not a marked
-                        // player and you're going in, then you don't have
-                        // to do anything.
-                        if (markedPlayers !== DPSOrSupport && inOrOut === "in") {
-                            textAtTop = "The rest of the circles have appeared. " +
-                                "Move to your spot to get knocked back into the " +
-                                "correct location."
-                            stage = 3
-                            if (markedPlayers === "supports") {
-                                MTPosition[0] = 2.5
-                                OTPosition[0] = 2.5
-                                H2Position[0] = 2.5
-                                H1Position[0] = 2.5
-                            } else {
-                                R2Position[0] = 2.5
-                                M2Position[0] = 2.5
-                                M1Position[0] = 2.5
-                                R1Position[0] = 2.5
-                            }
-                            realPositionList = []
-                            for (let position of [MTPosition, R2Position, OTPosition, M2Position, H2Position, M1Position, H1Position, R1Position]) {
-                                let r = 0
-                                switch (position[0]) {
-                                    case 1:
-                                        r = mainBodyWidth/24
-                                        break
-                                    case 2:
-                                        r = mainBodyWidth/12
-                                        break
-                                    case 2.5:
-                                        r = mainBodyWidth/6
-                                        break
-                                    case 3:
-                                        r = 3*mainBodyWidth/8
-                                        break
-                                    case 4:
-                                        r = 3*mainBodyWidth/7
-                                        break
-                                }
-                                let x = cos(radians(position[1]))*r
-                                let y = sin(radians(position[1]))*r
-                                realPositionList.push([x, y])
-                            }
-                            MT = realPositionList[0]
-                            R2 = realPositionList[1]
-                            OT = realPositionList[2]
-                            M2 = realPositionList[3]
-                            H2 = realPositionList[4]
-                            M1 = realPositionList[5]
-                            H1 = realPositionList[6]
-                            R1 = realPositionList[7]
-                        }
-
                         return
                     } else {
                         textAtTop = "You went to the wrong waymark color." +
@@ -1792,8 +1740,8 @@ intercardinals.`
                 circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
                 circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
                 fill(210, 50, 100, 10)
-                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
 
                 // make sure we know if we got targetted. we'll have a
                 // target marker if we are
@@ -1817,6 +1765,8 @@ intercardinals.`
                     // as we are, the center will be the center, and the
                     // outer ring will be the 4.5 times as far as we are.
                     // the far outer will be 5.15 times as far as we are.
+                    // this thing is called yourposition so that it doesn't
+                    // mistake yourPosition() for a variable.
                     let yourposition = yourPosition()
 
                     let farOuterPosition = [5.15*yourposition[0] + centerOfBoard[0], 5.15*yourposition[1] + centerOfBoard[1]]
@@ -1828,10 +1778,441 @@ intercardinals.`
                     displayGreenDot(outerRingPosition[0] - centerOfBoard[0], outerRingPosition[1] - centerOfBoard[1])
                     displayGreenDot(innerRingPosition[0] - centerOfBoard[0], innerRingPosition[1] - centerOfBoard[1])
                     displayGreenDot(centerPosition[0] - centerOfBoard[0], centerPosition[1] - centerOfBoard[1])
+
+                    // if you're not marked, you're already done!
+                    if (markedPlayers !== DPSOrSupports()) {
+                        textAtTop = "The rest of the circles have appeared. " +
+                            "Move to your spot to get knocked back into the " +
+                            "correct location."
+                        stage = 3
+                        if (markedPlayers === "supports") {
+                            MT[0] = MT[0]*2.1
+                            MT[1] = MT[1]*2.1
+                            OT[0] = OT[0]*2.1
+                            OT[1] = OT[1]*2.1
+                            H2[0] = H2[0]*2.1
+                            H2[1] = H2[1]*2.1
+                            H1[0] = H1[0]*2.1
+                            H1[1] = H1[1]*2.1
+                        } else {
+                            R2[0] = R2[0]*2.1
+                            R2[1] = R2[1]*2.1
+                            M2[0] = M2[0]*2.1
+                            M2[1] = M2[1]*2.1
+                            M1[0] = M1[0]*2.1
+                            M1[1] = M1[1]*2.1
+                            R1[0] = R1[0]*2.1
+                            R1[1] = R1[1]*2.1
+                        }
+
+                        // get the people in the correct place
+                        for (let i = 0; i < 1000; i++) {
+                            updateVectors()
+                            push()
+                            translateToCenterOfBoard()
+                            displayCharacterPositions()
+                            push()
+                            rotate(0.01)
+                            tint(0, 0, 100, 5)
+                            image(fruP2Image, -mainBodyWidth/2 + 20*scalingFactor, -mainBodyWidth/2 + 20*scalingFactor,
+                                mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+                            pop()
+                            pop()
+                        }
+
+                        // display circle explosions
+                        push()
+                        translateToCenterOfBoard()
+                        fill(30, 100, 100, 100)
+                        stroke(0, 0, 100, 100)
+                        circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
+                        circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                        frameRate(1)
+
+                        fill(200, 70, 100, 100)
+                        if (markedPlayers === "supports") {
+                            circle(MT[0], MT[1], mainBodyWidth/5)
+                            circle(OT[0], OT[1], mainBodyWidth/5)
+                            circle(H2[0], H2[1], mainBodyWidth/5)
+                            circle(H1[0], H1[1], mainBodyWidth/5)
+                        } else {
+                            circle(R2[0], R2[1], mainBodyWidth/5)
+                            circle(M2[0], M2[1], mainBodyWidth/5)
+                            circle(M1[0], M1[1], mainBodyWidth/5)
+                            circle(R1[0], R1[1], mainBodyWidth/5)
+                        }
+                        displayCharacterPositions()
+                        pop()
+                    }
+
+                    // as for the options, you will always want to go to the
+                    // inner ring. descriptions vary.
+                    if (mousePressedButNotHeldDown()) {
+                        if (inClickingRange(farOuterPosition, 10 * scalingFactor)) {
+                            textAtTop = "You went too far out."
+                            textAtBottom = "You went waaaay too far out. \n" +
+                                "[FAIL] — I don't think you can even make the distance!"
+                            stage = 100
+                        } if (inClickingRange(outerRingPosition, 10 * scalingFactor)) {
+                            textAtTop = "You went too far out. This is the" +
+                                " position you would drop your star AoEs in" +
+                                " if it were point-blank AoE."
+                            textAtBottom = "You went too far out. \n" +
+                                "[FAIL] — You are supposed go to the inner ring."
+                            stage = 100
+                        } if (inClickingRange(innerRingPosition, 10 * scalingFactor)) {
+                            textAtTop = "The rest of the circles have appeared. " +
+                                "Move to your spot to get knocked back into the " +
+                                "correct location."
+                            textAtBottom = "You went to the inner ring. \n" +
+                                "[PASS] — The inner ring is the correct spot."
+                            stage = 3
+                            if (markedPlayers === "supports") {
+                                MT[0] = MT[0]*2.1
+                                MT[1] = MT[1]*2.1
+                                OT[0] = OT[0]*2.1
+                                OT[1] = OT[1]*2.1
+                                H2[0] = H2[0]*2.1
+                                H2[1] = H2[1]*2.1
+                                H1[0] = H1[0]*2.1
+                                H1[1] = H1[1]*2.1
+                            } else {
+                                R2[0] = R2[0]*2.1
+                                R2[1] = R2[1]*2.1
+                                M2[0] = M2[0]*2.1
+                                M2[1] = M2[1]*2.1
+                                M1[0] = M1[0]*2.1
+                                M1[1] = M1[1]*2.1
+                                R1[0] = R1[0]*2.1
+                                R1[1] = R1[1]*2.1
+                            }
+
+                            // get the people in the correct place
+                            for (let i = 0; i < 1000; i++) {
+                                updateVectors()
+                                push()
+                                translateToCenterOfBoard()
+                                displayCharacterPositions()
+                                pop()
+                            }
+
+                            // display circle explosions
+                            push()
+                            translateToCenterOfBoard()
+                            fill(30, 100, 100, 100)
+                            stroke(0, 0, 100, 100)
+                            circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
+                            circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                            frameRate(1)
+
+                            fill(200, 70, 100, 100)
+                            if (markedPlayers === "supports") {
+                                circle(MT[0], MT[1], mainBodyWidth/5)
+                                circle(OT[0], OT[1], mainBodyWidth/5)
+                                circle(H2[0], H2[1], mainBodyWidth/5)
+                                circle(H1[0], H1[1], mainBodyWidth/5)
+                            } else {
+                                circle(R2[0], R2[1], mainBodyWidth/5)
+                                circle(M2[0], M2[1], mainBodyWidth/5)
+                                circle(M1[0], M1[1], mainBodyWidth/5)
+                                circle(R1[0], R1[1], mainBodyWidth/5)
+                            }
+                            displayCharacterPositions()
+                            pop()
+                        } if (inClickingRange(centerPosition, 10 * scalingFactor)) {
+                            textAtTop = "You did not go out to drop your AOEs."
+                            textAtBottom = "You did not go out. \n" +
+                                "[FAIL] — You are supposed go to the inner ring."
+                            stage = 100
+                        }
+                    }
+                }
+
+                // if we're out, we can also go out all the way, to the
+                // outer ring, or to just past the AoE.
+                if (inOrOut === "out") {
+                    let yourposition = yourPosition()
+                    let farOuterPosition
+                    let outerRingPosition
+                    let innerRingPosition
+                    if (markedPlayers === DPSOrSupports()) {
+                        // we will be on the far outer position
+                        farOuterPosition = [yourposition[0] + centerOfBoard[0], yourposition[1] + centerOfBoard[1]]
+                        outerRingPosition = [0.834 * yourposition[0] + centerOfBoard[0], 0.834 * yourposition[1] + centerOfBoard[1]]
+                        innerRingPosition = [0.3 * yourposition[0] + centerOfBoard[0], 0.3 * yourposition[1] + centerOfBoard[1]]
+                    } else {
+                        // we will be on the outer ring position
+                        farOuterPosition = [1.15 * yourposition[0] + centerOfBoard[0], 1.15 * yourposition[1] + centerOfBoard[1]]
+                        outerRingPosition = [yourposition[0] + centerOfBoard[0], yourposition[1] + centerOfBoard[1]]
+                        innerRingPosition = [0.33 * yourposition[0] + centerOfBoard[0], 0.33 * yourposition[1] + centerOfBoard[1]]
+                    }
+
+                    displayGreenDot(farOuterPosition[0] - centerOfBoard[0], farOuterPosition[1] - centerOfBoard[1])
+                    displayGreenDot(outerRingPosition[0] - centerOfBoard[0], outerRingPosition[1] - centerOfBoard[1])
+                    displayGreenDot(innerRingPosition[0] - centerOfBoard[0], innerRingPosition[1] - centerOfBoard[1])
+
+                    if (mousePressedButNotHeldDown()) {
+                        if (inClickingRange(farOuterPosition, 10*scalingFactor)) {
+                            if (markedPlayers === DPSOrSupports()) {
+                                // you pass because marked players are
+                                // supposed to stay out
+                                textAtTop = "The rest of the circles have" +
+                                    " appeared. Move to your spot to get" +
+                                    " knocked back into the correct location."
+                                textAtBottom = "[PASS] — You stayed where you were."
+                                stage = 3
+                                if (markedPlayers === "supports") {
+                                    R2[0] = R2[0]*0.33
+                                    R2[1] = R2[1]*0.33
+                                    M2[0] = M2[0]*0.33
+                                    M2[1] = M2[1]*0.33
+                                    M1[0] = M1[0]*0.33
+                                    M1[1] = M1[1]*0.33
+                                    R1[0] = R1[0]*0.33
+                                    R1[1] = R1[1]*0.33
+                                } else {
+                                    MT[0] = MT[0]*0.33
+                                    MT[1] = MT[1]*0.33
+                                    OT[0] = OT[0]*0.33
+                                    OT[1] = OT[1]*0.33
+                                    H2[0] = H2[0]*0.33
+                                    H2[1] = H2[1]*0.33
+                                    H1[0] = H1[0]*0.33
+                                    H1[1] = H1[1]*0.33
+                                }
+
+                                // get the people in the correct place
+                                for (let i = 0; i < 1000; i++) {
+                                    updateVectors()
+                                    push()
+                                    translateToCenterOfBoard()
+                                    displayCharacterPositions()
+                                    pop()
+                                }
+
+                                // display circle explosions
+                                push()
+                                translateToCenterOfBoard()
+                                fill(30, 100, 100, 100)
+                                stroke(0, 0, 100, 100)
+                                circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
+                                circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                                frameRate(1)
+
+                                fill(200, 70, 100, 100)
+                                if (markedPlayers === "supports") {
+                                    circle(MT[0], MT[1], mainBodyWidth/5)
+                                    circle(OT[0], OT[1], mainBodyWidth/5)
+                                    circle(H2[0], H2[1], mainBodyWidth/5)
+                                    circle(H1[0], H1[1], mainBodyWidth/5)
+                                } else {
+                                    circle(R2[0], R2[1], mainBodyWidth/5)
+                                    circle(M2[0], M2[1], mainBodyWidth/5)
+                                    circle(M1[0], M1[1], mainBodyWidth/5)
+                                    circle(R1[0], R1[1], mainBodyWidth/5)
+                                }
+                                displayCharacterPositions()
+                                pop()
+                            } else {
+                                textAtTop = "You did not run in as an" +
+                                    " unmarked player."
+                                textAtBottom = "You went out. \n" +
+                                    "[FAIL] — You did not run in.\n" +
+                                    "\n" +
+                                    "[NOTE] — It is technically okay to not" +
+                                    " run in so long as the first AoE did" +
+                                    " not spawn on you, but it is better \nto" +
+                                    " pre-position for the next mechanic."
+                                stage = 100
+                            }
+                        } if (inClickingRange(outerRingPosition, 10*scalingFactor)) {
+                            if (markedPlayers === DPSOrSupports()) {
+                                // descriptions are different for each,
+                                // though they result in the same outcome
+                                textAtTop = "You ran in slightly too much." +
+                                    " Though this will not necessarily cause" +
+                                    " a wipe, this may cause the parts of\n" +
+                                    "the star AoE running parellel to the" +
+                                    " edge to clip other people."
+                                textAtBottom = "[FAIL] — You ran in."
+                                stage = 100
+                            } else {
+                                textAtTop = "You did not run in as an" +
+                                    " unmarked player."
+                                textAtBottom = "You stayed where you were. \n" +
+                                    "[FAIL] — You did not run in.\n" +
+                                    "\n" +
+                                    "[NOTE] — It is technically okay to not" +
+                                    " run in so long as the first AoE did" +
+                                    " not spawn on you, but it is better \nto" +
+                                    " pre-position for the knockback."
+                                stage = 100
+                            }
+                        } if (inClickingRange(innerRingPosition, 10*scalingFactor)) {
+                            if (markedPlayers === DPSOrSupports()) {
+                                textAtTop = "You ran in too much, though" +
+                                    " the only reason why we don't run in is" +
+                                    " because it takes...more effort." +
+                                    " \nThat's all, it wouldn't cause a" +
+                                    " wipe, but it's better to avoid it."
+                                textAtBottom = "[FAIL] — You ran in."
+                                stage = 100
+                            } else {
+                                // you pass because marked players are
+                                // supposed to run in
+                                textAtTop = "The rest of the circles have" +
+                                    " appeared. Move to your spot to get" +
+                                    " knocked back into the correct location."
+                                textAtBottom = "[PASS] — You ran in."
+                                stage = 3
+                                if (markedPlayers === "supports") {
+                                    R2[0] = R2[0]*0.33
+                                    R2[1] = R2[1]*0.33
+                                    M2[0] = M2[0]*0.33
+                                    M2[1] = M2[1]*0.33
+                                    M1[0] = M1[0]*0.33
+                                    M1[1] = M1[1]*0.33
+                                    R1[0] = R1[0]*0.33
+                                    R1[1] = R1[1]*0.33
+                                } else {
+                                    MT[0] = MT[0]*0.33
+                                    MT[1] = MT[1]*0.33
+                                    OT[0] = OT[0]*0.33
+                                    OT[1] = OT[1]*0.33
+                                    H2[0] = H2[0]*0.33
+                                    H2[1] = H2[1]*0.33
+                                    H1[0] = H1[0]*0.33
+                                    H1[1] = H1[1]*0.33
+                                }
+
+                                // get the people in the correct place
+                                for (let i = 0; i < 1000; i++) {
+                                    updateVectors()
+                                    push()
+                                    translateToCenterOfBoard()
+                                    displayCharacterPositions()
+                                    pop()
+                                }
+
+                                // display circle explosions
+                                push()
+                                translateToCenterOfBoard()
+                                fill(30, 100, 100, 100)
+                                stroke(0, 0, 100, 100)
+                                circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
+                                circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                                frameRate(1)
+
+                                fill(200, 70, 100, 100)
+                                if (markedPlayers === "supports") {
+                                    circle(MT[0], MT[1], mainBodyWidth/5)
+                                    circle(OT[0], OT[1], mainBodyWidth/5)
+                                    circle(H2[0], H2[1], mainBodyWidth/5)
+                                    circle(H1[0], H1[1], mainBodyWidth/5)
+                                } else {
+                                    circle(R2[0], R2[1], mainBodyWidth/5)
+                                    circle(M2[0], M2[1], mainBodyWidth/5)
+                                    circle(M1[0], M1[1], mainBodyWidth/5)
+                                    circle(R1[0], R1[1], mainBodyWidth/5)
+                                }
+                                displayCharacterPositions()
+                                pop()
+                            }
+                        }
+                    }
+                }
+            } if (stage === 3) {
+                // display AoEs
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(210, 50, 100, 5)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                fill(200, 50, 100, 7.5)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                fill(210, 50, 100, 10)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+
+                // display star AoEs
+                if (inOrOut === "in") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * mainBodyWidth / 12, sqrt(2) * mainBodyWidth / 12)
+                        displayStarAoE(sqrt(2) * mainBodyWidth / 12, -sqrt(2) * mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * mainBodyWidth / 12, -sqrt(2) * mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * mainBodyWidth / 12, sqrt(2) * mainBodyWidth / 12)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(mainBodyWidth / 6, 0)
+                        displayStarAoE(0, -mainBodyWidth / 6)
+                        displayStarAoE(-mainBodyWidth / 6, 0)
+                        displayStarAoE(0, mainBodyWidth / 6)
+                    }
+                }
+                if (inOrOut === "out") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, -3*mainBodyWidth/7)
+                        displayStarAoE(-3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, 3*mainBodyWidth/7)
+                    }
                 }
             }
         }
     }
+}
+
+// displayStarAoE but infinitely expanded
+function displayExpandedStarAoE(x, y) {
+    push()
+    translateToCenterOfBoard()
+    translate(x, y)
+    fill(30, 100, 100, 60)
+    stroke(0, 0, 100, 100)
+    strokeWeight(1)
+    rect(-mainBodyWidth/2, -10*scalingFactor, mainBodyWidth/2, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-mainBodyWidth/2, -10*scalingFactor, mainBodyWidth/2, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-mainBodyWidth/2, -10*scalingFactor, mainBodyWidth/2, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-mainBodyWidth/2, -10*scalingFactor, mainBodyWidth/2, 10*scalingFactor)
+    pop()
+}
+
+// displays a star AoE in the specified location. since it is conditional,
+// it will never be done in a translation.
+function displayStarAoE(x, y) {
+    push()
+    translateToCenterOfBoard()
+    translate(x, y)
+    fill(30, 100, 100, 4)
+    stroke(0, 0, 100, 100)
+    strokeWeight(1)
+    rect(-30*scalingFactor, -10*scalingFactor, 30*scalingFactor, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-30*scalingFactor, -10*scalingFactor, 30*scalingFactor, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-30*scalingFactor, -10*scalingFactor, 30*scalingFactor, 10*scalingFactor)
+    rotate(PI/4)
+    rect(-30*scalingFactor, -10*scalingFactor, 30*scalingFactor, 10*scalingFactor)
+    pop()
+}
+
+function DPSOrSupports() {
+    if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "supports"}
+    return "DPS"
 }
 
 function yourPosition() {
@@ -2212,10 +2593,8 @@ function setupDiamondDust() {
 
     mechanicStarted = frameCount
 
-    // inOrOut = random(["in", "out"])
-    // markedPlayers = random(["supports", "DPS"])
-    inOrOut = "in"
-    markedPlayers = "supports"
+    inOrOut = random(["in", "out"])
+    markedPlayers = random(["supports", "DPS"])
     silenceOrStillness = random(["silence", "stillness"])
 
     MT = [0, -70*scalingFactor]
@@ -2237,9 +2616,9 @@ function setupDiamondDust() {
         if (randomNumber < 0.125) {
             secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
             thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            fourthCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
         } else {
-            secondCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            secondCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
             thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
             fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
         }
@@ -2247,26 +2626,26 @@ function setupDiamondDust() {
         firstCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
         if (randomNumber < 0.375) {
             secondCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            thirdCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
             fourthCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
         } else {
             secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            thirdCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
             fourthCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
         }
     } if (randomNumber >= 0.5 && randomNumber < 0.75) {
         firstCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
         if (randomNumber < 0.625) {
-            secondCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            secondCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
             thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
             fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
         } else {
             secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
             thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+            fourthCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
         }
     } if (randomNumber >= 0.75) {
-        firstCircles = [[0, -2*mainBodyWidth/5], [0, 2*mainBodyWidth/5]]
+        firstCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
         if (randomNumber < 0.875) {
             secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
             thirdCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
