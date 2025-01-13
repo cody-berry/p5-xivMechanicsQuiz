@@ -76,15 +76,16 @@ let mousePressedLastFrame = false // used sometimes
 
 // used in initialization of mechanics. also a great thing for me to refer
 // back to for version changes
-let updates = `<strong>Updates</strong>:
-    +Scaling factor adjust window
-    +Smoother character position changes
-    +<strong>FRU P2 background & Diamond Dust setup</strong>
-    +Background image through CSS
-    +Customization through code
-    +Resizing through code\n
-    +<strong>Utopian Sky</strong>
-    <strong>Initialization</strong>`
+let updates = `<strong>Updates</strong>:                                        🌴
+    +<strong>First half of Diamond Dust</strong>                  | |-🌿
+    +Scaling factor adjust window   🍃       🌿-| |
+    +Smoother character position changes     🌿-| |
+    +<strong>FRU P2 background & Diamond Dust setup</strong>      |/
+    +Background image through CSS            🌿-|       🍃
+    +Customization through code              🌿-|
+    +Resizing through code          🍃       🌿-|
+    +<strong>Utopian Sky</strong>                         🍂🍂   |  🌴
+    <strong>Initialization</strong>                      ————————————————`
 
 // your role
 let role = "MT"
@@ -1237,6 +1238,114 @@ function displayMainBodyContent() {
             mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
         pop()
 
+        // waymarks
+        strokeWeight(2*scalingFactor)
+        textSize(16*scalingFactor)
+        fill(0, 60, 60)
+        stroke(0, 60, 60)
+        textAlign(CENTER, CENTER)
+        text("1", -mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("A", 0, -2*mainBodyWidth/7 - 3*scalingFactor)
+        fill(90, 60, 60)
+        stroke(90, 60, 60)
+        text("2", mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("B", 2*mainBodyWidth/7, -3*scalingFactor)
+        fill(180, 60, 60)
+        stroke(180, 60, 60)
+        text("3", mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("C", 0, 2*mainBodyWidth/7 - 3*scalingFactor)
+        fill(270, 60, 60)
+        stroke(270, 60, 60)
+        text("4", -mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("D", -2*mainBodyWidth/7, -3*scalingFactor)
+
+        // display the waymark "glow"
+        strokeWeight(scalingFactor)
+        fill(0, 30, 80)
+        stroke(0, 30, 80)
+        text("1", -mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("A", 0, -2*mainBodyWidth/7 - 3*scalingFactor)
+        fill(90, 30, 80)
+        stroke(90, 30, 80)
+        text("2", mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("B", 2*mainBodyWidth/7, -3*scalingFactor)
+        fill(180, 30, 80)
+        stroke(180, 30, 80)
+        text("3", mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("C", 0, 2*mainBodyWidth/7 - 3*scalingFactor)
+        fill(270, 30, 80)
+        stroke(270, 30, 80)
+        text("4", -mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("D", -2*mainBodyWidth/7, -3*scalingFactor)
+
+        noStroke()
+        fill(0, 0, 100)
+        text("1", -mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("A", 0, -2*mainBodyWidth/7 - 3*scalingFactor)
+        text("2", mainBodyWidth/5, -mainBodyWidth/5 - 3*scalingFactor)
+        text("B", 2*mainBodyWidth/7, -3*scalingFactor)
+        text("3", mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("C", 0, 2*mainBodyWidth/7 - 3*scalingFactor)
+        text("4", -mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
+        text("D", -2*mainBodyWidth/7, -3*scalingFactor)
+        textSize(7*scalingFactor)
+        textAlign(LEFT, BOTTOM)
+
+
+        // do the same for the rectangles/circles around the waymark
+        noFill()
+        strokeWeight(3*scalingFactor)
+        stroke(0, 60, 60)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, -2*mainBodyWidth/7, 20*scalingFactor)
+        stroke(90, 60, 60)
+        rect(mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(2*mainBodyWidth/7, 0, 20*scalingFactor)
+        stroke(180, 60, 60)
+        rect(mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, 2*mainBodyWidth/7, 20*scalingFactor)
+        stroke(270, 60, 60)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(-2*mainBodyWidth/7, 0, 20*scalingFactor)
+
+        strokeWeight(2*scalingFactor)
+        stroke(0, 30, 80)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, -2*mainBodyWidth/7, 20*scalingFactor)
+        stroke(90, 30, 80)
+        rect(mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(2*mainBodyWidth/7, 0, 20*scalingFactor)
+        stroke(180, 30, 80)
+        rect(mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, 2*mainBodyWidth/7, 20*scalingFactor)
+        stroke(270, 30, 80)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(-2*mainBodyWidth/7, 0, 20*scalingFactor)
+
+        strokeWeight(scalingFactor)
+        stroke(0, 0, 100)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, -2*mainBodyWidth/7, 20*scalingFactor)
+        rect(mainBodyWidth/5 - 10*scalingFactor, -mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, -mainBodyWidth/5 + 10*scalingFactor)
+        circle(2*mainBodyWidth/7, 0, 20*scalingFactor)
+        rect(mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(0, 2*mainBodyWidth/7, 20*scalingFactor)
+        rect(-mainBodyWidth/5 - 10*scalingFactor, mainBodyWidth/5 - 10*scalingFactor,
+            -mainBodyWidth/5 + 10*scalingFactor, mainBodyWidth/5 + 10*scalingFactor)
+        circle(-2*mainBodyWidth/7, 0, 20*scalingFactor)
+
+
         // death wall
         noStroke()
         fill(240, 100, 50, 10)
@@ -1271,7 +1380,7 @@ function displayMainBodyContent() {
 
         displayCharacterPositions()
         pop()
-
+        print(stage)
         if (currentlySelectedMechanic === "Diamond Dust") {
             if (stage === 0) {
                 displayGreenDot(0, 0)
@@ -1296,8 +1405,8 @@ function displayMainBodyContent() {
                 stroke(0, 0, 100)
                 strokeWeight(2*scalingFactor)
                 fill(200, 50, 100, 10)
-                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
                 if (inOrOut === "in") {
                     displayShiva([0, -mainBodyWidth/5], "clone", "Reap!")
@@ -1734,14 +1843,14 @@ intercardinals.`
                 stroke(0, 0, 100)
                 strokeWeight(2*scalingFactor)
                 fill(200, 50, 100, 5)
-                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
                 fill(205, 50, 100, 7.5)
-                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
                 fill(210, 50, 100, 10)
-                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
                 // make sure we know if we got targetted. we'll have a
                 // target marker if we are
@@ -1825,8 +1934,8 @@ intercardinals.`
                         translateToCenterOfBoard()
                         fill(30, 100, 100, 100)
                         stroke(0, 0, 100, 100)
-                        circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
-                        circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                        circle(firstCircles[0][0], firstCircles[0][1], 150*scalingFactor)
+                        circle(firstCircles[1][0], firstCircles[1][1], 150*scalingFactor)
                         frameRate(1)
 
                         fill(200, 70, 100, 100)
@@ -1901,8 +2010,8 @@ intercardinals.`
                             translateToCenterOfBoard()
                             fill(30, 100, 100, 100)
                             stroke(0, 0, 100, 100)
-                            circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
-                            circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                            circle(firstCircles[0][0], firstCircles[0][1], 150*scalingFactor)
+                            circle(firstCircles[1][0], firstCircles[1][1], 150*scalingFactor)
                             frameRate(1)
 
                             fill(200, 70, 100, 100)
@@ -1995,8 +2104,8 @@ intercardinals.`
                                 translateToCenterOfBoard()
                                 fill(30, 100, 100, 100)
                                 stroke(0, 0, 100, 100)
-                                circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
-                                circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                                circle(firstCircles[0][0], firstCircles[0][1], 150*scalingFactor)
+                                circle(firstCircles[1][0], firstCircles[1][1], 150*scalingFactor)
                                 frameRate(1)
 
                                 fill(200, 70, 100, 100)
@@ -2099,8 +2208,8 @@ intercardinals.`
                                 translateToCenterOfBoard()
                                 fill(30, 100, 100, 100)
                                 stroke(0, 0, 100, 100)
-                                circle(firstCircles[0][0], firstCircles[0][1], 200*scalingFactor)
-                                circle(firstCircles[1][0], firstCircles[1][1], 200*scalingFactor)
+                                circle(firstCircles[0][0], firstCircles[0][1], 150*scalingFactor)
+                                circle(firstCircles[1][0], firstCircles[1][1], 150*scalingFactor)
                                 frameRate(1)
 
                                 fill(200, 70, 100, 100)
@@ -2126,30 +2235,30 @@ intercardinals.`
                 stroke(0, 0, 100)
                 strokeWeight(2*scalingFactor)
                 fill(210, 50, 100, 5)
-                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
                 fill(200, 50, 100, 7.5)
-                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
                 fill(210, 50, 100, 10)
-                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 200*scalingFactor)
-                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 200*scalingFactor)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
                 // display star AoEs
                 if (inOrOut === "in") {
                     // intercardinal display
                     if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
-                        displayStarAoE(sqrt(2) * mainBodyWidth / 12, sqrt(2) * mainBodyWidth / 12)
-                        displayStarAoE(sqrt(2) * mainBodyWidth / 12, -sqrt(2) * mainBodyWidth / 12)
-                        displayStarAoE(-sqrt(2) * mainBodyWidth / 12, -sqrt(2) * mainBodyWidth / 12)
-                        displayStarAoE(-sqrt(2) * mainBodyWidth / 12, sqrt(2) * mainBodyWidth / 12)
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
                     }
                     // cardinal display
                     if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
-                        displayStarAoE(mainBodyWidth / 6, 0)
-                        displayStarAoE(0, -mainBodyWidth / 6)
-                        displayStarAoE(-mainBodyWidth / 6, 0)
-                        displayStarAoE(0, mainBodyWidth / 6)
+                        displayStarAoE(1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, -1.05*mainBodyWidth / 6)
+                        displayStarAoE(-1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, 1.05*mainBodyWidth / 6)
                     }
                 }
                 if (inOrOut === "out") {
@@ -2168,9 +2277,352 @@ intercardinals.`
                         displayStarAoE(0, 3*mainBodyWidth/7)
                     }
                 }
+
+                // 8 dots on each cardinal/intercardinal
+                let dotRadius = mainBodyWidth/12
+                displayGreenDot(0, dotRadius)
+                displayGreenDot(dotRadius, 0)
+                displayGreenDot(0, -dotRadius)
+                displayGreenDot(-dotRadius, 0)
+                displayGreenDot(sqrt(2)*dotRadius/2, sqrt(2)*dotRadius/2)
+                displayGreenDot(sqrt(2)*dotRadius/2, -sqrt(2)*dotRadius/2)
+                displayGreenDot(-sqrt(2)*dotRadius/2, -sqrt(2)*dotRadius/2)
+                displayGreenDot(-sqrt(2)*dotRadius/2, sqrt(2)*dotRadius/2)
+                let greenDotLocations = [[centerOfBoard[0], dotRadius + centerOfBoard[1]],
+                                        [dotRadius + centerOfBoard[0], centerOfBoard[1]],
+                                        [centerOfBoard[0], -dotRadius + centerOfBoard[1]],
+                                        [-dotRadius + centerOfBoard[0], centerOfBoard[1]],
+                                        [sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                                        [sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                                        [-sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                                        [-sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]]]
+
+                // now check if it was clicked
+                let position = inClickingRanges(greenDotLocations, 10*scalingFactor)
+                if (mousePressedButNotHeldDown() && position) {
+                    // check if the clicked angle is one of the first circles.
+                    let clickedAngle = (atan2(position[1] - centerOfBoard[1], position[0] - centerOfBoard[0]) + TWO_PI) % TWO_PI
+                    let firstLightPartyCircleAngle = (atan2(firstCircles[0][1], firstCircles[0][0]) + TWO_PI) % TWO_PI
+                    let diffBetweenAngles = degrees(abs(clickedAngle - firstLightPartyCircleAngle))
+
+                    // if we're in light party 1, we will want to be
+                    // within 10 diff (or above 350). if we're in light party
+                    // 2, we will want to be between 170 and 190 diff
+                    if (diffBetweenAngles < 10 || diffBetweenAngles > 350) {
+                        if (lightParty() === 1) {
+                            textAtTop = "Knockback resolving..."
+                            textAtBottom = "You went to the correct" +
+                                " knockback spot. \n[PASS] — You went to" +
+                                " one of the locations where the first" +
+                                " circles spawned. \n[PASS] — You went to" +
+                                " the correct light party."
+                            stage = 3.5
+
+                            // use firstLightPartyCircleAngle to line
+                            // everyone up properly. these things are lined
+                            // up such that people can accurately see who's who.
+
+                            // MT = [cos(firstLightPartyCircleAngle)*60*scalingFactor, sin(firstLightPartyCircleAngle)*60*scalingFactor]
+                            // H1 = [cos(firstLightPartyCircleAngle)*45*scalingFactor, sin(firstLightPartyCircleAngle)*45*scalingFactor]
+                            // M1 = [cos(firstLightPartyCircleAngle)*30*scalingFactor, sin(firstLightPartyCircleAngle)*30*scalingFactor]
+                            // R1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            // R2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            // M2 = [-cos(firstLightPartyCircleAngle)*30*scalingFactor, -sin(firstLightPartyCircleAngle)*30*scalingFactor]
+                            // H2 = [-cos(firstLightPartyCircleAngle)*45*scalingFactor, -sin(firstLightPartyCircleAngle)*45*scalingFactor]
+                            // OT = [-cos(firstLightPartyCircleAngle)*60*scalingFactor, -sin(firstLightPartyCircleAngle)*60*scalingFactor]
+
+                            MT = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            H1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            M1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            R1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            OT = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            H2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            M2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            R2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                        } else {
+                            textAtTop = "You went to the wrong light party." +
+                                " Light party 1 always takes the red and" +
+                                " purple waymarks, and light \nparty 2 always" +
+                                " takes the yellow and blue waymarks."
+                            textAtBottom = "You went to the wrong light" +
+                                " party. \n[PASS] — You went to one of the" +
+                                " locations where the first circles spawned." +
+                                " spawned.\n[FAIL] — You went to light party" +
+                                " 2's circle instead of light party 1's."
+                            stage = 100
+                        }
+                    } else if (diffBetweenAngles > 170 && diffBetweenAngles < 190) {
+                        if (lightParty() === 2) {
+                            textAtTop = "Knockback resolving..."
+                            textAtBottom = "You went to the correct" +
+                                " knockback spot. \n[PASS] — You went to" +
+                                " one of the locations where the first" +
+                                " circles spawned. \n[PASS] — You went to" +
+                                " the correct light party."
+                            stage = 3.5
+
+                            // use firstLightPartyCircleAngle to line
+                            // everyone up properly. these things are lined
+                            // up such that people can accurately see who's who.
+
+                            // MT = [cos(firstLightPartyCircleAngle)*60*scalingFactor, sin(firstLightPartyCircleAngle)*60*scalingFactor]
+                            // H1 = [cos(firstLightPartyCircleAngle)*45*scalingFactor, sin(firstLightPartyCircleAngle)*45*scalingFactor]
+                            // M1 = [cos(firstLightPartyCircleAngle)*30*scalingFactor, sin(firstLightPartyCircleAngle)*30*scalingFactor]
+                            // R1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            // R2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            // M2 = [-cos(firstLightPartyCircleAngle)*30*scalingFactor, -sin(firstLightPartyCircleAngle)*30*scalingFactor]
+                            // H2 = [-cos(firstLightPartyCircleAngle)*45*scalingFactor, -sin(firstLightPartyCircleAngle)*45*scalingFactor]
+                            // OT = [-cos(firstLightPartyCircleAngle)*60*scalingFactor, -sin(firstLightPartyCircleAngle)*60*scalingFactor]
+
+                            MT = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            H1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            M1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            R1 = [cos(firstLightPartyCircleAngle)*15*scalingFactor, sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            OT = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            H2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            M2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                            R2 = [-cos(firstLightPartyCircleAngle)*15*scalingFactor, -sin(firstLightPartyCircleAngle)*15*scalingFactor]
+                        } else {
+                            textAtTop = "You went to the wrong light party." +
+                                " Light party 1 always takes the red and" +
+                                " purple waymarks, and light \nparty 2 always" +
+                                " takes the yellow and blue waymarks."
+                            textAtBottom = "You went to the wrong light" +
+                                " party. \n[PASS] — You went to one of the" +
+                                " locations where the first circles spawned." +
+                                " spawned.\n[FAIL] — You went to light party" +
+                                " 1's circle instead of light party 2's."
+                            stage = 100
+                        }
+                    } else {
+                        textAtTop = "You are supposed to go to one of the" +
+                            " places where the first circle spawned."
+                        textAtBottom = "You went to the wrong circle." +
+                            " \n[FAIL] — You didn't go to one of the" +
+                            " locations where the first circles spawned."
+                        stage = 100
+
+                        // use firstLightPartyCircleAngle to line
+                        // everyone up properly.
+                    }
+                }
+            } if (stage === 3.5) {
+                // display AoEs
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(210, 50, 100, 5)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                fill(200, 50, 100, 7.5)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                fill(210, 50, 100, 10)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+
+                // display star AoEs
+                if (inOrOut === "in") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, -1.05*mainBodyWidth / 6)
+                        displayStarAoE(-1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, 1.05*mainBodyWidth / 6)
+                    }
+                }
+                if (inOrOut === "out") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, -3*mainBodyWidth/7)
+                        displayStarAoE(-3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, 3*mainBodyWidth/7)
+                    }
+                }
+
+
+                // only finish with this stage once everyone has
+                // gotten into their positions
+                if (((abs(realMT.x - MT[0]) < scalingFactor*2) && (abs(realMT.y - MT[1]) < scalingFactor*2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor*2) && (abs(realOT.y - OT[1]) < scalingFactor*2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor*2) && (abs(realH1.y - H1[1]) < scalingFactor*2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor*2) && (abs(realH2.y - H2[1]) < scalingFactor*2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor*2) && (abs(realM1.y - M1[1]) < scalingFactor*2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor*2) && (abs(realM2.y - M2[1]) < scalingFactor*2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor*2) && (abs(realR1.y - R1[1]) < scalingFactor*2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor*2) && (abs(realR2.y - R2[1]) < scalingFactor*2))) {
+                    stage = 3.75
+                    MT = [realMT.x*10 + random(0, 5)*scalingFactor, realMT.y*10 + random(0, 5)*scalingFactor]
+                    OT = [realOT.x*10 + random(0, 5)*scalingFactor, realOT.y*10 - random(0, 5)*scalingFactor]
+                    H1 = [realH1.x*10 - random(0, 5)*scalingFactor, realH1.y*10 + random(0, 5)*scalingFactor]
+                    H2 = [realH2.x*10 - random(0, 5)*scalingFactor, realH2.y*10 - random(0, 5)*scalingFactor]
+                    M1 = [realM1.x*10 + random(0, 5)*scalingFactor, realM1.y*10 + random(0, 5)*scalingFactor]
+                    M2 = [realM2.x*10 + random(0, 5)*scalingFactor, realM2.y*10 - random(0, 5)*scalingFactor]
+                    R1 = [realR1.x*10 - random(0, 5)*scalingFactor, realR1.y*10 + random(0, 5)*scalingFactor]
+                    R2 = [realR2.x*10 - random(0, 5)*scalingFactor, realR2.y*10 - random(0, 5)*scalingFactor]
+
+                    // display second circles exploding
+                    fill(30, 100, 100, 100)
+                    stroke(0, 0, 100)
+                    circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                    circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                    circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                    circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+
+                    noStroke()
+                    for (let i = mainBodyWidth; i > 0; i -= mainBodyWidth/30) {
+                        fill(200, 40, 100, map(i, 0, mainBodyWidth, 0, 10))
+                        circle(centerOfBoard[0], centerOfBoard[1], i)
+                    }
+                }
+            } if (stage === 3.75) {
+                // display AoEs
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(210, 50, 100, 5)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                fill(200, 50, 100, 7.5)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                fill(210, 50, 100, 10)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+
+                // display star AoEs
+                if (inOrOut === "in") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                        displayStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, -1.05*mainBodyWidth / 6)
+                        displayStarAoE(-1.05*mainBodyWidth / 6, 0)
+                        displayStarAoE(0, 1.05*mainBodyWidth / 6)
+                    }
+                }
+                if (inOrOut === "out") {
+                    // intercardinal display
+                    if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                        displayStarAoE(-sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                    }
+                    // cardinal display
+                    if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                        displayStarAoE(3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, -3*mainBodyWidth/7)
+                        displayStarAoE(-3*mainBodyWidth/7, 0)
+                        displayStarAoE(0, 3*mainBodyWidth/7)
+                    }
+                }
+
+
+                // turbo knockback! 2 times the speed. handle this by
+                // updating vectors anotther time. also make sure to display
+                // positions a second time.
+                push()
+                translateToCenterOfBoard()
+                updateVectors()
+                displayCharacterPositions()
+                pop()
+
+                // display second circles exploding
+                fill(30, 100, 100, 100)
+                stroke(0, 0, 100)
+                circle(secondCircles[0][0] + centerOfBoard[0], secondCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(secondCircles[1][0] + centerOfBoard[0], secondCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+
+                noStroke()
+                for (let i = mainBodyWidth - mainBodyWidth/10; i > 0; i -= mainBodyWidth / 100) {
+                    fill(200, 40, 100, map(i, 0, mainBodyWidth, 0, 3))
+                    circle(centerOfBoard[0], centerOfBoard[1], i)
+                }
+                fill(200, 40, 100, 30)
+                circle(centerOfBoard[0], centerOfBoard[1], sin(frameCount/10)*mainBodyWidth/30 + mainBodyWidth/3)
+
+                // only finish with this stage once everyone has
+                // gotten into their positions
+                if (((abs(realMT.x - MT[0]) < scalingFactor*2) && (abs(realMT.y - MT[1]) < scalingFactor*2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor*2) && (abs(realOT.y - OT[1]) < scalingFactor*2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor*2) && (abs(realH1.y - H1[1]) < scalingFactor*2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor*2) && (abs(realH2.y - H2[1]) < scalingFactor*2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor*2) && (abs(realM1.y - M1[1]) < scalingFactor*2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor*2) && (abs(realM2.y - M2[1]) < scalingFactor*2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor*2) && (abs(realR1.y - R1[1]) < scalingFactor*2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor*2) && (abs(realR2.y - R2[1]) < scalingFactor*2))) {
+                    stage = 4
+                    textAtTop = "The knockback has resolved. Where do " +
+                        "you rotate to?"
+
+                    // display expanded star AoEs
+                    if (inOrOut === "in") {
+                        // intercardinal display
+                        if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                            displayExpandedStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                            displayExpandedStarAoE(sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                            displayExpandedStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, -sqrt(2) * 1.05*mainBodyWidth / 12)
+                            displayExpandedStarAoE(-sqrt(2) * 1.05*mainBodyWidth / 12, sqrt(2) * 1.05*mainBodyWidth / 12)
+                        }
+                        // cardinal display
+                        if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                            displayExpandedStarAoE(1.05*mainBodyWidth / 6, 0)
+                            displayExpandedStarAoE(0, -1.05*mainBodyWidth / 6)
+                            displayExpandedStarAoE(-1.05*mainBodyWidth / 6, 0)
+                            displayExpandedStarAoE(0, 1.05*mainBodyWidth / 6)
+                        }
+                    }
+                    if (inOrOut === "out") {
+                        // intercardinal display
+                        if (abs(firstCircles[0][0]) < 5*scalingFactor || abs(firstCircles[0][1]) < 5*scalingFactor) {
+                            displayExpandedStarAoE(sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                            displayExpandedStarAoE(sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                            displayExpandedStarAoE(-sqrt(2) * 3*mainBodyWidth/14, -sqrt(2) * 3*mainBodyWidth/14)
+                            displayExpandedStarAoE(-sqrt(2) * 3*mainBodyWidth/14, sqrt(2) * 3*mainBodyWidth/14)
+                        }
+                        // cardinal display
+                        if (abs(firstCircles[0][0]) > 5*scalingFactor && abs(firstCircles[0][1]) > 5*scalingFactor) {
+                            displayExpandedStarAoE(3*mainBodyWidth/7, 0)
+                            displayExpandedStarAoE(0, -3*mainBodyWidth/7)
+                            displayExpandedStarAoE(-3*mainBodyWidth/7, 0)
+                            displayExpandedStarAoE(0, 3*mainBodyWidth/7)
+                        }
+                    }
+
+                    frameRate(1)
+                }
+            } if (stage === 4) {
+                // which way do you rotate?
             }
         }
     }
+}
+
+function lightParty() {
+    if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
+    return 2
 }
 
 // displayStarAoE but infinitely expanded
@@ -2596,6 +3048,7 @@ function setupDiamondDust() {
     inOrOut = random(["in", "out"])
     markedPlayers = random(["supports", "DPS"])
     silenceOrStillness = random(["silence", "stillness"])
+    spawnAngle = random([0, 45, 90, 135, 180, 225, 270, 315])
 
     MT = [0, -70*scalingFactor]
     OT = [70*scalingFactor, 0]
@@ -2611,49 +3064,50 @@ function setupDiamondDust() {
     currentlySelectedBackground = "FRU P2"
 
     let randomNumber = random()
+    let radius = mainBodyWidth/6
     if (randomNumber < 0.25) {
-        firstCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+        firstCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
         if (randomNumber < 0.125) {
-            secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
-            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
+            secondCircles = [[-2*radius, 0], [2*radius, 0]]
+            thirdCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
+            fourthCircles = [[0, -2*radius], [0, 2*radius]]
         } else {
-            secondCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
-            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            secondCircles = [[0, -2*radius], [0, 2*radius]]
+            thirdCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
+            fourthCircles = [[-2*radius, 0], [2*radius, 0]]
         }
     } if (randomNumber >= 0.25 && randomNumber < 0.5) {
-        firstCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+        firstCircles = [[-2*radius, 0], [2*radius, 0]]
         if (randomNumber < 0.375) {
-            secondCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
-            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            secondCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
+            thirdCircles = [[0, -2*radius], [0, 2*radius]]
+            fourthCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
         } else {
-            secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
-            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            secondCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
+            thirdCircles = [[0, -2*radius], [0, 2*radius]]
+            fourthCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
         }
     } if (randomNumber >= 0.5 && randomNumber < 0.75) {
-        firstCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+        firstCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
         if (randomNumber < 0.625) {
-            secondCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
-            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
+            secondCircles = [[0, -2*radius], [0, 2*radius]]
+            thirdCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            fourthCircles = [[-2*radius, 0], [2*radius, 0]]
         } else {
-            secondCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
-            thirdCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            fourthCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
+            secondCircles = [[-2*radius, 0], [2*radius, 0]]
+            thirdCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
+            fourthCircles = [[0, -2*radius], [0, 2*radius]]
         }
     } if (randomNumber >= 0.75) {
-        firstCircles = [[0, 2*mainBodyWidth/5], [0, -2*mainBodyWidth/5]]
+        firstCircles = [[0, -2*radius], [0, 2*radius]]
         if (randomNumber < 0.875) {
-            secondCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
-            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
+            secondCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
+            thirdCircles = [[-2*radius, 0], [2*radius, 0]]
+            fourthCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
         } else {
-            secondCircles = [[-sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5]]
-            thirdCircles = [[-2*mainBodyWidth/5, 0], [2*mainBodyWidth/5, 0]]
-            fourthCircles = [[-sqrt(2)*mainBodyWidth/5, -sqrt(2)*mainBodyWidth/5], [sqrt(2)*mainBodyWidth/5, sqrt(2)*mainBodyWidth/5]]
+            secondCircles = [[-sqrt(2)*radius, sqrt(2)*radius], [sqrt(2)*radius, -sqrt(2)*radius]]
+            thirdCircles = [[-2*radius, 0], [2*radius, 0]]
+            fourthCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
         }
     }
 
