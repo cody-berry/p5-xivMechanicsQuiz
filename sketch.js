@@ -6,34 +6,61 @@
  *  Some encapsulations might not be included in certain places, making the code
  *   messier than it can be.
  */
+let cnv // in case we want to update more later
 
-// arriving 2D variable
+/* arriving 2D variable. Caution: modes may be difficult to use. Different
+modes:
+  Faster at Intercards (default): Moves in cardinal directions
+   independently, resulting in possibly curved lines.
+  Straight Line: Moves directly in a straight line.
+  Ice: Basically the same, except you move slightly more randomly.
+*/
 class ArrivingVector {
-    constructor(x, y, targetX, targetY, speed, slowdown) {
+    constructor(x, y, targetX, targetY, speed, slowdown, mode) {
         this.x = x;
         this.y = y;
         this.targetX = targetX
         this.targetY = targetY
         this.speed = speed
         this.slowdown = slowdown
+        this.mode = mode
     }
 
     // update x and y.
     update() {
-        if (this.x > this.targetX) {
-            let diffX = this.x - this.targetX
-            this.x -= map(diffX, 0, this.slowdown, 0, this.speed, true)
-        } if (this.x < this.targetX) { // simply reverse the code earlier
-            let diffX = this.targetX - this.x
-            this.x += map(diffX, 0, this.slowdown, 0, this.speed, true)
-        }
-
-        if (this.y > this.targetY) {
-            let diffY = this.y - this.targetY
-            this.y -= map(diffY, 0, this.slowdown, 0, this.speed, true)
-        } if (this.y < this.targetY) { // simply reverse the code earlier
-            let diffY = this.targetY - this.y
-            this.y += map(diffY, 0, this.slowdown, 0, this.speed, true)
+        let angleBetween
+        let distanceBetween
+        switch (this.mode) {
+            case "Faster at Intercards":
+                if (this.x > this.targetX) {
+                    let diffX = this.x - this.targetX
+                    this.x -= map(diffX, 0, this.slowdown, 0, this.speed, true)
+                } if (this.x < this.targetX) { // simply reverse the code earlier
+                    let diffX = this.targetX - this.x
+                    this.x += map(diffX, 0, this.slowdown, 0, this.speed, true)
+                }
+                if (this.y > this.targetY) {
+                    let diffY = this.y - this.targetY
+                    this.y -= map(diffY, 0, this.slowdown, 0, this.speed, true)
+                } if (this.y < this.targetY) { // simply reverse the code earlier
+                    let diffY = this.targetY - this.y
+                    this.y += map(diffY, 0, this.slowdown, 0, this.speed, true)
+                }
+                break
+            case "Straight Line":
+                // figure out the angle and distance, and move that direction
+                angleBetween = atan2(this.targetY - this.y, this.targetX - this.x)
+                distanceBetween = sqrt((this.targetY - this.y)**2 + (this.targetX - this.x)**2)
+                this.x += cos(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed, true)
+                this.y += sin(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed, true)
+                break
+            case "Ice":
+                // figure out the angle and distance, and move that direction
+                angleBetween = atan2(this.targetY - this.y, this.targetX - this.x)
+                distanceBetween = sqrt((this.targetY - this.y)**2 + (this.targetX - this.x)**2)
+                this.x += cos(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
+                this.y += sin(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
+                break
         }
     }
 }
@@ -76,16 +103,25 @@ let mousePressedLastFrame = false // used sometimes
 
 // used in initialization of mechanics. also a great thing for me to refer
 // back to for version changes
-let updates = `<strong>Updates</strong>:                                        🌴
-    +<strong>First half of Diamond Dust</strong>                  | |-🌿
-    +Scaling factor adjust window   🍃       🌿-| |
-    +Smoother character position changes     🌿-| |
-    +<strong>FRU P2 background & Diamond Dust setup</strong>      |/
-    +Background image through CSS            🌿-|       🍃
-    +Customization through code              🌿-|
-    +Resizing through code          🍃       🌿-|
-    +<strong>Utopian Sky</strong>                         🍂🍂   |  🌴
-    <strong>Initialization</strong>                      ————————————————`
+let updates = `<strong>Updates</strong>:                                     🌴 🌿
++Add win/loss, streak, & coin tracking    🌿-|  |
++Make character paths straight lines      🌿-|  |
++<strong>First half of Diamond Dust</strong>                  |  |-🌿
++Scaling factor adjust window   🍃       🌿-|  |
++Smoother character position changes     🌿-|  |
++<strong>FRU P2 background & Diamond Dust setup</strong>      |_/
++Background image through CSS            🌿-|       🍃
++Customization through code                  |-🌿
++Resizing through code          🍃       🌿-|
++<strong>Utopian Sky</strong>                         🍂🍂   |  🌴
+<strong>Initialization</strong>                      ————————————————
+    
+<strong>Future updates</strong>:
+Moving to an intercardinal at the same pace as moving to a cardinal (accompanied by noncurved paths)
+Customization from the user
+Win-loss tracker, currencies, implement purge data button
+Time tracker, more currencies
+`
 
 // your role
 let role = "MT"
@@ -99,14 +135,14 @@ let M1 = [0, 0]
 let M2 = [0, 0]
 let R1 = [0, 0]
 let R2 = [0, 0]
-let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor)
-let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor)
-let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor)
-let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor)
-let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor)
-let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor)
-let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor)
-let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor)
+let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor, "Straight Line")
 
 // window positions
 let greenSquareX = 0
@@ -166,7 +202,7 @@ function preload() {
 
 function setup() {
     let bonusWidth = 200*scalingFactor
-    let cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth + bonusWidth,
+    cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth + bonusWidth,
         topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + scalingAdjustHeight + holeSize*7)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
@@ -280,6 +316,7 @@ function draw() {
     fill(120, 80, 50)
     noStroke()
     rect(greenSquareX, greenSquareY, greenSquareX + topSquareSize, greenSquareY + topSquareSize, cornerRounding)
+    displayWinContent()
 
     // the top window
     fill(234, 34, 24)
@@ -291,6 +328,7 @@ function draw() {
     fill(350, 80, 50)
     noStroke()
     rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
+    displayLossContent()
 
     // the main body window.
     fill(234, 34, 24, 0.5)
@@ -330,6 +368,86 @@ function draw() {
 
     // make sure mousePressedLastFrame is updated
     mousePressedLastFrame = mouseIsPressed
+}
+
+function displayWinContent() {
+    let wins = parseInt(localStorage.getItem(currentlySelectedMechanic + " wins"))
+    let streak = parseInt(localStorage.getItem(currentlySelectedMechanic + " streak"))
+    if (frameCount % 30 === 0) {
+        print("wins", wins)
+    }
+    if (isNaN(wins)) {
+        localStorage.setItem(currentlySelectedMechanic + " wins", "0")
+    }
+    if (isNaN(streak)) {
+        localStorage.setItem(currentlySelectedMechanic + " streak", "0")
+    }
+
+    // display in the form of:
+    // 🟩🟩🟩🟩🟩🟩🟩🟩
+    // 🟩              🟩
+    // 🟩     WINS     🟩
+    // 🟩     1000     🟩
+    // 🟩  STREAK: 0   🟩
+    // 🟩              🟩
+    // 🟩              🟩
+    // 🟩🟩🟩🟩🟩🟩🟩🟩
+    // ...or something like that. lol
+    fill(0, 0, 100)
+    noStroke()
+    textAlign(CENTER, CENTER)
+    textSize(12*scalingFactor)
+    text("WINS", greenSquareX + topSquareSize/2, greenSquareY + topSquareSize/4)
+    textSize(7*scalingFactor)
+    text(wins + "\nSTREAK: " + streak, greenSquareX + topSquareSize/2, greenSquareY + 7*topSquareSize/12)
+}
+
+function displayLossContent() {
+    let wipes = parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes"))
+    let coins = parseInt(localStorage.getItem("coins"))
+    if (frameCount % 30 === 0) {
+        print("wipes", wipes)
+    }
+    if (isNaN(wipes)) {
+        localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
+    }
+    if (isNaN(coins)) {
+        localStorage.setItem("coins", "0")
+    }
+
+    // display in the form of:
+    // 🟥🟥🟥🟥🟥🟥🟥🟥
+    // 🟥              🟥
+    // 🟥    WIPES     🟥
+    // 🟥      1       🟥
+    // 🟥    STREAK    🟥
+    // 🟥   COINS: 0   🟥
+    // 🟥              🟥
+    // 🟥🟥🟥🟥🟥🟥🟥🟥
+    // ...or something like that. lol
+    // *brags about how he's had situations like these many times in the
+    // past when in reality he hasn't*
+
+    fill(0, 0, 100)
+    noStroke()
+    textAlign(CENTER, CENTER)
+    textSize(12*scalingFactor)
+    text("WIPES", redSquareX + topSquareSize/2, redSquareY + topSquareSize/5)
+    textSize(7*scalingFactor)
+    text(wipes + "\nSTREAK\nCOINS: " + coins, redSquareX + topSquareSize/2, redSquareY + 7*topSquareSize/12)
+
+}
+
+function updateWins(winsPerCoinIncrease) {
+    localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
+    localStorage.setItem(currentlySelectedMechanic + " wins", parseInt(localStorage.getItem(currentlySelectedMechanic + " wins")) + 1)
+    localStorage.setItem("coins", parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease))) + parseInt(localStorage.getItem("coins")))
+}
+
+function updateLosses(winsPerCoinIncrease) {
+    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 +  + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem(currentlySelectedMechanic + " streak", 0)
+    localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
 }
 
 function displayScalingAdjustContent() {
@@ -517,6 +635,12 @@ function displayTopWindowContent() {
 
         if (mouseX > topWindowX + topWidth/3 && mouseX < topWindowX + 2*topWidth/3) {
             rect(topWindowX + topWidth/3, topWindowY + textAscent() * 3 + textDescent() * 3 + textPadding, topWindowX + 2*topWidth/3, topWindowY + topSquareSize, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                localStorage.setItem(currentlySelectedMechanic + " wins", "0")
+                localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
+                localStorage.setItem(currentlySelectedMechanic + " streak", "0")
+                return
+            }
         }
 
         if (mouseX > topWindowX + 2*topWidth/3 && mouseX < topWindowX + topWidth) {
@@ -817,6 +941,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You ran in. \n[FAIL] — Your" +
                                 " clone's arm is lowered."
                             stage = 100
+                            updateLosses(4)
 
                             if (unsafeClones.includes("MT") || role === "MT") {
                                 MT = [0, -innerGreenDotRadius]
@@ -852,6 +977,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You stayed where you are." +
                                 " \n[FAIL] — Your clone's arm is raised."
                             stage = 100
+                            updateLosses(4)
 
                             if (unsafeClones.includes("MT") && role !== "MT") {
                                 MT = [0, -innerGreenDotRadius]
@@ -1008,6 +1134,7 @@ function displayMainBodyContent() {
                                 " \n[FAIL] — The person opposite you stayed" +
                                 " out."
                             stage = 100
+                            updateLosses(4)
 
                             if (unsafeClones.includes("MT") || unsafeClones.includes("H2") || role === "MT") {
                                 MT = [0, -innerGreenDotRadius]
@@ -1042,6 +1169,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You stayed where you are." +
                                 " \n[FAIL] — The person opposite you moved in."
                             stage = 100
+                            updateLosses(4)
 
                             if (unsafeClones.includes("MT") || unsafeClones.includes("H2") && role !== "MT") {
                                 MT = [0, -innerGreenDotRadius]
@@ -1180,6 +1308,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You went to your spread spot." +
                                 " \n[PASS] It's spreads. [CLEARED]"
                             stage = 99
+                            updateWins()
                         } else {
                             textAtTop = "You went to the wrong position. If" +
                                 " you're having trouble, you might want to" +
@@ -1188,6 +1317,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You went to your spread spot." +
                                 " \n[FAIL] It's stacks."
                             stage = 100
+                            updateLosses(4)
                         }
                     }
                     return
@@ -1202,6 +1332,7 @@ function displayMainBodyContent() {
                             textAtBottom = "You went to your stack spot." +
                                 " \n[FAIL] It's spreads."
                             stage = 100
+                            updateLosses(4)
                         } else {
                             textAtTop = "Congratulations! You made it" +
                                 " through everything, although this is one" +
@@ -1221,6 +1352,7 @@ function displayMainBodyContent() {
                             }
 
                             stage = 99
+                            updateWins()
                         }
                         return
                     }
@@ -1380,7 +1512,6 @@ function displayMainBodyContent() {
 
         displayCharacterPositions()
         pop()
-        print(stage)
         if (currentlySelectedMechanic === "Diamond Dust") {
             if (stage === 0) {
                 displayGreenDot(0, 0)
@@ -1460,6 +1591,7 @@ function displayMainBodyContent() {
                                 " the arena for display \npurposes. "
                             textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         if (inClickingRanges(outerCirclePositions, 5 * scalingFactor)) {
@@ -1468,6 +1600,7 @@ function displayMainBodyContent() {
                                 " the arena for display \npurposes. "
                             textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom = "[PASS] — \"Reap\" is a donut. You went in."
@@ -1479,6 +1612,7 @@ function displayMainBodyContent() {
                                 " the arena for display \npurposes. "
                             textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         if (inClickingRanges(outerDonutPositions, 5 * scalingFactor)) {
@@ -1487,6 +1621,7 @@ function displayMainBodyContent() {
                                 " the arena for display \npurposes. "
                             textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom = "[PASS] — \"Cleave\" is a circle. You went out."
@@ -1514,6 +1649,7 @@ function displayMainBodyContent() {
                                 " position.\n" + textAtBottom + "\n[FAIL] —" +
                                 " You were not marked."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         if (inClickingRanges(outerDonutPositions, 5 * scalingFactor)) {
@@ -1522,6 +1658,7 @@ function displayMainBodyContent() {
                                 " position.\n" + textAtBottom + "\n[FAIL] —" +
                                 " You were not marked."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom += "\n[PASS] — You went in and you were not marked."
@@ -1532,6 +1669,7 @@ function displayMainBodyContent() {
                                 " position.\n" + textAtBottom + "\n[FAIL] —" +
                                 " You were marked."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         if (inClickingRanges(innerDonutPositions, 5 * scalingFactor)) {
@@ -1540,6 +1678,7 @@ function displayMainBodyContent() {
                                 " position.\n" + textAtBottom + "\n[FAIL] —" +
                                 " You were marked."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom += "\n[PASS] — You went out and you were marked."
@@ -1577,6 +1716,7 @@ function displayMainBodyContent() {
                                 ".\n" + textAtBottom + "\n[FAIL] — AoEs" +
                                 " spawned on the " + AoEsSpawnedOn + "s."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom += "\n[PASS] — AoEs spawned on " + AoEsSpawnedOn +
@@ -1590,6 +1730,7 @@ intercardinals.`
                                 ".\n" + textAtBottom + "\n[FAIL] — AoEs" +
                                 " spawned on the " + AoEsSpawnedOn + "s."
                             stage = 100
+                            updateLosses(2)
                             return
                         }
                         textAtBottom += "\n[PASS] — AoEs spawned on " + AoEsSpawnedOn +
@@ -1835,6 +1976,7 @@ intercardinals.`
                             textAtBottom + "\n[FAIL] — You went to the " + clickedColor +
                             " waymarks instead of the " + correctColor + " ones."
                         stage = 100
+                        updateLosses(2)
                         return
                     }
                 }
@@ -1962,6 +2104,7 @@ intercardinals.`
                             textAtBottom = "You went waaaay too far out. \n" +
                                 "[FAIL] — I don't think you can even make the distance!"
                             stage = 100
+                            updateLosses(2)
                         } if (inClickingRange(outerRingPosition, 10 * scalingFactor)) {
                             textAtTop = "You went too far out. This is the" +
                                 " position you would drop your star AoEs in" +
@@ -1969,6 +2112,7 @@ intercardinals.`
                             textAtBottom = "You went too far out. \n" +
                                 "[FAIL] — You are supposed go to the inner ring."
                             stage = 100
+                            updateLosses(2)
                         } if (inClickingRange(innerRingPosition, 10 * scalingFactor)) {
                             textAtTop = "The rest of the circles have appeared. " +
                                 "Move to your spot to get knocked back into the " +
@@ -2033,6 +2177,7 @@ intercardinals.`
                             textAtBottom = "You did not go out. \n" +
                                 "[FAIL] — You are supposed go to the inner ring."
                             stage = 100
+                            updateLosses(2)
                         }
                     }
                 }
@@ -2133,6 +2278,7 @@ intercardinals.`
                                     " not spawn on you, but it is better \nto" +
                                     " pre-position for the next mechanic."
                                 stage = 100
+                                updateLosses(2)
                             }
                         } if (inClickingRange(outerRingPosition, 10*scalingFactor)) {
                             if (markedPlayers === DPSOrSupports()) {
@@ -2145,6 +2291,7 @@ intercardinals.`
                                     " edge to clip other people."
                                 textAtBottom = "[FAIL] — You ran in."
                                 stage = 100
+                                updateLosses(2)
                             } else {
                                 textAtTop = "You did not run in as an" +
                                     " unmarked player."
@@ -2156,6 +2303,7 @@ intercardinals.`
                                     " not spawn on you, but it is better \nto" +
                                     " pre-position for the knockback."
                                 stage = 100
+                                updateLosses(2)
                             }
                         } if (inClickingRange(innerRingPosition, 10*scalingFactor)) {
                             if (markedPlayers === DPSOrSupports()) {
@@ -2166,6 +2314,7 @@ intercardinals.`
                                     " wipe, but it's better to avoid it."
                                 textAtBottom = "[FAIL] — You ran in."
                                 stage = 100
+                                updateLosses(2)
                             } else {
                                 // you pass because marked players are
                                 // supposed to run in
@@ -2350,6 +2499,7 @@ intercardinals.`
                                 " spawned.\n[FAIL] — You went to light party" +
                                 " 2's circle instead of light party 1's."
                             stage = 100
+                            updateLosses(2)
                         }
                     } else if (diffBetweenAngles > 170 && diffBetweenAngles < 190) {
                         if (lightParty() === 2) {
@@ -2393,6 +2543,7 @@ intercardinals.`
                                 " spawned.\n[FAIL] — You went to light party" +
                                 " 1's circle instead of light party 2's."
                             stage = 100
+                            updateLosses(2)
                         }
                     } else {
                         textAtTop = "You are supposed to go to one of the" +
@@ -2401,6 +2552,7 @@ intercardinals.`
                             " \n[FAIL] — You didn't go to one of the" +
                             " locations where the first circles spawned."
                         stage = 100
+                        updateLosses(2)
 
                         // use firstLightPartyCircleAngle to line
                         // everyone up properly.
