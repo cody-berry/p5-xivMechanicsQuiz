@@ -87,7 +87,7 @@ let topSquareSize = 50*scalingFactor // the size of the top corner squares
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
 let mechanicSelectionRows = 7 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
-let middleTopHeight = 50*scalingFactor // the height of the window just above the main body
+let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
 let cornerRounding = 10*scalingFactor
@@ -373,23 +373,24 @@ function draw() {
 function displayWinContent() {
     let wins = parseInt(localStorage.getItem(currentlySelectedMechanic + " wins"))
     let streak = parseInt(localStorage.getItem(currentlySelectedMechanic + " streak"))
-    if (frameCount % 30 === 0) {
-        print("wins", wins)
-    }
+    let coins = parseInt(localStorage.getItem("coins"))
     if (isNaN(wins)) {
         localStorage.setItem(currentlySelectedMechanic + " wins", "0")
     }
     if (isNaN(streak)) {
         localStorage.setItem(currentlySelectedMechanic + " streak", "0")
     }
+    if (isNaN(coins)) {
+        localStorage.setItem("coins", "0")
+    }
 
     // display in the form of:
     // 🟩🟩🟩🟩🟩🟩🟩🟩
     // 🟩              🟩
     // 🟩     WINS     🟩
-    // 🟩     1000     🟩
+    // 🟩      20      🟩
     // 🟩  STREAK: 0   🟩
-    // 🟩              🟩
+    // 🟩  COINS: 0    🟩
     // 🟩              🟩
     // 🟩🟩🟩🟩🟩🟩🟩🟩
     // ...or something like that. lol
@@ -399,34 +400,29 @@ function displayWinContent() {
     textSize(12*scalingFactor)
     text("WINS", greenSquareX + topSquareSize/2, greenSquareY + topSquareSize/4)
     textSize(7*scalingFactor)
-    text(wins + "\nSTREAK: " + streak, greenSquareX + topSquareSize/2, greenSquareY + 7*topSquareSize/12)
+    text("\n" + wins + "\nSTREAK: " + streak + "\nCOINS: " + coins, +
+        greenSquareX + topSquareSize/2, +
+        greenSquareY + 7*topSquareSize/12)
 }
 
 function displayLossContent() {
     let wipes = parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes"))
-    let coins = parseInt(localStorage.getItem("coins"))
-    if (frameCount % 30 === 0) {
-        print("wipes", wipes)
-    }
     if (isNaN(wipes)) {
         localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
-    }
-    if (isNaN(coins)) {
-        localStorage.setItem("coins", "0")
     }
 
     // display in the form of:
     // 🟥🟥🟥🟥🟥🟥🟥🟥
     // 🟥              🟥
     // 🟥    WIPES     🟥
-    // 🟥      1       🟥
-    // 🟥    STREAK    🟥
-    // 🟥   COINS: 0   🟥
+    // 🟥      0       🟥
+    // 🟥              🟥
+    // 🟥              🟥
     // 🟥              🟥
     // 🟥🟥🟥🟥🟥🟥🟥🟥
     // ...or something like that. lol
     // *brags about how he's had situations like these many times in the
-    // past when in reality he hasn't*
+    // past*
 
     fill(0, 0, 100)
     noStroke()
@@ -434,7 +430,8 @@ function displayLossContent() {
     textSize(12*scalingFactor)
     text("WIPES", redSquareX + topSquareSize/2, redSquareY + topSquareSize/5)
     textSize(7*scalingFactor)
-    text(wipes + "\nSTREAK\nCOINS: " + coins, redSquareX + topSquareSize/2, redSquareY + 7*topSquareSize/12)
+    text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\n\n", redSquareX +
+        topSquareSize/2, redSquareY + 7*topSquareSize/12)
 
 }
 
@@ -687,11 +684,40 @@ function displayTopWindowContent() {
 function displayMiddleTopWindowContent() {
     fill(0, 0, 100)
     text(textAtTop, middleTopX + textPadding, middleTopY + textPadding)
+
+    // display how long it's been since the mechanic started
+    fill(0, 0, 100)
+    noStroke()
+    textSize(7*scalingFactor)
+    textAlign(LEFT, TOP)
+    text("It's been " + formatSeconds((millis() - mechanicStarted)/1000) + " since" +
+        " the mechanic started.", middleTopX + textPadding, middleTopY + middleTopHeight -
+        textPadding - textAscent() - textDescent())
+}
+
+function formatSeconds(s) {
+    let seconds = floor(s) % 60
+    let minutes = floor(s/60) % 60
+    let hours = floor(s/3600)
+
+    if (hours) return hours + ":" + addLeadingZero(minutes, 2) + ":" + addLeadingZero(seconds, 2)
+    else if (minutes) return minutes + ":" + addLeadingZero(seconds, 2)
+    else return seconds + "s"
+}
+
+// adds leading zeros to "string" until it reaches targetLen
+function addLeadingZero(string, targetLen) {
+    let s = string + ""
+    while (s.length < targetLen) {
+        s = "0" + s
+    }
+    return s
 }
 
 function displayMainBodyContent() {
     push()
     translateToCenterOfBoard()
+
     // Futures Rewritten Ultimate phase 1 background
     if (currentlySelectedBackground === "FRU P1") {
         // background image (it's slightly tilted, I don't know why, but
@@ -1095,7 +1121,6 @@ function displayMainBodyContent() {
                         oppositeRole = "M2"
                         break
                 }
-                print(oppositeRole)
 
                 // handle clicking on the green dots
                 if (sqrt((mouseX - innerGreenDotPosition[0] - (mainBodyX + mainBodyWidth/2))**2 +
@@ -1306,9 +1331,9 @@ function displayMainBodyContent() {
                                 " of the easier mechanics \nto do when not" +
                                 " timed."
                             textAtBottom = "You went to your spread spot." +
-                                " \n[PASS] It's spreads. [CLEARED]"
+                                " \n[PASS] It's spreads. [CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
                             stage = 99
-                            updateWins()
+                            updateWins(4)
                         } else {
                             textAtTop = "You went to the wrong position. If" +
                                 " you're having trouble, you might want to" +
@@ -1339,7 +1364,7 @@ function displayMainBodyContent() {
                                 " of the easier mechanics \nto do when not" +
                                 " timed."
                             textAtBottom = "You went to your stack spot." +
-                                " \n[PASS] It's stacks. [CLEARED]"
+                                " \n[PASS] It's stacks. [CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
 
                             if (role === "H1" || role === "H2") {
                                 textAtTop += "\n\n\nHey, you're a healer." +
@@ -1348,11 +1373,11 @@ function displayMainBodyContent() {
                                 textAtBottom = "You went to your" +
                                     " stack—I mean, spread—wait, there" +
                                     " isn't even a difference—spot." +
-                                    " \n[PASS] You're a healer. [CLEARED]"
+                                    " \n[PASS] You're a healer. [CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
                             }
 
                             stage = 99
-                            updateWins()
+                            updateWins(4)
                         }
                         return
                     }
@@ -3122,7 +3147,7 @@ function setupUtopianSky() {
     rect(0, 0, width, height)
     noErase()
 
-    mechanicStarted = frameCount
+    mechanicStarted = millis()
 
     stage = 0
     currentlySelectedMechanic = "Utopian Sky"
@@ -3195,7 +3220,7 @@ function setupDiamondDust() {
     rect(0, 0, width, height)
     noErase()
 
-    mechanicStarted = frameCount
+    mechanicStarted = millis()
 
     inOrOut = random(["in", "out"])
     markedPlayers = random(["supports", "DPS"])
