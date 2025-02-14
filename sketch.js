@@ -13,7 +13,10 @@ modes:
   Faster at Intercards (default): Moves in cardinal directions
    independently, resulting in possibly curved lines.
   Straight Line: Moves directly in a straight line.
-  Ice: Basically the same, except you move slightly more randomly.
+  Ice: Basically the same as Straight Line, except you move slightly more randomly.
+  Radial: Moves in radius and angle independently, resulting in possibly curved lines.
+    Designed for no radius changes.
+    Significantly faster when further away from center.
 */
 class ArrivingVector {
     constructor(x, y, targetX, targetY, speed, slowdown, mode) {
@@ -61,6 +64,26 @@ class ArrivingVector {
                 this.x += cos(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
                 this.y += sin(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
                 break
+            case "Radial":
+                let currentAngle = atan2(this.y, this.x)
+                let currentDistance = sqrt(this.y**2 + this.x**2)
+                let targetAngle = atan2(this.targetY, this.targetX)
+                let targetDistance = sqrt(this.targetY**2 + this.targetX**2)
+                let angleDiff = (targetAngle - currentAngle + PI*3) % TWO_PI - PI
+                let distanceDiff = targetDistance - currentDistance
+                let nextAngle = currentAngle + map(angleDiff, -radians(this.slowdown), radians(this.slowdown), -radians(this.speed), radians(this.speed), true)
+                let nextDistance = currentDistance + map(distanceDiff, -this.slowdown, this.slowdown, -this.speed, this.speed, true)
+                // print("Current xy:", this.y, this.x)
+                // print("Target xy:", this.targetY, this.targetX)
+                // print("Current ad:", currentAngle, currentDistance)
+                // print("Target ad:", targetAngle, targetDistance)
+                // print("Diff ad:", angleDiff, distanceDiff)
+                // print("Diff from next ad:", map(angleDiff, -radians(this.slowdown), radians(this.slowdown), -radians(this.speed), radians(this.speed), true), map(distanceDiff, -this.slowdown, this.slowdown, -this.speed, this.speed, true))
+                // print("Next ad:", nextAngle, nextDistance)
+                // print("———————————————")
+                this.x = cos(nextAngle)*nextDistance
+                this.y = sin(nextAngle)*nextDistance
+                break
         }
     }
 }
@@ -103,18 +126,18 @@ let mousePressedLastFrame = false // used sometimes
 
 // used in initialization of mechanics. also a great thing for me to refer
 // back to for version changes
-let updates = `<strong>Updates</strong>:                                     🌴 🌿
-+Add win/loss, streak, & coin tracking    🌿-|  |
-+Make character paths straight lines      🌿-|  |
-+<strong>First half of Diamond Dust</strong>                  |  |-🌿
-+Scaling factor adjust window   🍃       🌿-|  |
-+Smoother character position changes     🌿-|  |
-+<strong>FRU P2 background & Diamond Dust setup</strong>      |_/
-+Background image through CSS            🌿-|       🍃
-+Customization through code                  |-🌿
-+Resizing through code          🍃       🌿-|
-+<strong>Utopian Sky</strong>                         🍂🍂   |  🌴
-<strong>Initialization</strong>                      ————————————————
+let updates = `<strong>Updates</strong>:
++Add win/loss, streak, & coin tracking
++Make character paths straight lines
++<strong>First half of Diamond Dust</strong>
++Scaling factor adjust window
++Smoother character position changes
++<strong>FRU P2 background & Diamond Dust setup</strong>
++Background image through CSS
++Customization through code
++Resizing through code
++<strong>Utopian Sky</strong>
+<strong>Initialization</strong>
     
 <strong>Future updates</strong>:
 Moving to an intercardinal at the same pace as moving to a cardinal (accompanied by noncurved paths)
@@ -179,6 +202,7 @@ let markedPlayers
 let silenceOrStillness
 let inOrOut
 let ice
+let spawnAngle
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -442,7 +466,8 @@ function updateWins(winsPerCoinIncrease) {
 }
 
 function updateLosses(winsPerCoinIncrease) {
-    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 +  + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem("coins", max(parseInt(localStorage.getItem("coins")), 0))
     localStorage.setItem(currentlySelectedMechanic + " streak", 0)
     localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
 }
@@ -717,6 +742,7 @@ function addLeadingZero(string, targetLen) {
 function displayMainBodyContent() {
     push()
     translateToCenterOfBoard()
+    let rotation = 0
 
     // Futures Rewritten Ultimate phase 1 background
     if (currentlySelectedBackground === "FRU P1") {
@@ -1388,12 +1414,15 @@ function displayMainBodyContent() {
     // Futures Rewritten Ultimate phase 2 background
     if (currentlySelectedBackground === "FRU P2") {
         // background image. also rotated for some reason, but not as much
+        rotate(rotation)
+
         push()
         rotate(0.01)
         tint(0, 0, 100, 5)
         image(fruP2Image, -mainBodyWidth/2 + 20*scalingFactor, -mainBodyWidth/2 + 20*scalingFactor,
             mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
         pop()
+
 
         // waymarks
         strokeWeight(2*scalingFactor)
@@ -1537,12 +1566,16 @@ function displayMainBodyContent() {
 
         displayCharacterPositions()
         pop()
+        // push()
+        // translate(mainBodyWidth/2, mainBodyHeight/2)
+        // rotate(frameCount/100)
+        // translate((mainBodyWidth/2)*cos(frameCount/100), (mainBodyHeight/2)*sin(frameCount/100))
         if (currentlySelectedMechanic === "Diamond Dust") {
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
-                displayShiva([-20*scalingFactor, 0], "clone", null)
-                displayShiva([20*scalingFactor, 0], "boss", null)
+                displayShiva([-20*scalingFactor, 0], "clone", null, 10*scalingFactor)
+                displayShiva([20*scalingFactor, 0], "boss", null, 10*scalingFactor)
 
                 if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
                     stage = 1
@@ -1565,9 +1598,9 @@ function displayMainBodyContent() {
                 circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
                 if (inOrOut === "in") {
-                    displayShiva([0, -mainBodyWidth/5], "clone", "Reap!")
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Reap!", 10*scalingFactor)
                 } if (inOrOut === "out") {
-                    displayShiva([0, -mainBodyWidth/5], "clone", "Cleave!")
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Cleave!", 10*scalingFactor)
                 }
 
                 let radii = [mainBodyWidth/24, mainBodyWidth/12, mainBodyWidth*3/8, mainBodyWidth*3/7]
@@ -2643,14 +2676,22 @@ intercardinals.`
                     ((abs(realR1.x - R1[0]) < scalingFactor*2) && (abs(realR1.y - R1[1]) < scalingFactor*2)) &&
                     ((abs(realR2.x - R2[0]) < scalingFactor*2) && (abs(realR2.y - R2[1]) < scalingFactor*2))) {
                     stage = 3.75
-                    MT = [realMT.x*10 + random(0, 5)*scalingFactor, realMT.y*10 + random(0, 5)*scalingFactor]
-                    OT = [realOT.x*10 + random(0, 5)*scalingFactor, realOT.y*10 - random(0, 5)*scalingFactor]
-                    H1 = [realH1.x*10 - random(0, 5)*scalingFactor, realH1.y*10 + random(0, 5)*scalingFactor]
-                    H2 = [realH2.x*10 - random(0, 5)*scalingFactor, realH2.y*10 - random(0, 5)*scalingFactor]
-                    M1 = [realM1.x*10 + random(0, 5)*scalingFactor, realM1.y*10 + random(0, 5)*scalingFactor]
-                    M2 = [realM2.x*10 + random(0, 5)*scalingFactor, realM2.y*10 - random(0, 5)*scalingFactor]
-                    R1 = [realR1.x*10 - random(0, 5)*scalingFactor, realR1.y*10 + random(0, 5)*scalingFactor]
-                    R2 = [realR2.x*10 - random(0, 5)*scalingFactor, realR2.y*10 - random(0, 5)*scalingFactor]
+                    MT = [realMT.x*10 + random(0, 5)*scalingFactor, realMT.y*10]
+                    OT = [realOT.x*10, realOT.y*10 + random(0, 5)*scalingFactor]
+                    H1 = [realH1.x*10 - random(0, 5)*scalingFactor, realH1.y*10]
+                    H2 = [realH2.x*10, realH2.y*10 - random(0, 5)*scalingFactor]
+                    M1 = [realM1.x*10 + random(0, 5)*scalingFactor, realM1.y*10]
+                    M2 = [realM2.x*10, realM2.y*10 + random(0, 5)*scalingFactor]
+                    R1 = [realR1.x*10 - random(0, 5)*scalingFactor, realR1.y*10]
+                    R2 = [realR2.x*10, realR2.y*10 - random(0, 5)*scalingFactor]
+
+
+
+
+
+
+
+
 
                     // display second circles exploding
                     fill(30, 100, 100, 100)
@@ -2789,10 +2830,42 @@ intercardinals.`
                     }
 
                     frameRate(1)
+
+                    // set the player targets
+                    let firstLightPartyCircleAngle = (atan2(firstCircles[0][1], firstCircles[0][0]) + TWO_PI) % TWO_PI
+                    let secondLightPartyCircleAngle = (firstLightPartyCircleAngle + PI) % TWO_PI
+                    let spread = 15*scalingFactor
+                    let radius = 17*mainBodyWidth/44
+                    MT = [cos(firstLightPartyCircleAngle)*radius + spread/3, sin(firstLightPartyCircleAngle)*radius + spread]
+                    H1 = [cos(firstLightPartyCircleAngle)*radius, sin(firstLightPartyCircleAngle)*radius]
+                    M1 = [cos(firstLightPartyCircleAngle)*radius - spread, sin(firstLightPartyCircleAngle)*radius]
+                    R1 = [cos(firstLightPartyCircleAngle)*radius + spread/3, sin(firstLightPartyCircleAngle)*radius - spread]
+                    OT = [cos(secondLightPartyCircleAngle)*radius + spread, sin(secondLightPartyCircleAngle)*radius]
+                    H2 = [cos(secondLightPartyCircleAngle)*radius, sin(secondLightPartyCircleAngle)*radius]
+                    M2 = [cos(secondLightPartyCircleAngle)*radius - spread/3, sin(secondLightPartyCircleAngle)*radius + spread]
+                    R2 = [cos(secondLightPartyCircleAngle)*radius - spread/3, sin(secondLightPartyCircleAngle)*radius - spread]
                 }
             } if (stage === 4) {
-                // which way do you rotate?
+                // display AoEs
+                stroke(0, 0, 100)
+                strokeWeight(2*scalingFactor)
+                fill(200, 50, 100, 7.5)
+                circle(thirdCircles[0][0] + centerOfBoard[0], thirdCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
+                circle(thirdCircles[1][0] + centerOfBoard[0], thirdCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
+
+                let yourposition = yourPosition()
+                let angle = (degrees(atan2(yourposition[1], yourposition[0])) + 360) % 360
+                let radius = sqrt(yourposition[1]**2 + yourposition[0]**2)
+
+                for (let greenDotAngle of [72.5, 90, 107.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5]) {
+                    displayGreenDot(cos(radians(angle + greenDotAngle))*radius, sin(radians(angle + greenDotAngle))*radius)
+                }
+
+                // also display Shiva at one of the positions
+                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
+                    "clone", "", 20*scalingFactor)
             }
+            // pop()
         }
     }
 }
@@ -2821,7 +2894,7 @@ function displayExpandedStarAoE(x, y) {
 }
 
 // displays a star AoE in the specified location. since it is conditional,
-// it will never be done in a translation.
+// it will never be done in a translation, so this has to translate itself.
 function displayStarAoE(x, y) {
     push()
     translateToCenterOfBoard()
@@ -2844,6 +2917,7 @@ function DPSOrSupports() {
     return "DPS"
 }
 
+// because it's super annoying when you have to write a switch statement
 function yourPosition() {
     switch (role) {
         case "MT":
@@ -2893,13 +2967,12 @@ function mousePressedButNotHeldDown() {
     return mouseIsPressed && !mousePressedLastFrame
 }
 
-function displayShiva(position, type, messageBox) {
+function displayShiva(position, type, messageBox, sizeOfTorso) {
     push()
     translateToCenterOfBoard()
     noFill()
     let x = position[0]
     let y = position[1]
-    let sizeOfTorso = 10*scalingFactor
     if (type === "clone") {
         stroke(0, 0, 80)
     } else {
