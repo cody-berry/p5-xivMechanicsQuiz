@@ -7,6 +7,7 @@
  *   messier than it can be.
  */
 let cnv // in case we want to update more later
+let defaultMovementMode = "Straight Line"
 
 /* arriving 2D variable. Caution: modes may be difficult to use. Different
 modes:
@@ -19,14 +20,14 @@ modes:
     Significantly faster when further away from center.
 */
 class ArrivingVector {
-    constructor(x, y, targetX, targetY, speed, slowdown, mode) {
+    constructor(x, y, targetX, targetY, speed, slowdown) {
         this.x = x;
         this.y = y;
         this.targetX = targetX
         this.targetY = targetY
         this.speed = speed
         this.slowdown = slowdown
-        this.mode = mode
+        this.mode = defaultMovementMode
     }
 
     // update x and y.
@@ -61,8 +62,8 @@ class ArrivingVector {
                 // figure out the angle and distance, and move that direction
                 angleBetween = atan2(this.targetY - this.y, this.targetX - this.x)
                 distanceBetween = sqrt((this.targetY - this.y)**2 + (this.targetX - this.x)**2)
-                this.x += cos(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
-                this.y += sin(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, this.speed + sin(frameCount/10)*this.speed/4, true)
+                this.x += cos(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, (this.speed + sin(frameCount/10)*this.speed/4)*2, true)
+                this.y += sin(angleBetween)*map(distanceBetween, 0, this.slowdown, 0, (this.speed + sin(frameCount/10)*this.speed/4)*2, true)
                 break
             case "Radial":
                 let currentAngle = atan2(this.y, this.x)
@@ -71,16 +72,16 @@ class ArrivingVector {
                 let targetDistance = sqrt(this.targetY**2 + this.targetX**2)
                 let angleDiff = (targetAngle - currentAngle + PI*3) % TWO_PI - PI
                 let distanceDiff = targetDistance - currentDistance
-                let nextAngle = currentAngle + map(angleDiff, -radians(this.slowdown), radians(this.slowdown), -radians(this.speed), radians(this.speed), true)
+                let nextAngle = currentAngle + map(angleDiff, -radians(this.slowdown/scalingFactor), radians(this.slowdown/scalingFactor), -radians(this.speed/scalingFactor)/2, radians(this.speed/scalingFactor)/2, true)
                 let nextDistance = currentDistance + map(distanceDiff, -this.slowdown, this.slowdown, -this.speed, this.speed, true)
-                // print("Current xy:", this.y, this.x)
-                // print("Target xy:", this.targetY, this.targetX)
-                // print("Current ad:", currentAngle, currentDistance)
-                // print("Target ad:", targetAngle, targetDistance)
-                // print("Diff ad:", angleDiff, distanceDiff)
-                // print("Diff from next ad:", map(angleDiff, -radians(this.slowdown), radians(this.slowdown), -radians(this.speed), radians(this.speed), true), map(distanceDiff, -this.slowdown, this.slowdown, -this.speed, this.speed, true))
-                // print("Next ad:", nextAngle, nextDistance)
-                // print("———————————————")
+                // console.log("Current xy:", this.y, this.x)
+                // console.log("Target xy:", this.targetY, this.targetX)
+                // console.log("Current ad:", currentAngle, currentDistance)
+                // console.log("Target ad:", targetAngle, targetDistance)
+                // console.log("Diff ad:", angleDiff, distanceDiff)
+                // console.log("Diff from next ad:", map(angleDiff, -radians(this.slowdown), radians(this.slowdown), -radians(this.speed), radians(this.speed), true), map(distanceDiff, -this.slowdown, this.slowdown, -this.speed, this.speed, true))
+                // console.log("Next ad:", nextAngle, nextDistance)
+                // console.log("———————————————")
                 this.x = cos(nextAngle)*nextDistance
                 this.y = sin(nextAngle)*nextDistance
                 break
@@ -113,7 +114,7 @@ let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPaddi
 let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 10*scalingFactor
-let cornerRounding = 10*scalingFactor
+let cornerRounding = 5*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*4 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
 let scalingAdjustHeight = 50*scalingFactor
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
@@ -127,7 +128,9 @@ let mousePressedLastFrame = false // used sometimes
 // used in initialization of mechanics. also a great thing for me to refer
 // back to for version changes
 let updates = `<strong>Updates</strong>:
-+Add win/loss, streak, & coin tracking
++Add puddle-dropping phase (no puddles included)
++Add time tracker
++Add win/loss, streak, purge data, & coin tracking
 +Make character paths straight lines
 +<strong>First half of Diamond Dust</strong>
 +Scaling factor adjust window
@@ -140,10 +143,8 @@ let updates = `<strong>Updates</strong>:
 <strong>Initialization</strong>
     
 <strong>Future updates</strong>:
-Moving to an intercardinal at the same pace as moving to a cardinal (accompanied by noncurved paths)
 Customization from the user
-Win-loss tracker, currencies, implement purge data button
-Time tracker, more currencies
+More currencies! But you've got to spend them somehow...although the dopamine hit is nice. 😉
 `
 
 // your role
@@ -158,14 +159,14 @@ let M1 = [0, 0]
 let M2 = [0, 0]
 let R1 = [0, 0]
 let R2 = [0, 0]
-let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor, "Straight Line")
-let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor, "Straight Line")
+let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor)
+let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor)
+let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor)
+let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor)
+let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor)
+let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor)
+let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor)
+let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor)
 
 // window positions
 let greenSquareX = 0
@@ -194,6 +195,7 @@ let safeDirections
 
 // Diamond Dust (FRU P2)
 let fruP2Image
+let fruP2IceFloor
 let firstCircles
 let secondCircles
 let thirdCircles
@@ -220,6 +222,7 @@ function preload() {
     fruP1Image = loadImage('data/FRU P1 Floor.png')
     utopianSkyFog = loadImage('data/fogGrain2.jpg')
     fruP2Image = loadImage('data/FRU P2 Floor.webp')
+    fruP2IceFloor = loadImage('data/FRU P2 Ice Floor (generated by ChatGPT DALL-E) 2.png')
     ice = loadImage('data/Ice.jpg')
 }
 
@@ -2334,7 +2337,8 @@ intercardinals.`
                                     "[NOTE] — It is technically okay to not" +
                                     " run in so long as the first AoE did" +
                                     " not spawn on you, but it is better \nto" +
-                                    " pre-position for the next mechanic."
+                                    " pre-position for the next mechanic." +
+                                    " Besides, it's difficult to code."
                                 stage = 100
                                 updateLosses(2)
                             }
@@ -2359,7 +2363,8 @@ intercardinals.`
                                     "[NOTE] — It is technically okay to not" +
                                     " run in so long as the first AoE did" +
                                     " not spawn on you, but it is better \nto" +
-                                    " pre-position for the knockback."
+                                    " pre-position for the next mechanic." +
+                                    " Besides, it's difficult to code."
                                 stage = 100
                                 updateLosses(2)
                             }
@@ -2856,18 +2861,565 @@ intercardinals.`
                 let yourposition = yourPosition()
                 let angle = (degrees(atan2(yourposition[1], yourposition[0])) + 360) % 360
                 let radius = sqrt(yourposition[1]**2 + yourposition[0]**2)
+                let positions = []
 
-                for (let greenDotAngle of [72.5, 90, 107.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5]) {
+                for (let greenDotAngle of [67.5, 90, 112.5, 157.5, 202.5, 247.5, 270, 292.5]) {
+                    positions.push([cos(radians(angle + greenDotAngle))*radius + centerOfBoard[0], sin(radians(angle + greenDotAngle))*radius + centerOfBoard[1]])
                     displayGreenDot(cos(radians(angle + greenDotAngle))*radius, sin(radians(angle + greenDotAngle))*radius)
                 }
 
                 // also display Shiva at one of the positions
                 displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
                     "clone", "", 20*scalingFactor)
+
+                if (mousePressedButNotHeldDown()) {
+                    let angleDiffFromShiva = (spawnAngle - angle + 540) % 360 - 180
+                    if (inClickingRange([positions[0][0], positions[0][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > -157.5 && angleDiffFromShiva < -112.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 67.5º clockwise of you. \n[PASS] — Shiva" +
+                                " is 135º counterclockwise of you."
+
+                            // the light party you are in will move
+                            // 60º clockwise. the other will move
+                            // 105º counterclockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(60))*radius,
+                                        sin(angle + radians(60))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-105))*radius,
+                                        sin(angle + radians(-105))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-105))*radius,
+                                            sin(angle + radians(-105))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(60))*radius,
+                                            sin(angle + radians(60))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 135º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 67.5º clockwise of you. \n[PASS] — Shiva" +
+                                " is 135º counterclockwise of you."
+                        }
+                    } if (inClickingRange([positions[1][0], positions[1][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > -112.5 && angleDiffFromShiva < -67.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 90º counterclockwise of you. \n[PASS] —" +
+                                " Shiva is 90º counterclockwise of you."
+
+                            // the light party you are in will move
+                            // 82.5º clockwise. the other will move
+                            // 82.5º counterclockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(82.5))*radius,
+                                            sin(angle + radians(82.5))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-82.5))*radius,
+                                            sin(angle + radians(-82.5))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-82.5))*radius,
+                                            sin(angle + radians(-82.5))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(82.5))*radius,
+                                            sin(angle + radians(82.5))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 90º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 90º counterclockwise of you. \n[FAIL] —" +
+                                " Shiva is not 90º counterclockwise of you."
+                        }
+                    } if (inClickingRange([positions[2][0], positions[2][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > -67.5 && angleDiffFromShiva < -22.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 112.5º counterclockwise of you. \n[PASS] —" +
+                                " Shiva is 45º counterclockwise of you."
+
+                            // the light party you are in will move
+                            // 105º clockwise. the other will move
+                            // 60º counterclockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(105))*radius,
+                                            sin(angle + radians(105))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-60))*radius,
+                                            sin(angle + radians(-60))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-60))*radius,
+                                            sin(angle + radians(-60))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(105))*radius,
+                                            sin(angle + radians(105))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 45º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 112.5º counterclockwise of you. \n[FAIL] —" +
+                                " Shiva is not 45º counterclockwise of you."
+                        }
+                    } if (inClickingRange([positions[3][0], positions[3][1]], 15*scalingFactor)) {
+                        if ((angleDiffFromShiva > -22.5 && angleDiffFromShiva < 22.5) ||
+                            angleDiffFromShiva < -157.5 || angleDiffFromShiva > 157.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 22.5º counterclockwise of the other group." +
+                                " \n[PASS] — Shiva is 45º counterclockwise of you."
+
+                            // both light parties will rotate 157.5º clockwise.
+                            setMovementMode("Radial")
+                            let newPositions = []
+                            for (let position of [H1, M1, R1, MT]) {
+                                radius = sqrt(position[0]**2 + position[1]**2)
+                                angle = atan2(position[1], position[0])
+                                newPositions.push(
+                                    [cos(angle + radians(157.5))*radius,
+                                        sin(angle + radians(157.5))*radius])
+                            } for (let position of [H2, M2, R2, OT]) {
+                                radius = sqrt(position[0]**2 + position[1]**2)
+                                angle = atan2(position[1], position[0])
+                                newPositions.push(
+                                    [cos(angle + radians(157.5))*radius,
+                                        sin(angle + radians(157.5))*radius])
+                            }
+                            H1 = newPositions[0]
+                            M1 = newPositions[1]
+                            R1 = newPositions[2]
+                            MT = newPositions[3]
+                            H2 = newPositions[4]
+                            M2 = newPositions[5]
+                            R2 = newPositions[6]
+                            OT = newPositions[7]
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is on top of one of the groups."
+                            textAtBottom = "You went to the position" +
+                                " 22.5º counterclockwise of the other group." +
+                                " \n[FAIL] — Shiva is not 45º counterclockwise" +
+                                " of you."
+                        }
+                    } if (inClickingRange([positions[4][0], positions[4][1]], 15*scalingFactor)) {
+                        stage = 100
+                        textAtTop = "You are never supposed to go 22.5º" +
+                            " clockwise of light party 2. If it is a cursed" +
+                            " pattern, you're supposed \nto rotate clockwise," +
+                            " not counterclockwise."
+                        textAtBottom = "You went 22.5º clockwise of the" +
+                            " other group. \n[FAIL] — This location is never" +
+                            " correct."
+                    } if (inClickingRange([positions[5][0], positions[5][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > 22.5 && angleDiffFromShiva < 67.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 112.5º counterclockwise of you. \n[PASS] —" +
+                                " Shiva is 45º clockwise of you."
+
+                            // the light party you are in will move
+                            // 105º counterclockwise. the other will move
+                            // 60º clockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-105))*radius,
+                                            sin(angle + radians(-105))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(60))*radius,
+                                            sin(angle + radians(60))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(60))*radius,
+                                            sin(angle + radians(60))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-105))*radius,
+                                            sin(angle + radians(-105))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 45º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 112.5º counterclockwise of you. \n[FAIL] —" +
+                                " Shiva is not 45º clockwise of you."
+                        }
+                    } if (inClickingRange([positions[6][0], positions[6][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > 67.5 && angleDiffFromShiva < 112.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 90º counterclockwise of you. \n[PASS] —" +
+                                " Shiva is 90º clockwise of you."
+                            // the light party you are in will move
+                            // 82.5º clockwise. the other will move
+                            // 82.5º counterclockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-82.5))*radius,
+                                            sin(angle + radians(-82.5))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(82.5))*radius,
+                                            sin(angle + radians(82.5))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(82.5))*radius,
+                                            sin(angle + radians(82.5))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-82.5))*radius,
+                                            sin(angle + radians(-82.5))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 90º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 90º counterclockwise of you. \n[FAIL] —" +
+                                " Shiva is not 90º clockwise of you."
+                        }
+                    } if (inClickingRange([positions[7][0], positions[7][1]], 15*scalingFactor)) {
+                        if (angleDiffFromShiva > 112.5 && angleDiffFromShiva < 157.5) {
+                            stage = 4.5
+                            textAtTop = "Dropping puddles and moving..."
+                            textAtBottom = "You went to the position" +
+                                " 67.5º counterclockwise of you. \n[PASS] —" +
+                                " Shiva is 135º clockwise of you."
+
+                            // the light party you are in will move
+                            // 60º counterclockwise. the other will move
+                            // 105º clockwise
+                            setMovementMode("Radial")
+                            if (lightParty() === 1) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-60))*radius,
+                                            sin(angle + radians(-60))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(105))*radius,
+                                            sin(angle + radians(105))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            } if (lightParty() === 2) {
+                                let newPositions = []
+                                for (let position of [H1, M1, R1, MT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(105))*radius,
+                                            sin(angle + radians(105))*radius])
+                                } for (let position of [H2, M2, R2, OT]) {
+                                    radius = sqrt(position[0]**2 + position[1]**2)
+                                    angle = atan2(position[1], position[0])
+                                    newPositions.push(
+                                        [cos(angle + radians(-60))*radius,
+                                            sin(angle + radians(-60))*radius])
+                                }
+                                H1 = newPositions[0]
+                                M1 = newPositions[1]
+                                R1 = newPositions[2]
+                                MT = newPositions[3]
+                                H2 = newPositions[4]
+                                M2 = newPositions[5]
+                                R2 = newPositions[6]
+                                OT = newPositions[7]
+                            }
+                        } else {
+                            stage = 100
+                            textAtTop = "This position is only okay if Shiva" +
+                                " is 135º clockwise of you."
+                            textAtBottom = "You went to the position" +
+                                " 67.5º counterclockwise of you. \n[FAIL] —" +
+                                " Shiva is not 135º clockwise of you."
+                        }
+                    }
+                    return
+                }
+            } if (stage === 4.5) {
+                // tint(0, 0, 100, 10)
+                // image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
+                //     mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+
+                // attempt at shine
+                // fill(0, 0, 100, 20)
+                // noStroke()
+                // beginShape()
+                // let topLeft = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100) - 100*scalingFactor, 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
+                // let bottomRight = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100), 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
+                //
+                // vertex(topLeft + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(centerOfBoard[0] - mainBodyWidth/2, topLeft + centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(centerOfBoard[0] - mainBodyWidth/2, bottomRight + centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(bottomRight + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
+                // endShape(CLOSE)
+
+                // also display Shiva at one of the positions
+                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
+                    "clone", "", 20*scalingFactor)
+
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 4.75
+
+
+                    tint(0, 0, 100, 90)
+                    image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
+                        mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+                    setMovementMode("Ice")
+                    frameRate(1)
+
+                    // if it's a cursed pattern, H1 or H2 should slide over.
+                    // how do we determine whether it's a cursed pattern?
+                    // if it is, H1 and H2 will be greater than 90º apart.
+                    // how do we determine whether H1 or H2 slides over?
+                    // whichever one is closer to Shiva slides over.
+                    // how do we determine where they slide?
+                    let H1Angle = atan2(H1[1], H1[0])
+                    let H2Angle = atan2(H2[1], H2[0])
+                    if (abs(H1Angle - H2Angle) % 360 > radians(90) &&
+                        abs(H1Angle - H2Angle) % 360 < radians(270)) {
+                        let distanceToSlide = mainBodyWidth*23/32
+                        if (abs(H1Angle - radians(spawnAngle)) % 360 < abs(H2Angle - radians(spawnAngle)) % 360) {
+                            H1 = [H1[0] + -cos(-radians(spawnAngle))*distanceToSlide, H1[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            R1 = [R1[0] + -cos(-radians(spawnAngle))*distanceToSlide, R1[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            M1 = [M1[0] + -cos(-radians(spawnAngle))*distanceToSlide, M1[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            MT = [MT[0] + -cos(-radians(spawnAngle))*distanceToSlide, MT[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                        } else {
+                            H2 = [H2[0] + -cos(-radians(spawnAngle))*distanceToSlide, H2[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            R2 = [R2[0] + -cos(-radians(spawnAngle))*distanceToSlide, R2[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            M2 = [M2[0] + -cos(-radians(spawnAngle))*distanceToSlide, M2[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            OT = [OT[0] + -cos(-radians(spawnAngle))*distanceToSlide, OT[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                        }
+                    }
+                }
+            } if (stage === 4.75) {
+                // display the ice floor!
+                tint(0, 0, 100, 10)
+                image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
+                    mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+
+                // also display Shiva at one of the positions
+                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
+                    "clone", "", 20*scalingFactor)
+
+
             }
             // pop()
         }
     }
+}
+
+function setMovementMode(mode) {
+    realMT.mode = mode
+    realOT.mode = mode
+    realH1.mode = mode
+    realH2.mode = mode
+    realM1.mode = mode
+    realM2.mode = mode
+    realR1.mode = mode
+    realR2.mode = mode
 }
 
 function lightParty() {
@@ -3220,6 +3772,8 @@ function setupUtopianSky() {
     rect(0, 0, width, height)
     noErase()
 
+    setMovementMode(defaultMovementMode)
+
     mechanicStarted = millis()
 
     stage = 0
@@ -3292,6 +3846,8 @@ function setupDiamondDust() {
     erase()
     rect(0, 0, width, height)
     noErase()
+
+    setMovementMode(defaultMovementMode)
 
     mechanicStarted = millis()
 
