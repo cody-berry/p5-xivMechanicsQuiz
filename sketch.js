@@ -1577,8 +1577,8 @@ function displayMainBodyContent() {
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
-                displayShiva([-20*scalingFactor, 0], "clone", null, 10*scalingFactor)
-                displayShiva([20*scalingFactor, 0], "boss", null, 10*scalingFactor)
+                displayShiva([-20*scalingFactor, 0], "clone", null, 15*scalingFactor)
+                displayShiva([20*scalingFactor, 0], "boss", null, 15*scalingFactor)
 
                 if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
                     stage = 1
@@ -1601,9 +1601,9 @@ function displayMainBodyContent() {
                 circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
                 if (inOrOut === "in") {
-                    displayShiva([0, -mainBodyWidth/5], "clone", "Reap!", 10*scalingFactor)
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Reap!", 15*scalingFactor)
                 } if (inOrOut === "out") {
-                    displayShiva([0, -mainBodyWidth/5], "clone", "Cleave!", 10*scalingFactor)
+                    displayShiva([0, -mainBodyWidth/5], "clone", "Cleave!", 15*scalingFactor)
                 }
 
                 let radii = [mainBodyWidth/24, mainBodyWidth/12, mainBodyWidth*3/8, mainBodyWidth*3/7]
@@ -2869,7 +2869,7 @@ intercardinals.`
                 }
 
                 // also display Shiva at one of the positions
-                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
                     "clone", "", 20*scalingFactor)
 
                 if (mousePressedButNotHeldDown()) {
@@ -2935,6 +2935,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 135º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3002,6 +3003,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 90º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3069,6 +3071,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 45º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3110,6 +3113,7 @@ intercardinals.`
                             OT = newPositions[7]
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is on top of one of the groups."
                             textAtBottom = "You went to the position" +
@@ -3119,6 +3123,7 @@ intercardinals.`
                         }
                     } if (inClickingRange([positions[4][0], positions[4][1]], 15*scalingFactor)) {
                         stage = 100
+                        updateLosses(2)
                         textAtTop = "You are never supposed to go 22.5º" +
                             " clockwise of light party 2. If it is a cursed" +
                             " pattern, you're supposed \nto rotate clockwise," +
@@ -3187,6 +3192,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 45º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3253,6 +3259,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 90º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3320,6 +3327,7 @@ intercardinals.`
                             }
                         } else {
                             stage = 100
+                            updateLosses(2)
                             textAtTop = "This position is only okay if Shiva" +
                                 " is 135º clockwise of you."
                             textAtBottom = "You went to the position" +
@@ -3348,8 +3356,8 @@ intercardinals.`
                 // endShape(CLOSE)
 
                 // also display Shiva at one of the positions
-                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
-                    "clone", "", 20*scalingFactor)
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
+                    "clone", "", 15*scalingFactor)
 
                 // once everyone's gotten close enough, advance to the next
                 // stage
@@ -3361,6 +3369,10 @@ intercardinals.`
                     ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
                     ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
                     ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    erase()
+                    rect(0, 0, width, height)
+                    noErase()
+
                     stage = 4.75
 
 
@@ -3381,7 +3393,7 @@ intercardinals.`
                     if (abs(H1Angle - H2Angle) % 360 > radians(90) &&
                         abs(H1Angle - H2Angle) % 360 < radians(270)) {
                         let distanceToSlide = mainBodyWidth*23/32
-                        if (abs(H1Angle - radians(spawnAngle)) % 360 < abs(H2Angle - radians(spawnAngle)) % 360) {
+                        if (abs((H1Angle - radians(spawnAngle) + radians(540)) % radians(360) - radians(180)) < abs((H2Angle - radians(spawnAngle) + radians(540)) % radians(360) - radians(180))) {
                             H1 = [H1[0] + -cos(-radians(spawnAngle))*distanceToSlide, H1[1] + sin(-radians(spawnAngle))*distanceToSlide]
                             R1 = [R1[0] + -cos(-radians(spawnAngle))*distanceToSlide, R1[1] + sin(-radians(spawnAngle))*distanceToSlide]
                             M1 = [M1[0] + -cos(-radians(spawnAngle))*distanceToSlide, M1[1] + sin(-radians(spawnAngle))*distanceToSlide]
@@ -3401,12 +3413,198 @@ intercardinals.`
                     mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
 
                 // also display Shiva at one of the positions
-                displayShiva([cos(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5, sin(radians(spawnAngle))*sqrt(H1[1]**2 + H1[0]**2)*3/5],
-                    "clone", "", 20*scalingFactor)
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
+                    "clone", "", 15*scalingFactor)
 
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 5
+                    textAtTop = "Look at the message box on Shiva's head to" +
+                        " figure out where to go. You're on thin ice" +
+                        " here—so be\ncareful!"
+                    textAtBottom = "Everyone's finished sliding. Speaking of" +
+                        " which, have you ever tripped on ice before?"
+                }
+            } if (stage === 5) {
+                // display the ice floor!
+                tint(0, 0, 100, 10)
+                image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
+                    mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
 
+                // also display Shiva at one of the positions
+                // the possible things she can say are "Sink into silence!"
+                // or "In stillness freeze!"
+                let textToDisplay
+                if (silenceOrStillness === "silence") {
+                    textToDisplay = "Sink into silence!"
+                } if (silenceOrStillness === "stillness") {
+                    textToDisplay = "In stillness freeze!"
+                }
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
+                    "boss", textToDisplay, 15*scalingFactor)
+
+                // display the green dots: where you are, and behind Shiva
+                let yourPositionDot = [yourPosition()[0] + centerOfBoard[0], yourPosition()[1] + centerOfBoard[1]]
+                displayGreenDot(yourPosition()[0], yourPosition()[1]) // yourPosition() returns a list
+                let behindShiva = [cos(radians(spawnAngle))*mainBodyWidth*3/8 + centerOfBoard[0], sin(radians(spawnAngle))*mainBodyWidth*3/8 + centerOfBoard[1]]
+                displayGreenDot(cos(radians(spawnAngle))*mainBodyWidth*3/8, sin(radians(spawnAngle))*mainBodyWidth*3/8)
+
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(yourPositionDot, 15*scalingFactor)) {
+                        if (silenceOrStillness === "silence") {
+                            // correct!
+                            textAtTop = "Just a little more animations and" +
+                                " you'll be there!"
+                            textAtBottom = "You stayed where you are." +
+                                " \n[PASS] — It's a behind cleave."
+                            stage = 5.5
+                        } else {
+                            // incorrect!
+                            textAtTop = "This is a 270º cleave in front of" +
+                                " Shiva. You'd rather stay where you are."
+                            textAtBottom = "You stayed where you are." +
+                                " \n[FAIL] — It's a front cleave."
+                            stage = 100
+                            updateLosses(2)
+                        }
+                    } if (inClickingRange(behindShiva, 15*scalingFactor)) {
+                        if (silenceOrStillness === "stillness") {
+                            // correct!
+                            textAtTop = "Just a little more animations and" +
+                                " you'll be there!"
+                            textAtBottom = "You slid over." +
+                                " \n[PASS] — It's a front cleave."
+                            stage = 5.5
+
+                            // time to slide over! all people slide in
+                            // Shiva's direction
+                            let shivaPosition =
+                                [cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4]
+                            let slidingDistance = mainBodyWidth*3/4
+                            let newPositions = []
+                            for (let position of [MT, OT, H1, H2, M1, M2, R1, R2]) {
+                                let slidingAngle = atan2(shivaPosition[1] - position[1], shivaPosition[0] - position[0])
+                                newPositions.push([position[0] + cos(slidingAngle)*slidingDistance,
+                                    position[1] + sin(slidingAngle)*slidingDistance])
+                            }
+                            MT = newPositions[0]
+                            OT = newPositions[1]
+                            H1 = newPositions[2]
+                            H2 = newPositions[3]
+                            M1 = newPositions[4]
+                            M2 = newPositions[5]
+                            R1 = newPositions[6]
+                            R2 = newPositions[7]
+                        } else {
+                            // incorrect!
+                            textAtTop = "This is a 90º cleave behind of" +
+                                " Shiva. You'd rather stay where you are."
+                            textAtBottom = "You slid over." +
+                                " \n[FAIL] — It's a behind cleave."
+                            stage = 100
+                            updateLosses(2)
+                        }
+                    }
+                    return
+                }
+            } if (stage === 5.5) {
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
+                    "boss", "", 15*scalingFactor)
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 5.75
+
+                    // time to slide over! all people slide in
+                    // Shiva's direction
+                    let shivaPosition =
+                        [cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4]
+                    let slidingDistance = mainBodyWidth*3/4
+                    let newPositions = []
+                    for (let position of [MT, OT, H1, H2, M1, M2, R1, R2]) {
+                        let slidingAngle = atan2(shivaPosition[1] - position[1], shivaPosition[0] - position[0])
+                        newPositions.push([position[0] + cos(slidingAngle)*slidingDistance,
+                            position[1] + sin(slidingAngle)*slidingDistance])
+                    }
+                    MT = newPositions[0]
+                    OT = newPositions[1]
+                    H1 = newPositions[2]
+                    H2 = newPositions[3]
+                    M1 = newPositions[4]
+                    M2 = newPositions[5]
+                    R1 = newPositions[6]
+                    R2 = newPositions[7]
+
+                    // also display the AoE
+                    frameRate(1)
+                    fill(192, 74, 91)
+                    noStroke()
+                    push()
+                    translateToCenterOfBoard()
+                    translate(shivaPosition[0], shivaPosition[1])
+                    rotate(radians(spawnAngle - 45))
+                    if (silenceOrStillness === "silence") {
+                        rect(0, 0, width, height)
+                    } else {
+                        rect(0, 0, -width, height)
+                        rect(0, 0, -width, -height)
+                        rect(0, 0, width, -height)
+                    }
+                    pop()
+                }
+            } if (stage === 5.75) {
+                displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
+                    "boss", "", 15*scalingFactor)
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 99
+                    textAtTop = "Congrats! You made it! Note: This mechanic" +
+                        " is kind of long."
+                    textAtBottom = `[CLEARED, ${formatSeconds((millis() - mechanicStarted)/1000)}]`
+                    updateWins(2)
+
+                    // time to slide over! all people slide in
+                    // Shiva's direction
+                    let shivaPosition =
+                        [cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4]
+
+                    // also display the AoE
+                    frameRate(1)
+                    fill(192, 74, 91)
+                    noStroke()
+                    push()
+                    translateToCenterOfBoard()
+                    translate(shivaPosition[0], shivaPosition[1])
+                    rotate(radians(spawnAngle - 45))
+                    if (silenceOrStillness === "stillness") {
+                        rect(0, 0, width, height)
+                    } else {
+                        rect(0, 0, -width, height)
+                        rect(0, 0, -width, -height)
+                        rect(0, 0, width, -height)
+                    }
+                    pop()
+                }
             }
-            // pop()
         }
     }
 }
@@ -3854,6 +4052,7 @@ function setupDiamondDust() {
     inOrOut = random(["in", "out"])
     markedPlayers = random(["supports", "DPS"])
     silenceOrStillness = random(["silence", "stillness"])
+    silenceOrStillness = "stillness"
     spawnAngle = random([0, 45, 90, 135, 180, 225, 270, 315])
 
     MT = [0, -70*scalingFactor]
