@@ -1593,7 +1593,7 @@ function displayMainBodyContent() {
                         " direction. All directions are included for ease of" +
                         " implementation.\nThe green dots are made smaller" +
                         " so that you can't click on two.\n\nThis time, " + markedPlayers +
-                        " have been targetted."
+                        " have been targeted."
                     textAtBottom = "[PASS] — You are waiting in your spot."
                     return
                 }
@@ -1628,7 +1628,7 @@ function displayMainBodyContent() {
                     displaySmallGreenDot(cos(i)*radii[3], sin(i)*radii[3])
                 }
 
-                // make sure we know if we got targetted. we'll have a
+                // make sure we know if we got targeted. we'll have a
                 // target marker if we are
                 stroke(30, 100, 70)
                 strokeWeight(2)
@@ -2060,7 +2060,7 @@ intercardinals.`
                 circle(fourthCircles[0][0] + centerOfBoard[0], fourthCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
                 circle(fourthCircles[1][0] + centerOfBoard[0], fourthCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
-                // make sure we know if we got targetted. we'll have a
+                // make sure we know if we got targeted. we'll have a
                 // target marker if we are
                 if (markedPlayers === "DPS") {
                     displayTargetSymbol(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1])
@@ -2803,7 +2803,8 @@ intercardinals.`
                     ((abs(realR2.x - R2[0]) < scalingFactor*2) && (abs(realR2.y - R2[1]) < scalingFactor*2))) {
                     stage = 4
                     textAtTop = "The knockback has resolved. Where do " +
-                        "you rotate to?"
+                        "you rotate to? \nSelect the spot you will end up at" +
+                        " the END, not which way you're rotating."
 
                     // display expanded star AoEs
                     if (inOrOut === "in") {
