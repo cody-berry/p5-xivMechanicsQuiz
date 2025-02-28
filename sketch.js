@@ -6,8 +6,89 @@
  *  Some encapsulations might not be included in certain places, making the code
  *   messier than it can be.
  */
-let cnv // in case we want to update more later
-let defaultMovementMode = "Straight Line"
+
+/** 🧹 shows debugging info using text() 🧹 */
+class CanvasDebugCorner {
+    constructor(lines) {
+        this.visible = true
+        this.size = lines
+        this.debugMsgList = [] /* initialize all elements to empty string */
+        for (let i in lines)
+            this.debugMsgList[i] = ''
+    }
+
+    setText(text, index) {
+        if (index >= this.size) {
+            this.debugMsgList[0] = `${index} ← index>${this.size} not supported`
+        } else this.debugMsgList[index] = text
+    }
+
+    showBottom() {
+        if (this.visible) {
+            noStroke()
+            textFont(fixedWidthFont, 7*scalingFactor)
+
+            const LEFT_MARGIN = 10
+            const DEBUG_Y_OFFSET = height - 10 /* floor of debug corner */
+            const LINE_SPACING = 2
+            const LINE_HEIGHT = textAscent() + textDescent() + LINE_SPACING
+
+            /* semi-transparent background */
+            fill(0, 0, 0, 10)
+            rectMode(CORNERS)
+            const TOP_PADDING = 3 /* extra padding on top of the 1st line */
+            rect(
+                0,
+                height,
+                width,
+                DEBUG_Y_OFFSET - LINE_HEIGHT * this.debugMsgList.length - TOP_PADDING
+            )
+
+            fill(0, 0, 100, 100) /* white */
+            strokeWeight(0)
+
+            for (let index in this.debugMsgList) {
+                const msg = this.debugMsgList[index]
+                text(msg, LEFT_MARGIN, DEBUG_Y_OFFSET - LINE_HEIGHT * index)
+            }
+        }
+    }
+
+    showTop() {
+        if (this.visible) {
+            noStroke()
+            textFont(fixedWidthFont, 7*scalingFactor)
+
+            const LEFT_MARGIN = 10
+            const TOP_PADDING = 3 /* extra padding on top of the 1st line */
+
+            /* offset from top of canvas */
+            const DEBUG_Y_OFFSET = textAscent() + TOP_PADDING
+            const LINE_SPACING = 2
+            const LINE_HEIGHT = textAscent() + textDescent() + LINE_SPACING
+
+            /* semi-transparent background, a console-like feel */
+            fill(0, 0, 0, 10)
+            rectMode(CORNERS)
+
+            rect( /* x, y, w, h */
+                0,
+                0,
+                width,
+                DEBUG_Y_OFFSET + LINE_HEIGHT*this.debugMsgList.length/*-TOP_PADDING*/
+            )
+
+            fill(0, 0, 100, 100) /* white */
+            strokeWeight(0)
+
+            textAlign(LEFT)
+            for (let i in this.debugMsgList) {
+                const msg = this.debugMsgList[i]
+                text(msg, LEFT_MARGIN, LINE_HEIGHT*i + DEBUG_Y_OFFSET)
+            }
+        }
+    }
+}
 
 /* arriving 2D variable. Caution: modes may be difficult to use. Different
 modes:
@@ -40,16 +121,16 @@ class ArrivingVector {
                     let diffX = this.x - this.targetX
                     this.x -= map(diffX, 0, this.slowdown, 0, this.speed, true)
                 } if (this.x < this.targetX) { // simply reverse the code earlier
-                    let diffX = this.targetX - this.x
-                    this.x += map(diffX, 0, this.slowdown, 0, this.speed, true)
-                }
+                let diffX = this.targetX - this.x
+                this.x += map(diffX, 0, this.slowdown, 0, this.speed, true)
+            }
                 if (this.y > this.targetY) {
                     let diffY = this.y - this.targetY
                     this.y -= map(diffY, 0, this.slowdown, 0, this.speed, true)
                 } if (this.y < this.targetY) { // simply reverse the code earlier
-                    let diffY = this.targetY - this.y
-                    this.y += map(diffY, 0, this.slowdown, 0, this.speed, true)
-                }
+                let diffY = this.targetY - this.y
+                this.y += map(diffY, 0, this.slowdown, 0, this.speed, true)
+            }
                 break
             case "Straight Line":
                 // figure out the angle and distance, and move that direction
@@ -88,6 +169,10 @@ class ArrivingVector {
         }
     }
 }
+
+//————————————————————————————initialize variables————————————————————————————\\
+let cnv // in case we want to update more later
+let defaultMovementMode = "Straight Line"
 
 // initial variables from template
 let font
@@ -211,6 +296,14 @@ let ice
 let spawnAngle
 let puddles
 
+// Mirror Mirror (FRU P2)
+let mirror
+let redMirror
+let blueMirrorAngle
+let redMirrorConfig
+let redMirrorAngleOne
+let redMirrorAngleTwo
+
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
 let currentlySelectedBackground = "FRU P1"
@@ -220,6 +313,8 @@ let textAtTop
 let textAtBottom
 let centerOfBoard
 
+//——————————————————————————your everyday functions——————————————————————————\\
+
 function preload() {
     font = loadFont('data/meiryo.ttf')
     fixedWidthFont = loadFont('data/consola.ttf')
@@ -228,6 +323,8 @@ function preload() {
     utopianSkyFog = loadImage('data/fogGrain2.jpg')
     fruP2Image = loadImage('data/FRU P2 Floor.webp')
     fruP2IceFloor = loadImage('data/FRU P2 Ice Floor (generated by ChatGPT DALL-E) 2.png')
+    mirror = loadImage('data/FRU P2 Mirror Mirror Mirror.png')
+    redMirror = loadImage('data/FRU P2 Mirror Mirror Red Mirror.png')
     ice = loadImage('data/Ice.jpg')
 }
 
@@ -259,7 +356,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupDiamondDust()
+    setupMirrorMirror()
 
     // there is a padding of holeSize on the sides. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -310,33 +407,6 @@ function setup() {
     centerOfBoard = [mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2]
 
     textAlign(CENTER, CENTER)
-}
-
-function updateVectors() {
-    realMT.targetX = MT[0]
-    realMT.targetY = MT[1]
-    realMT.update()
-    realOT.targetX = OT[0]
-    realOT.targetY = OT[1]
-    realOT.update()
-    realH1.targetX = H1[0]
-    realH1.targetY = H1[1]
-    realH1.update()
-    realH2.targetX = H2[0]
-    realH2.targetY = H2[1]
-    realH2.update()
-    realM1.targetX = M1[0]
-    realM1.targetY = M1[1]
-    realM1.update()
-    realM2.targetX = M2[0]
-    realM2.targetY = M2[1]
-    realM2.update()
-    realR1.targetX = R1[0]
-    realR1.targetY = R1[1]
-    realR1.update()
-    realR2.targetX = R2[0]
-    realR2.targetY = R2[1]
-    realR2.update()
 }
 
 function draw() {
@@ -402,6 +472,9 @@ function draw() {
     mousePressedLastFrame = mouseIsPressed
 }
 
+//——————————————————————————display window contents——————————————————————————\\
+// top to bottom!
+
 function displayWinContent() {
     let wins = parseInt(localStorage.getItem(currentlySelectedMechanic + " wins"))
     let streak = parseInt(localStorage.getItem(currentlySelectedMechanic + " streak"))
@@ -465,175 +538,6 @@ function displayLossContent() {
     text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\n\n", redSquareX +
         topSquareSize/2, redSquareY + 7*topSquareSize/12)
 
-}
-
-function updateWins(winsPerCoinIncrease) {
-    localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
-    localStorage.setItem(currentlySelectedMechanic + " wins", parseInt(localStorage.getItem(currentlySelectedMechanic + " wins")) + 1)
-    localStorage.setItem("coins", parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease))) + parseInt(localStorage.getItem("coins")))
-}
-
-function updateLosses(winsPerCoinIncrease) {
-    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 + parseInt(localStorage.getItem("coins")))
-    localStorage.setItem("coins", max(parseInt(localStorage.getItem("coins")), 0))
-    localStorage.setItem(currentlySelectedMechanic + " streak", 0)
-    localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
-}
-
-function displayScalingAdjustContent() {
-    // display whatever the current scaling factor is
-    textAlign(CENTER, CENTER)
-    fill(0, 0, 100)
-    noStroke()
-    textSize(10*scalingFactor)
-    text("Scaling Factor\nAdjust\nCurrent: " + parseInt(scalingFactorFetch*100) + "%",
-        scalingAdjustX + scalingAdjustWidth/2, scalingAdjustY + scalingAdjustHeight/3)
-    textAlign(LEFT, CENTER)
-    text("     -50%             -25%  " +
-         "                                  +25%          +50%\n" +
-         "     -10%              -1%           " +
-         "                           +1%          +10%\n\n" +
-         "Changes to scaling will take effect on next reload via local storage.",
-        scalingAdjustX, scalingAdjustY + scalingAdjustHeight/2)
-    textAlign(LEFT, BOTTOM)
-    textSize(7*scalingFactor)
-
-    // now that we're done with the text, display the buttons
-    // row 1: "-50%", "-25%", "+25%", "+50%"
-    fill(0, 0, 0, 50)
-    if (mouseY > scalingAdjustY && mouseY < scalingAdjustY + 13*scalingFactor) {
-        // -50%
-        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
-            rect(scalingAdjustX, scalingAdjustY, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.5
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // -25%
-        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.25
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +25%
-        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.25
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +50%
-        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
-            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.5
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-    }
-    // row 2: "-10%", "-1%", "+1%", "+10%"
-    if (mouseY > scalingAdjustY + 13*scalingFactor && mouseY < scalingAdjustY + 26*scalingFactor) {
-        // -10%
-        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
-            rect(scalingAdjustX, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.1
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // -1%
-        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.01
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +1%
-        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.01
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +10%
-        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
-            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.1
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-    }
-}
-
-function displayMechanicSelection() {
-    fill(0, 0, 100)
-    noStroke()
-    textAlign(LEFT, TOP)
-    textSize(10*scalingFactor)
-    text("FRU: Utopian Sky | Diamond Dust | |\n" +
-        "\n" +
-        "Who knows, maybe there'll be other mechanics soon.",
-        selectionX + textPadding, selectionY + textPadding)
-
-    fill(0, 0, 0, 30)
-    if (mouseX > selectionX + textPadding && mouseX < selectionX + selectionWidth - textPadding) {
-        // row 1
-        if (mouseY > selectionY + textPadding && mouseY < selectionY + 13*scalingFactor + textPadding) {
-            if (mouseX > selectionX + textPadding + textWidth("FRU:") &&
-                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky ")) {
-                rect(selectionX + textPadding + textWidth("FRU:"), selectionY + textPadding,
-                     selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + 13*scalingFactor + textPadding)
-                if (mousePressedButNotHeldDown()) {
-                    setupUtopianSky()
-                }
-            } if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky |") &&
-                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust ")) {
-                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky |"), selectionY + textPadding,
-                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + 13*scalingFactor + textPadding)
-                if (mousePressedButNotHeldDown()) {
-                    setupDiamondDust()
-                }
-            }
-        }
-        // row 2
-        if (mouseY > selectionY + 13*scalingFactor + textPadding && mouseY < selectionY + 26*scalingFactor + textPadding) {
-            // rect(0, selectionY + 13*scalingFactor + textPadding, width, selectionY + 26*scalingFactor + textPadding)
-        }
-        // row 3
-        if (mouseY > selectionY + 26*scalingFactor + textPadding && mouseY < selectionY + 39*scalingFactor + textPadding) {
-            // rect(0, selectionY + 26*scalingFactor + textPadding, width, selectionY + 39*scalingFactor + textPadding)
-        }
-        // row 4
-        if (mouseY > selectionY + 39*scalingFactor + textPadding && mouseY < selectionY + 52*scalingFactor + textPadding) {
-            // rect(0, selectionY + 39*scalingFactor + textPadding, width, selectionY + 52*scalingFactor + textPadding)
-        }
-    }
-
-
-    textSize(7*scalingFactor)
 }
 
 function displayTopWindowContent() {
@@ -726,25 +630,6 @@ function displayMiddleTopWindowContent() {
     text("It's been " + formatSeconds((millis() - mechanicStarted)/1000) + " since" +
         " the mechanic started.", middleTopX + textPadding, middleTopY + middleTopHeight -
         textPadding - textAscent() - textDescent())
-}
-
-function formatSeconds(s) {
-    let seconds = floor(s) % 60
-    let minutes = floor(s/60) % 60
-    let hours = floor(s/3600)
-
-    if (hours) return hours + ":" + addLeadingZero(minutes, 2) + ":" + addLeadingZero(seconds, 2)
-    else if (minutes) return minutes + ":" + addLeadingZero(seconds, 2)
-    else return seconds + "s"
-}
-
-// adds leading zeros to "string" until it reaches targetLen
-function addLeadingZero(string, targetLen) {
-    let s = string + ""
-    while (s.length < targetLen) {
-        s = "0" + s
-    }
-    return s
 }
 
 function displayMainBodyContent() {
@@ -2506,13 +2391,13 @@ intercardinals.`
                 displayGreenDot(-sqrt(2)*dotRadius/2, -sqrt(2)*dotRadius/2)
                 displayGreenDot(-sqrt(2)*dotRadius/2, sqrt(2)*dotRadius/2)
                 let greenDotLocations = [[centerOfBoard[0], dotRadius + centerOfBoard[1]],
-                                        [dotRadius + centerOfBoard[0], centerOfBoard[1]],
-                                        [centerOfBoard[0], -dotRadius + centerOfBoard[1]],
-                                        [-dotRadius + centerOfBoard[0], centerOfBoard[1]],
-                                        [sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]],
-                                        [sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
-                                        [-sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
-                                        [-sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]]]
+                    [dotRadius + centerOfBoard[0], centerOfBoard[1]],
+                    [centerOfBoard[0], -dotRadius + centerOfBoard[1]],
+                    [-dotRadius + centerOfBoard[0], centerOfBoard[1]],
+                    [sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                    [sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                    [-sqrt(2)*dotRadius/2 + centerOfBoard[0], -sqrt(2)*dotRadius/2 + centerOfBoard[1]],
+                    [-sqrt(2)*dotRadius/2 + centerOfBoard[0], sqrt(2)*dotRadius/2 + centerOfBoard[1]]]
 
                 // now check if it was clicked
                 let position = inClickingRanges(greenDotLocations, 10*scalingFactor)
@@ -3361,8 +3246,393 @@ intercardinals.`
                 displayPuddle(puddle)
             }
         }
+        if (currentlySelectedMechanic === "Mirror Mirror") {
+            if (stage === 0) {
+                // draw a mirror mirror! 30*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorRadius = mainBodyWidth/2
+                let mirrorSize = 60*scalingFactor
+                let mirrorLocation = [
+                    cos(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[1]]
+                image(mirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                let greenDotRadius = 3*mainBodyWidth/8
+                let correctRangedGreenDotPosition = []
+                let correctMeleeGreenDotPosition = []
+                let incorrectGreenDots = []
+
+                // make sure that blue mirror angle is positive
+                let realBlueMirrorAngle = (blueMirrorAngle + 36000000000000) % 360
+
+                for (let angle of [0, 45, 90, 135, 180, 225, 270, 315]) {
+                    let x = cos(radians(angle))*greenDotRadius
+                    let y = sin(radians(angle))*greenDotRadius
+                    displayGreenDot(x, y)
+
+                    let atBlueMirror = abs(angle - realBlueMirrorAngle) < 22.5 || abs(angle - realBlueMirrorAngle) > 337.5
+                    let awayFromBlueMirror = abs(angle - realBlueMirrorAngle) > 157.5 && abs(angle - realBlueMirrorAngle) < 202.5
+                    if (atBlueMirror) {
+                        correctRangedGreenDotPosition = [x + centerOfBoard[0], y + centerOfBoard[1]]
+                    } else if (awayFromBlueMirror) {
+                        correctMeleeGreenDotPosition = [x + centerOfBoard[0], y + centerOfBoard[1]]
+                    } else {
+                        incorrectGreenDots.push([x + centerOfBoard[0], y + centerOfBoard[1]])
+                    }
+                }
+
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(correctRangedGreenDotPosition, 15*scalingFactor)) {
+                        if (meleeOrRanged() === "ranged") {
+                            stage = 1
+                            textAtTop = "You have gone into the correct" +
+                                " spot. Now you need to bait your blue" +
+                                " mirror properly."
+                            textAtBottom = "You went at the blue mirror." +
+                                " \n[PASS] — You went to the blue mirror." +
+                                " \n[PASS] — You are a ranged."
+                        } else {
+                            stage = 100
+                            updateLosses(3)
+                            textAtTop = "If you are a melee, you must go" +
+                                " opposite the blue mirror. Usually the" +
+                                " tanks pull the boss opposite the \nmirror," +
+                                " though it always helps to do it yourself."
+                            textAtBottom = "You went at the blue mirror." +
+                                " \n[PASS] — You went to the blue mirror." +
+                                " \n[FAIL] — You are a melee."
+                        }
+                    } if (inClickingRange(correctMeleeGreenDotPosition, 15*scalingFactor)) {
+                        if (meleeOrRanged() === "melee") {
+                            stage = 1
+                            textAtTop = "You have gone into the correct" +
+                                " spot. Now you need to bait the boss properly."
+                            textAtBottom = "You went opposite the blue" +
+                                " mirror. \n[PASS] — You went opposite the" +
+                                " blue mirror. \n[PASS] — You are a melee."
+                        } else {
+                            stage = 100
+                            updateLosses(3)
+                            textAtTop = "If you are a ranged, you must go" +
+                                " towards the blue mirror. I don't recommend" +
+                                " following another ranged."
+                            textAtBottom = "You went opposite the blue" +
+                                " mirror. \n[PASS] — You went opposite the" +
+                                " blue mirror. \n[FAIL] — You are a ranged."
+                        }
+                    } if (inClickingRanges(incorrectGreenDots, 15*scalingFactor)) {
+                        stage = 100
+                        updateLosses(3)
+                        textAtTop = "You should always start at or opposite" +
+                            " the blue mirror. The blue mirror partially covers" +
+                            " the notch."
+                        textAtBottom = "You went neither opposite nor at the" +
+                            " blue mirror. \n[FAIL] — You did not go at or" +
+                            " opposite the blue mirror."
+                    }
+                }
+            }
+        }
     }
 }
+
+function displayMechanicSelection() {
+    fill(0, 0, 100)
+    noStroke()
+    textAlign(LEFT, TOP)
+    textSize(10*scalingFactor)
+    text("FRU: Utopian Sky | Diamond Dust | Mirror Mirror |\n" +
+        "\n" +
+        "Who knows, maybe there'll be other mechanics soon.",
+        selectionX + textPadding, selectionY + textPadding)
+
+    fill(0, 0, 0, 30)
+    if (mouseX > selectionX + textPadding && mouseX < selectionX + selectionWidth - textPadding) {
+        // row 1
+        if (mouseY > selectionY + textPadding && mouseY < selectionY + 13*scalingFactor + textPadding) {
+            if (mouseX > selectionX + textPadding + textWidth("FRU:") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky ")) {
+                rect(selectionX + textPadding + textWidth("FRU:"), selectionY + textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + 13*scalingFactor + textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupUtopianSky()
+                }
+            }
+            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky |") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky |"), selectionY + textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + 13*scalingFactor + textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupDiamondDust()
+                }
+            }
+            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust |") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust | Mirror Mirror ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust | Mirror Mirror "), selectionY + 13*scalingFactor + textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupMirrorMirror()
+                }
+            }
+        }
+        // row 2
+        if (mouseY > selectionY + 13*scalingFactor + textPadding && mouseY < selectionY + 26*scalingFactor + textPadding) {
+            // rect(0, selectionY + 13*scalingFactor + textPadding, width, selectionY + 26*scalingFactor + textPadding)
+        }
+        // row 3
+        if (mouseY > selectionY + 26*scalingFactor + textPadding && mouseY < selectionY + 39*scalingFactor + textPadding) {
+            // rect(0, selectionY + 26*scalingFactor + textPadding, width, selectionY + 39*scalingFactor + textPadding)
+        }
+        // row 4
+        if (mouseY > selectionY + 39*scalingFactor + textPadding && mouseY < selectionY + 52*scalingFactor + textPadding) {
+            // rect(0, selectionY + 39*scalingFactor + textPadding, width, selectionY + 52*scalingFactor + textPadding)
+        }
+    }
+
+
+    textSize(7*scalingFactor)
+}
+
+function displayBottomWindowContent() {
+    // before we display any text, we should set the background
+    if (stage < 99) { // stage < 99 indicates you're still on track
+        fill(120, 100, 50, 50)
+    } if (stage === 99) { // if stage is 99, you've completed the mechanic
+        fill(240, 100, 50, 50)
+    } if (stage > 99) { // if stage is greater than 99, you failed the mechanic in some way
+        fill(0, 100, 50, 50)
+    }
+    noStroke()
+    rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
+
+    fill(0, 0, 100)
+    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding)
+}
+
+function displayScalingAdjustContent() {
+    // display whatever the current scaling factor is
+    textAlign(CENTER, CENTER)
+    fill(0, 0, 100)
+    noStroke()
+    textSize(10*scalingFactor)
+    text("Scaling Factor\nAdjust\nCurrent: " + parseInt(scalingFactorFetch*100) + "%",
+        scalingAdjustX + scalingAdjustWidth/2, scalingAdjustY + scalingAdjustHeight/3)
+    textAlign(LEFT, CENTER)
+    text("     -50%             -25%  " +
+        "                                  +25%          +50%\n" +
+        "     -10%              -1%           " +
+        "                           +1%          +10%\n\n" +
+        "Changes to scaling will take effect on next reload via local storage.",
+        scalingAdjustX, scalingAdjustY + scalingAdjustHeight/2)
+    textAlign(LEFT, BOTTOM)
+    textSize(7*scalingFactor)
+
+    // now that we're done with the text, display the buttons
+    // row 1: "-50%", "-25%", "+25%", "+50%"
+    fill(0, 0, 0, 50)
+    if (mouseY > scalingAdjustY && mouseY < scalingAdjustY + 13*scalingFactor) {
+        // -50%
+        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
+            rect(scalingAdjustX, scalingAdjustY, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.5
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // -25%
+        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.25
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +25%
+        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.25
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +50%
+        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
+            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 13*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.5
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+    }
+    // row 2: "-10%", "-1%", "+1%", "+10%"
+    if (mouseY > scalingAdjustY + 13*scalingFactor && mouseY < scalingAdjustY + 26*scalingFactor) {
+        // -10%
+        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
+            rect(scalingAdjustX, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.1
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // -1%
+        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch -= 0.01
+                scalingFactorFetch = max(scalingFactorFetch, 0.25)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +1%
+        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
+            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.01
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+        // +10%
+        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
+            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 26*scalingFactor, cornerRounding)
+            if (mousePressedButNotHeldDown()) {
+                scalingFactorFetch += 0.1
+                scalingFactorFetch = min(scalingFactorFetch, 10)
+                localStorage.setItem("scalingFactor", scalingFactorFetch)
+                return
+            }
+        }
+    }
+}
+
+// since all the other things that display something on top of the separate
+// sections are in functions, this should be in a function too for consistency
+function displayDebugCorner() {
+    textAlign(LEFT, BOTTOM)
+    debugCorner.setText(`frameCount: ${frameCount}`, 2)
+    debugCorner.setText(`fps: ${frameRate().toFixed(0)}`, 1)
+    debugCorner.showBottom()
+    textAlign(CENTER, CENTER)
+}
+
+//—————————————————————————————utility functions—————————————————————————————\\
+
+function updateWins(winsPerCoinIncrease) {
+    localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
+    localStorage.setItem(currentlySelectedMechanic + " wins", parseInt(localStorage.getItem(currentlySelectedMechanic + " wins")) + 1)
+    localStorage.setItem("coins", parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease))) + parseInt(localStorage.getItem("coins")))
+}
+
+function updateLosses(winsPerCoinIncrease) {
+    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem("coins", max(parseInt(localStorage.getItem("coins")), 0))
+    localStorage.setItem(currentlySelectedMechanic + " streak", 0)
+    localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
+}
+
+function formatSeconds(s) {
+    let seconds = floor(s) % 60
+    let minutes = floor(s/60) % 60
+    let hours = floor(s/3600)
+
+    if (hours) return hours + ":" + addLeadingZero(minutes, 2) + ":" + addLeadingZero(seconds, 2)
+    else if (minutes) return minutes + ":" + addLeadingZero(seconds, 2)
+    else return seconds + "s"
+}
+
+function setMovementMode(mode) {
+    realMT.mode = mode
+    realOT.mode = mode
+    realH1.mode = mode
+    realH2.mode = mode
+    realM1.mode = mode
+    realM2.mode = mode
+    realR1.mode = mode
+    realR2.mode = mode
+}
+
+// adds leading zeros to "string" until it reaches targetLen (blunt-force
+// strategy. wait, is it even called "blunt force"?)
+function addLeadingZero(string, targetLen) {
+    let s = string + ""
+    while (s.length < targetLen) {
+        s = "0" + s
+    }
+    return s
+}
+
+// in range of clicking something (circle radius)
+function inClickingRange(position, range) {
+    return (sqrt((mouseX - position[0])**2 +
+        (mouseY - position[1])**2) < range)
+}
+
+// in range of clicking multiple things (circle radius)
+function inClickingRanges(positions, range) {
+    for (let position of positions) {
+        if (inClickingRange(position, range)) return position
+    }
+    return false
+}
+
+// encapsulation function. makes code less messy
+function translateToCenterOfBoard() {
+    translate(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2);
+}
+
+function mousePressedButNotHeldDown() {
+    return mouseIsPressed && !mousePressedLastFrame
+}
+
+// update all the position vectors
+function updateVectors() {
+    realMT.targetX = MT[0]
+    realMT.targetY = MT[1]
+    realMT.update()
+    realOT.targetX = OT[0]
+    realOT.targetY = OT[1]
+    realOT.update()
+    realH1.targetX = H1[0]
+    realH1.targetY = H1[1]
+    realH1.update()
+    realH2.targetX = H2[0]
+    realH2.targetY = H2[1]
+    realH2.update()
+    realM1.targetX = M1[0]
+    realM1.targetY = M1[1]
+    realM1.update()
+    realM2.targetX = M2[0]
+    realM2.targetY = M2[1]
+    realM2.update()
+    realR1.targetX = R1[0]
+    realR1.targetY = R1[1]
+    realR1.update()
+    realR2.targetX = R2[0]
+    realR2.targetY = R2[1]
+    realR2.update()
+}
+
+//—————————————————————————————display functions—————————————————————————————\\
 
 // these puddles are always given in the format of [x, y, millisAppeared,
 // radius]
@@ -3377,22 +3647,6 @@ function displayPuddle(puddleInfo) {
     fill(0, 0, 80, 50)
     circle(puddleX, puddleY, map(millisSinceAppeared, 0, 500, 0, radius, true))
     pop()
-}
-
-function setMovementMode(mode) {
-    realMT.mode = mode
-    realOT.mode = mode
-    realH1.mode = mode
-    realH2.mode = mode
-    realM1.mode = mode
-    realM2.mode = mode
-    realR1.mode = mode
-    realR2.mode = mode
-}
-
-function lightParty() {
-    if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
-    return 2
 }
 
 // displayStarAoE but infinitely expanded
@@ -3432,33 +3686,6 @@ function displayStarAoE(x, y) {
     pop()
 }
 
-function DPSOrSupports() {
-    if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "supports"}
-    return "DPS"
-}
-
-// because it's super annoying when you have to write a switch statement
-function yourPosition() {
-    switch (role) {
-        case "MT":
-            return MT
-        case "OT":
-            return OT
-        case "M1":
-            return M1
-        case "M2":
-            return M2
-        case "R1":
-            return R1
-        case "R2":
-            return R2
-        case "H1":
-            return H1
-        case "H2":
-            return H2
-    }
-}
-
 // target symbol is orange plus above player.
 function displayTargetSymbol(x, y) {
     stroke(30, 100, 70)
@@ -3467,24 +3694,6 @@ function displayTargetSymbol(x, y) {
     line(x, y - 10*scalingFactor, x, y - 20*scalingFactor)
     line(x - 3*scalingFactor, y - 15*scalingFactor, x + 3*scalingFactor, y - 15*scalingFactor)
     arc(x, y - 24*scalingFactor, 8*scalingFactor, 8*scalingFactor, -PI/8, 9*PI/8)
-}
-
-// in range of clicking something (circle radius)
-function inClickingRange(position, range) {
-    return (sqrt((mouseX - position[0])**2 +
-        (mouseY - position[1])**2) < range)
-}
-
-// in range of clicking multiple things (circle radius)
-function inClickingRanges(positions, range) {
-    for (let position of positions) {
-        if (inClickingRange(position, range)) return position
-    }
-    return false
-}
-
-function mousePressedButNotHeldDown() {
-    return mouseIsPressed && !mousePressedLastFrame
 }
 
 function displayShiva(position, type, messageBox, sizeOfTorso) {
@@ -3582,11 +3791,6 @@ function displayFatebreaker(position, raisedArm) {
     pop()
 }
 
-// encapsulation function. makes code less messy
-function translateToCenterOfBoard() {
-    translate(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2);
-}
-
 // display a green dot for where to go
 function displayGreenDot(x, y) {
     push()
@@ -3605,7 +3809,7 @@ function displayGreenDot(x, y) {
 }
 
 // displays- a smaller green dot if you're in a tight spot
-function displaySmallGreenDot (x, y) {
+function displaySmallGreenDot(x, y) {
     push()
     translateToCenterOfBoard()
     stroke(120, 100, 100)
@@ -3682,47 +3886,46 @@ function displayCharacterPositions() {
     text("R2", realR2.x, realR2.y - scalingFactor)
 }
 
-function displayBottomWindowContent() {
-    // before we display any text, we should set the background
-    if (stage < 99) { // stage < 99 indicates you're still on track
-        fill(120, 100, 50, 50)
-    } if (stage === 99) { // if stage is 99, you've completed the mechanic
-        fill(240, 100, 50, 50)
-    } if (stage > 99) { // if stage is greater than 99, you failed the mechanic in some way
-        fill(0, 100, 50, 50)
-    }
-    noStroke()
-    rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
+//———————————————————————————————find your role———————————————————————————————\\
 
-    fill(0, 0, 100)
-    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding)
+function meleeOrRanged() {
+    if (role === "MT" || role === "OT" || role === "M1" || role === "M2") {return "melee"}
+    return "ranged"
 }
 
-// since all the other things that display something on top of the separate
-// sections are in functions, this should be in a function too for consistency
-function displayDebugCorner() {
-    textAlign(LEFT, BOTTOM)
-    debugCorner.setText(`frameCount: ${frameCount}`, 2)
-    debugCorner.setText(`fps: ${frameRate().toFixed(0)}`, 1)
-    debugCorner.showBottom()
-    textAlign(CENTER, CENTER)
+function DPSOrSupports() {
+    if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "supports"}
+    return "DPS"
 }
 
-function keyPressed() {
-    /* stop sketch */
-    if (keyCode === 97) { /* numpad 1 */
-        noLoop()
-        instructions.html(`<pre>
-            sketch stopped</pre>`)
-    }
+function lightParty() {
+    if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
+    return 2
+}
 
-    if (key === '`') { /* toggle debug corner visibility */
-        debugCorner.visible = !debugCorner.visible
-        console.log(`debugCorner visibility set to ${debugCorner.visible}`)
+// because it's super annoying when you have to write a switch statement
+function yourPosition() {
+    switch (role) {
+        case "MT":
+            return MT
+        case "OT":
+            return OT
+        case "M1":
+            return M1
+        case "M2":
+            return M2
+        case "R1":
+            return R1
+        case "R2":
+            return R2
+        case "H1":
+            return H1
+        case "H2":
+            return H2
     }
 }
 
-//————————————below is a list of setup functions for each mechanic————————————\\
+//——————————————————————————setup mechanic functions——————————————————————————\\
 
 function reset() {
     switch (currentlySelectedMechanic) {
@@ -3731,6 +3934,9 @@ function reset() {
             break
         case "Diamond Dust":
             setupDiamondDust()
+            break
+        case "Mirror Mirror":
+            setupMirrorMirror()
             break
     }
 }
@@ -3918,85 +4124,90 @@ ${updates}
 </pre>`)
 }
 
-/** 🧹 shows debugging info using text() 🧹 */
-class CanvasDebugCorner {
-    constructor(lines) {
-        this.visible = true
-        this.size = lines
-        this.debugMsgList = [] /* initialize all elements to empty string */
-        for (let i in lines)
-            this.debugMsgList[i] = ''
+function setupMirrorMirror() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
+    setMovementMode(defaultMovementMode)
+
+    mechanicStarted = millis()
+
+    blueMirrorAngle = random([0, 45, 90, 135, 180, 225, 270, 315])
+
+    // red mirror configurations:
+    // 1. red mirrors spawn around blue mirror
+    // 2. red mirrors spawn 45º and 135º counterclockwise of blue mirror
+    // 3. red mirrors spawn 90º and 180º counterclockwise of blue mirror
+    // 4. red mirrors spawn opposite blue mirror
+    // 5. red mirrors spawn 90º and 180º clockwise of blue mirror
+    // 6. red mirrors spawn 45º and 135º clockwise of blue mirror
+    redMirrorConfig = random([1, 2, 3, 4, 5, 6])
+    redMirrorAngleOne = blueMirrorAngle
+    redMirrorAngleTwo = blueMirrorAngle
+    if (redMirrorConfig === 1) {
+        redMirrorAngleOne -= 45
+        redMirrorAngleTwo += 45
+    } if (redMirrorConfig === 2) {
+        redMirrorAngleOne -= 135
+        redMirrorAngleTwo -= 45
+    } if (redMirrorConfig === 3) {
+        redMirrorAngleOne -= 180
+        redMirrorAngleTwo -= 90
+    } if (redMirrorConfig === 4) {
+        redMirrorAngleOne += 135
+        redMirrorAngleTwo -= 135
+    } if (redMirrorConfig === 5) {
+        redMirrorAngleOne += 90
+        redMirrorAngleTwo += 180
+    } if (redMirrorConfig === 6) {
+        redMirrorAngleOne += 45
+        redMirrorAngleTwo += 135
     }
 
-    setText(text, index) {
-        if (index >= this.size) {
-            this.debugMsgList[0] = `${index} ← index>${this.size} not supported`
-        } else this.debugMsgList[index] = text
+    redMirrorAngleOne += 360
+    redMirrorAngleOne %= 360
+    redMirrorAngleTwo += 360
+    redMirrorAngleTwo %= 360
+
+    MT = [0, -70*scalingFactor]
+    OT = [70*scalingFactor, 0]
+    H1 = [-70*scalingFactor, 0]
+    H2 = [0, 70*scalingFactor]
+    M1 = [-49*scalingFactor, 49*scalingFactor]
+    M2 = [49*scalingFactor, 49*scalingFactor]
+    R1 = [-49*scalingFactor, -49*scalingFactor]
+    R2 = [49*scalingFactor, -49*scalingFactor]
+
+    stage = 0
+    currentlySelectedMechanic = "Mirror Mirror"
+    currentlySelectedBackground = "FRU P2"
+
+    let css = select("html")
+    css.style("background-image", "url(\"data/FRU P2 Floor.webp\")")
+    css = select("body")
+    css.style("background-image", "url(\"data/FRU P2 Floor.webp\")")
+
+    textAtTop = "You just finished Diamond Dust—but you have no idea where" +
+        " to go for the next mechanic, Mirror Mirror! \nOr maybe you do have" +
+        " an idea. Whether you do or don't, this simulator should help you" +
+        " reinforce your \nunderstanding.\n\nPlease select which cardinal or" +
+        " intercardinal you should go to."
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
+}
+
+//——————————————————————————miscellany——————————————————————————\\
+function keyPressed() {
+    /* stop sketch */
+    if (keyCode === 97) { /* numpad 1 */
+        noLoop()
+        instructions.html(`<pre>
+            sketch stopped</pre>`)
     }
 
-    showBottom() {
-        if (this.visible) {
-            noStroke()
-            textFont(fixedWidthFont, 7*scalingFactor)
-
-            const LEFT_MARGIN = 10
-            const DEBUG_Y_OFFSET = height - 10 /* floor of debug corner */
-            const LINE_SPACING = 2
-            const LINE_HEIGHT = textAscent() + textDescent() + LINE_SPACING
-
-            /* semi-transparent background */
-            fill(0, 0, 0, 10)
-            rectMode(CORNERS)
-            const TOP_PADDING = 3 /* extra padding on top of the 1st line */
-            rect(
-                0,
-                height,
-                width,
-                DEBUG_Y_OFFSET - LINE_HEIGHT * this.debugMsgList.length - TOP_PADDING
-            )
-
-            fill(0, 0, 100, 100) /* white */
-            strokeWeight(0)
-
-            for (let index in this.debugMsgList) {
-                const msg = this.debugMsgList[index]
-                text(msg, LEFT_MARGIN, DEBUG_Y_OFFSET - LINE_HEIGHT * index)
-            }
-        }
-    }
-
-    showTop() {
-        if (this.visible) {
-            noStroke()
-            textFont(fixedWidthFont, 7*scalingFactor)
-
-            const LEFT_MARGIN = 10
-            const TOP_PADDING = 3 /* extra padding on top of the 1st line */
-
-            /* offset from top of canvas */
-            const DEBUG_Y_OFFSET = textAscent() + TOP_PADDING
-            const LINE_SPACING = 2
-            const LINE_HEIGHT = textAscent() + textDescent() + LINE_SPACING
-
-            /* semi-transparent background, a console-like feel */
-            fill(0, 0, 0, 10)
-            rectMode(CORNERS)
-
-            rect( /* x, y, w, h */
-                0,
-                0,
-                width,
-                DEBUG_Y_OFFSET + LINE_HEIGHT*this.debugMsgList.length/*-TOP_PADDING*/
-            )
-
-            fill(0, 0, 100, 100) /* white */
-            strokeWeight(0)
-
-            textAlign(LEFT)
-            for (let i in this.debugMsgList) {
-                const msg = this.debugMsgList[i]
-                text(msg, LEFT_MARGIN, LINE_HEIGHT*i + DEBUG_Y_OFFSET)
-            }
-        }
+    if (key === '`') { /* toggle debug corner visibility */
+        debugCorner.visible = !debugCorner.visible
+        console.log(`debugCorner visibility set to ${debugCorner.visible}`)
     }
 }
