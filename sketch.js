@@ -3247,11 +3247,12 @@ intercardinals.`
             }
         }
         if (currentlySelectedMechanic === "Mirror Mirror") {
+            let mirrorRadius = mainBodyWidth/2 - 20*scalingFactor
+            let mirrorSize = 60*scalingFactor
+
             if (stage === 0) {
-                // draw a mirror mirror! 30*scalingFactor width
+                // draw a mirror mirror! 60*scalingFactor width
                 tint(200, 50, 100, 20)
-                let mirrorRadius = mainBodyWidth/2
-                let mirrorSize = 60*scalingFactor
                 let mirrorLocation = [
                     cos(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[0],
                     sin(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[1]]
@@ -3292,7 +3293,7 @@ intercardinals.`
                 if (mousePressedButNotHeldDown()) {
                     if (inClickingRange(correctRangedGreenDotPosition, 15*scalingFactor)) {
                         if (meleeOrRanged() === "ranged") {
-                            stage = 1
+                            stage = 0.5
                             textAtTop = "You have gone into the correct" +
                                 " spot. Now you need to bait your blue" +
                                 " mirror properly."
@@ -3312,7 +3313,7 @@ intercardinals.`
                         }
                     } if (inClickingRange(correctMeleeGreenDotPosition, 15*scalingFactor)) {
                         if (meleeOrRanged() === "melee") {
-                            stage = 1
+                            stage = 0.5
                             textAtTop = "You have gone into the correct" +
                                 " spot. Now you need to bait the boss properly."
                             textAtBottom = "You went opposite the blue" +
@@ -3338,6 +3339,428 @@ intercardinals.`
                             " blue mirror. \n[FAIL] — You did not go at or" +
                             " opposite the blue mirror."
                     }
+                }
+            } if (stage === 0.5) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[1]]
+                image(mirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                // this is a 1-frame, intermediate stage
+                stage = 1
+
+                // just make people arrive to their spots
+                let radius = mainBodyWidth/3
+                MT = [cos(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius, sin(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius]
+                OT = [cos(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius, sin(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius]
+                M1 = [cos(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius, sin(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius]
+                M2 = [cos(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius, sin(radians(blueMirrorAngle - 180 + random(-10, 10)))*radius]
+                H1 = [cos(radians(blueMirrorAngle + random(-10, 10)))*radius, sin(radians(blueMirrorAngle + random(-10, 10)))*radius]
+                H2 = [cos(radians(blueMirrorAngle + random(-10, 10)))*radius, sin(radians(blueMirrorAngle + random(-10, 10)))*radius]
+                R1 = [cos(radians(blueMirrorAngle + random(-10, 10)))*radius, sin(radians(blueMirrorAngle + random(-10, 10)))*radius]
+                R2 = [cos(radians(blueMirrorAngle + random(-10, 10)))*radius, sin(radians(blueMirrorAngle + random(-10, 10)))*radius]
+            } if (stage === 1) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[1]]
+                image(mirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                let shivaRadius = mainBodyWidth/4
+                displayShiva([cos(radians(blueMirrorAngle - 180))*shivaRadius,
+                    sin(radians(blueMirrorAngle - 180))*shivaRadius], "boss", "Reap!", 15*scalingFactor)
+
+                let H1Spot = [
+                    cos(radians(blueMirrorAngle - 10))*(mirrorRadius - 5*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 10))*(mirrorRadius - 5*scalingFactor) + centerOfBoard[1]
+                ]
+                let H2Spot = [
+                    cos(radians(blueMirrorAngle + 10))*(mirrorRadius - 5*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle + 10))*(mirrorRadius - 5*scalingFactor) + centerOfBoard[1]
+                ]
+                let R1Spot = [
+                    cos(radians(blueMirrorAngle - 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[1]
+                ]
+                let R2Spot = [
+                    cos(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[1]
+                ]
+                let MTSpot = [
+                    cos(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor) + centerOfBoard[1]
+                ]
+                let OTSpot = [
+                    cos(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor) + centerOfBoard[1]
+                ]
+                let M1Spot = [
+                    cos(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor) + centerOfBoard[1]
+                ]
+                let M2Spot = [
+                    cos(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor) + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor) + centerOfBoard[1]
+                ]
+
+                // of course, the positions are wildly different between melee and ranged
+                if (meleeOrRanged() === "ranged") {
+                    displaySmallGreenDot(H1Spot[0] - centerOfBoard[0], H1Spot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(H2Spot[0] - centerOfBoard[0], H2Spot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(R1Spot[0] - centerOfBoard[0], R1Spot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(R2Spot[0] - centerOfBoard[0], R2Spot[1] - centerOfBoard[1])
+
+                    if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(H1Spot, 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to H1's spot."
+                        if (lightParty() === 1) {
+                            textAtBottom += "\n[PASS] — You're light party 1."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 2."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        }
+                        if (DPSOrSupports() === "supports") {
+                            textAtBottom += "\n[PASS] — You're a support."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're a DPS."
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        }
+                        if (stage !== 100) stage = 1.25
+                    }
+                    if (inClickingRange(H2Spot, 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to H2's spot."
+                        if (lightParty() === 1) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 1."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        } else {
+                            textAtBottom += "\n[PASS] — You're light party 2."
+                        }
+                        if (DPSOrSupports() === "supports") {
+                            textAtBottom += "\n[PASS] — You're a support."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're a DPS."
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        }
+                        if (stage !== 100) stage = 1.25
+                    }
+                    if (inClickingRange(R1Spot, 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to R1's spot."
+                        if (lightParty() === 1) {
+                            textAtBottom += "\n[PASS] — You're light party 1."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 2."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        }
+                        if (DPSOrSupports() === "supports") {
+                            textAtBottom += "\n[FAIL] — You're a support."
+                            stage = 100
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        } else {
+                            textAtBottom += "\n[PASS] — You're a DPS."
+                        }
+                        if (stage !== 100) stage = 1.25
+                    }
+                    if (inClickingRange(R2Spot, 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to R2's spot."
+                        if (lightParty() === 1) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 1."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        } else {
+                            textAtBottom += "\n[PASS] — You're light party 2."
+                        }
+                        if (DPSOrSupports() === "supports") {
+                            textAtBottom += "\n[FAIL] — You're a support."
+                            stage = 100
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        } else {
+                            textAtBottom += "\n[PASS] — You're a DPS."
+                        }
+                        if (stage !== 100) stage = 1.25
+                    }
+                    }
+                } if (meleeOrRanged() === "melee") {
+                    displaySmallGreenDot(MTSpot[0] - centerOfBoard[0], MTSpot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(OTSpot[0] - centerOfBoard[0], OTSpot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(M1Spot[0] - centerOfBoard[0], M1Spot[1] - centerOfBoard[1])
+                    displaySmallGreenDot(M2Spot[0] - centerOfBoard[0], M2Spot[1] - centerOfBoard[1])
+                    if (mousePressedButNotHeldDown()) {
+                        if (inClickingRange(MTSpot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to MT's spot."
+                            if (lightParty() === 1) {
+                                textAtBottom += "\n[PASS] — You're light party 1."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 2."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[PASS] — You're a support."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're a DPS."
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            }
+                        }
+                        if (inClickingRange(OTSpot, 10*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to OT's spot."
+                            if (lightParty() === 1) {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 1."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            } else {
+                                textAtBottom += "\n[PASS] — You're light party 2."
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[PASS] — You're a support."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're a DPS."
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            }
+                        }
+                        if (inClickingRange(M1Spot, 10*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to M1's spot."
+                            if (lightParty() === 1) {
+                                textAtBottom += "\n[PASS] — You're light party 1."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 2."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[FAIL] — You're a support."
+                                stage = 100
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            } else {
+                                textAtBottom += "\n[PASS] — You're a DPS."
+                            }
+                        }
+                        if (inClickingRange(M2Spot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to M2's spot."
+                            if (lightParty() === 1) {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 1."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            } else {
+                                textAtBottom += "\n[PASS] — You're light party 2."
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[FAIL] — You're a support."
+                                stage = 100
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            } else {
+                                textAtBottom += "\n[PASS] — You're a DPS."
+                            }
+                        }
+                        if (stage !== 100) stage = 1.25
+                        else updateLosses(3)
+                    }
+                }
+            } if (stage === 1.25) {
+                let shivaRadius = mainBodyWidth/4
+                displayShiva([cos(radians(blueMirrorAngle - 180))*shivaRadius,
+                    sin(radians(blueMirrorAngle - 180))*shivaRadius], "boss", "Reap!", 15*scalingFactor)
+                H1 = [
+                    cos(radians(blueMirrorAngle - 10))*(mirrorRadius - 5*scalingFactor),
+                    sin(radians(blueMirrorAngle - 10))*(mirrorRadius - 5*scalingFactor)
+                ]
+                H2 = [
+                    cos(radians(blueMirrorAngle + 10))*(mirrorRadius - 5*scalingFactor),
+                    sin(radians(blueMirrorAngle + 10))*(mirrorRadius - 5*scalingFactor)
+                ]
+                R1 = [
+                    cos(radians(blueMirrorAngle - 7))*(mirrorRadius - 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 7))*(mirrorRadius - 20*scalingFactor)
+                ]
+                R2 = [
+                    cos(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor),
+                    sin(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor)
+                ]
+                MT = [
+                    cos(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor)
+                ]
+                OT = [
+                    cos(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor)
+                ]
+                M1 = [
+                    cos(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor)
+                ]
+                M2 = [
+                    cos(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor)
+                ]
+                stage = 1.5
+            } if (stage === 1.5) {
+                let shivaRadius = mainBodyWidth/4
+                displayShiva([cos(radians(blueMirrorAngle - 180))*shivaRadius,
+                    sin(radians(blueMirrorAngle - 180))*shivaRadius], "boss", "Reap!", 15*scalingFactor)
+
+                // only finish with this stage once everyone has
+                // gotten into their positions
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 2
+
+
+                    let baseX = cos(radians(blueMirrorAngle - 180))*shivaRadius
+                    let baseY = sin(radians(blueMirrorAngle - 180))*shivaRadius
+
+                    // donut
+                    fill(200, 70, 100, 100)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(3)
+                    beginShape()
+                    for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/2 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/2 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    beginContour()
+                    for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/10 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/10 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    endContour()
+                    endShape(CLOSE)
+
+
+                    // display proteans
+                    fill(60, 100, 100, 60)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(5)
+                    for (let player of [MT, OT, M1, M2]) {
+                        let angle = atan2(player[1] - baseY, player[0] - baseX)
+
+                        arc(centerOfBoard[0] + baseX, centerOfBoard[1] + baseY,
+                            1500*scalingFactor, 1500*scalingFactor, angle - PI/8, angle + PI/8, PIE)
+                    }
+
+                    baseX = cos(radians(blueMirrorAngle))*mirrorRadius
+                    baseY = sin(radians(blueMirrorAngle))*mirrorRadius
+
+                    // donut
+                    fill(200, 70, 100, 100)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(3)
+                    beginShape()
+                    for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/2 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/2 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    beginContour()
+                    for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/10 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/10 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    endContour()
+                    endShape(CLOSE)
+
+                    // display proteans
+                    fill(60, 100, 100, 60)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(5)
+                    for (let player of [H1, H2, R1, R2]) {
+                        let angle = atan2(player[1] - baseY, player[0] - baseX)
+
+                        arc(centerOfBoard[0] + baseX, centerOfBoard[1] + baseY,
+                            1500*scalingFactor, 1500*scalingFactor, angle - PI/8, angle + PI/8, PIE)
+                    }
+
+                    // reference code, inherited from Diamond Dust. it
+                    // displays proteans on cardinals or intercardinals
+                    // strokeWeight(5*scalingFactor)
+                    // if (AoEsSpawnedOn === "cardinal") {
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, -PI/8, PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 3*PI/8, 5*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 7*PI/8, 9*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 11*PI/8, 13*PI/8, PIE)
+                    // } if (AoEsSpawnedOn === "intercardinal") {
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, PI/8, 3*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 5*PI/8, 7*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 9*PI/8, 11*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 13*PI/8, 15*PI/8, PIE)
+                    // }
+
+                    frameRate(1)
+
+                    stage = 2
                 }
             }
         }
