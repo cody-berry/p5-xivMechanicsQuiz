@@ -371,7 +371,6 @@ function setup() {
     // selectionX, and scalingAdjustX. Also subtract bonusWidth/2 from
     // redSquareX.
 
-
     greenSquareX = holeSize + bonusWidth/2
     greenSquareY = holeSize
     redSquareX = width - topSquareSize - holeSize - bonusWidth/2
@@ -407,6 +406,28 @@ function setup() {
     centerOfBoard = [mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2]
 
     textAlign(CENTER, CENTER)
+
+    if (parseInt(localStorage.getItem("coins")) > 99) {
+        let link = document.getElementById('coin')
+        let newFavicon = 'data/Gold Coin Bag.ico'
+        let timestamp = new Date().getTime()
+        link.href = `${newFavicon}?${timestamp}`
+    } if (parseInt(localStorage.getItem("coins")) > 249) {
+        let link = document.getElementById('coin')
+        let newFavicon = 'data/Gold Coin Medium Bag.ico'
+        let timestamp = new Date().getTime()
+        link.href = `${newFavicon}?${timestamp}`
+    } if (parseInt(localStorage.getItem("coins")) > 499) {
+        let link = document.getElementById('coin')
+        let newFavicon = 'data/Gold Coin Large Bag.ico'
+        let timestamp = new Date().getTime()
+        link.href = `${newFavicon}?${timestamp}`
+    } if (parseInt(localStorage.getItem("coins")) > 999) {
+        let link = document.getElementById('coin')
+        let newFavicon = 'data/Gold Coin Giant Heap.ico'
+        let timestamp = new Date().getTime()
+        link.href = `${newFavicon}?${timestamp}`
+    }
 }
 
 function draw() {
@@ -3405,19 +3426,19 @@ intercardinals.`
                     cos(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[0],
                     sin(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor) + centerOfBoard[1]
                 ]
-                let MTSpot = [
+                let OTSpot = [
                     cos(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor) + centerOfBoard[0],
                     sin(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor) + centerOfBoard[1]
                 ]
-                let OTSpot = [
+                let MTSpot = [
                     cos(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor) + centerOfBoard[0],
                     sin(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor) + centerOfBoard[1]
                 ]
-                let M1Spot = [
+                let M2Spot = [
                     cos(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor) + centerOfBoard[0],
                     sin(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor) + centerOfBoard[1]
                 ]
-                let M2Spot = [
+                let M1Spot = [
                     cos(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor) + centerOfBoard[0],
                     sin(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor) + centerOfBoard[1]
                 ]
@@ -3430,94 +3451,98 @@ intercardinals.`
                     displaySmallGreenDot(R2Spot[0] - centerOfBoard[0], R2Spot[1] - centerOfBoard[1])
 
                     if (mousePressedButNotHeldDown()) {
-                    if (inClickingRange(H1Spot, 7*scalingFactor)) {
-                        textAtTop = ""
-                        textAtBottom = "You went to H1's spot."
-                        if (lightParty() === 1) {
-                            textAtBottom += "\n[PASS] — You're light party 1."
-                        } else {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're light party 2."
-                            textAtTop = "Light party 1 is left facing the" +
-                                " wall. Light party 2 is right facing the" +
-                                " wall.\n"
+                        if (inClickingRange(H1Spot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to H1's spot."
+                            if (lightParty() === 1) {
+                                textAtBottom += "\n[PASS] — You're light party 1."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 2."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[PASS] — You're a support."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're a DPS."
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
-                        if (DPSOrSupports() === "supports") {
-                            textAtBottom += "\n[PASS] — You're a support."
-                        } else {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're a DPS."
-                            textAtTop += "Supports are closer to the wall" +
-                                " than DPS."
+                        if (inClickingRange(H2Spot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to H2's spot."
+                            if (lightParty() === 1) {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 1."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            } else {
+                                textAtBottom += "\n[PASS] — You're light party 2."
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[PASS] — You're a support."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're a DPS."
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
-                        if (stage !== 100) stage = 1.25
-                    }
-                    if (inClickingRange(H2Spot, 7*scalingFactor)) {
-                        textAtTop = ""
-                        textAtBottom = "You went to H2's spot."
-                        if (lightParty() === 1) {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're light party 1."
-                            textAtTop = "Light party 1 is left facing the" +
-                                " wall. Light party 2 is right facing the" +
-                                " wall.\n"
-                        } else {
-                            textAtBottom += "\n[PASS] — You're light party 2."
+                        if (inClickingRange(R1Spot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to R1's spot."
+                            if (lightParty() === 1) {
+                                textAtBottom += "\n[PASS] — You're light party 1."
+                            } else {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 2."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[FAIL] — You're a support."
+                                stage = 100
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            } else {
+                                textAtBottom += "\n[PASS] — You're a DPS."
+                            }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
-                        if (DPSOrSupports() === "supports") {
-                            textAtBottom += "\n[PASS] — You're a support."
-                        } else {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're a DPS."
-                            textAtTop += "Supports are closer to the wall" +
-                                " than DPS."
+                        if (inClickingRange(R2Spot, 7*scalingFactor)) {
+                            textAtTop = ""
+                            textAtBottom = "You went to R2's spot."
+                            if (lightParty() === 1) {
+                                stage = 100
+                                textAtBottom += "\n[FAIL] — You're light party 1."
+                                textAtTop = "Light party 1 is left facing the" +
+                                    " wall. Light party 2 is right facing the" +
+                                    " wall.\n"
+                            } else {
+                                textAtBottom += "\n[PASS] — You're light party 2."
+                            }
+                            if (DPSOrSupports() === "supports") {
+                                textAtBottom += "\n[FAIL] — You're a support."
+                                stage = 100
+                                textAtTop += "Supports are closer to the wall" +
+                                    " than DPS."
+                            } else {
+                                textAtBottom += "\n[PASS] — You're a DPS."
+                            }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
-                        if (stage !== 100) stage = 1.25
-                    }
-                    if (inClickingRange(R1Spot, 7*scalingFactor)) {
-                        textAtTop = ""
-                        textAtBottom = "You went to R1's spot."
-                        if (lightParty() === 1) {
-                            textAtBottom += "\n[PASS] — You're light party 1."
-                        } else {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're light party 2."
-                            textAtTop = "Light party 1 is left facing the" +
-                                " wall. Light party 2 is right facing the" +
-                                " wall.\n"
-                        }
-                        if (DPSOrSupports() === "supports") {
-                            textAtBottom += "\n[FAIL] — You're a support."
-                            stage = 100
-                            textAtTop += "Supports are closer to the wall" +
-                                " than DPS."
-                        } else {
-                            textAtBottom += "\n[PASS] — You're a DPS."
-                        }
-                        if (stage !== 100) stage = 1.25
-                    }
-                    if (inClickingRange(R2Spot, 7*scalingFactor)) {
-                        textAtTop = ""
-                        textAtBottom = "You went to R2's spot."
-                        if (lightParty() === 1) {
-                            stage = 100
-                            textAtBottom += "\n[FAIL] — You're light party 1."
-                            textAtTop = "Light party 1 is left facing the" +
-                                " wall. Light party 2 is right facing the" +
-                                " wall.\n"
-                        } else {
-                            textAtBottom += "\n[PASS] — You're light party 2."
-                        }
-                        if (DPSOrSupports() === "supports") {
-                            textAtBottom += "\n[FAIL] — You're a support."
-                            stage = 100
-                            textAtTop += "Supports are closer to the wall" +
-                                " than DPS."
-                        } else {
-                            textAtBottom += "\n[PASS] — You're a DPS."
-                        }
-                        if (stage !== 100) stage = 1.25
-                    }
                     }
                 } if (meleeOrRanged() === "melee") {
                     displaySmallGreenDot(MTSpot[0] - centerOfBoard[0], MTSpot[1] - centerOfBoard[1])
@@ -3544,6 +3569,8 @@ intercardinals.`
                                 textAtBottom += "\n[FAIL] — You're a DPS."
                                 textAtTop += "Supports are closer to the wall" +
                                     " than DPS."
+                                if (stage !== 100) stage = 1.25
+                                else updateLosses(3)
                             }
                         }
                         if (inClickingRange(OTSpot, 10*scalingFactor)) {
@@ -3565,6 +3592,8 @@ intercardinals.`
                                 textAtBottom += "\n[FAIL] — You're a DPS."
                                 textAtTop += "Supports are closer to the wall" +
                                     " than DPS."
+                                if (stage !== 100) stage = 1.25
+                                else updateLosses(3)
                             }
                         }
                         if (inClickingRange(M1Spot, 10*scalingFactor)) {
@@ -3587,6 +3616,8 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're a DPS."
                             }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
                         if (inClickingRange(M2Spot, 7*scalingFactor)) {
                             textAtTop = ""
@@ -3608,9 +3639,9 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're a DPS."
                             }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
-                        if (stage !== 100) stage = 1.25
-                        else updateLosses(3)
                     }
                 }
             } if (stage === 1.25) {
@@ -3649,8 +3680,24 @@ intercardinals.`
                     cos(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor),
                     sin(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor)
                 ]
+                textAtTop = "Which red mirror should you go to?"
                 stage = 1.5
             } if (stage === 1.5) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(blueMirrorAngle))*mirrorRadius + centerOfBoard[1]]
+                image(mirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
                 let shivaRadius = mainBodyWidth/4
                 displayShiva([cos(radians(blueMirrorAngle - 180))*shivaRadius,
                     sin(radians(blueMirrorAngle - 180))*shivaRadius], "boss", "Reap!", 15*scalingFactor)
@@ -3760,8 +3807,56 @@ intercardinals.`
 
                     frameRate(1)
 
-                    stage = 2
+                    stage = 1.75
+                    return
                 }
+            } if (stage === 1.75) {
+                erase()
+                rect(0, 0, width, height)
+                noErase()
+                stage = 2
+            } if (stage === 2) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                // where to click? red mirror 1 is always counterclockwise
+                // of red mirror 2.
+                // for reference:
+                // 1. red mirrors spawn around blue mirror                           \\
+                // 2. red mirrors spawn 45º and 135º counterclockwise of blue mirror \\
+                // 3. red mirrors spawn 90º and 180º counterclockwise of blue mirror \\
+                // 4. red mirrors spawn opposite blue mirror                         \\
+                // 5. red mirrors spawn 90º and 180º clockwise of blue mirror        \\
+                // 6. red mirrors spawn 45º and 135º clockwise of blue mirror        \\
+                // now for the real thing
+                // ranged:
+                // 1. we want to rotate clockwise. red mirror 2 is more clockwise, and it's still around us
+                // 2. the nearest one is 45º counterclockwise of us. it's less counterclockwise than the 135 one, so that's red mirror 2
+                // 3. the nearest one is 90º counterclockwise of us. That's also red mirror 2
+                // 4. we want to rotate clockwise. red mirror 2 is more clockwise, but it's technically more than 180º clockwise. we want red mirror 1.
+                // 5. the nearest one is 90º clockwise of us. That's more counterclockwise, so it's red mirror 1.
+                // 6. the nearest one is 45º clockwise of us. That's more counterclockwise, so it's red mirror 1.
+                // summary: if state > 3, ranged pick red mirror 1 and melee pick red mirror 2.
+                // if state <= 3, ranged pick red mirror 2 and melee pick
+                // red mirror 2.
+                // note: the variable is redMirrorConfig
+
+                // alright. enough commenting. more code.
+                let greenDotRadius = 3*mainBodyWidth/8
+                displayGreenDot(cos(radians(redMirrorAngleOne))*greenDotRadius,
+                    sin(radians(redMirrorAngleOne))*greenDotRadius)
+                displayGreenDot(cos(radians(redMirrorAngleTwo))*greenDotRadius,
+                    sin(radians(redMirrorAngleTwo))*greenDotRadius)
+
+
             }
         }
     }
@@ -4565,9 +4660,10 @@ function setupMirrorMirror() {
     // 4. red mirrors spawn opposite blue mirror
     // 5. red mirrors spawn 90º and 180º clockwise of blue mirror
     // 6. red mirrors spawn 45º and 135º clockwise of blue mirror
-    redMirrorConfig = random([1, 2, 3, 4, 5, 6])
+    redMirrorConfig = random([1, 2, 4, 6])
     redMirrorAngleOne = blueMirrorAngle
     redMirrorAngleTwo = blueMirrorAngle
+    rangedRedMirror = 1
     if (redMirrorConfig === 1) {
         redMirrorAngleOne -= 45
         redMirrorAngleTwo += 45
@@ -4618,6 +4714,26 @@ function setupMirrorMirror() {
         " intercardinal you should go to."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+This mechanic uses NAUR strats: https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79
+
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+        Warning: not implemented.
+        
+You are currently on the mechanic Diamond Dust.
+Click on any green dot to move to—or near—that location.
+There isn't a timing feature on this mechanic——yet, that is. There will be soon.
+You cannot track wins and losses yet. Once there is a system, wins and losses 
+ from separate mechanics will be saved to local storage but counted separately.
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
 }
 
 //——————————————————————————miscellany——————————————————————————\\
