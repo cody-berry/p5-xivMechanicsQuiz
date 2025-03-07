@@ -182,13 +182,14 @@ let instructions
 let debugCorner /* output debug text in the bottom left corner of the canvas */
 
 // displaying the windows
-let scalingFactor = 1.33
+let baseScalingFactor = 1.5
+let scalingFactor = 1
 let scalingFactorFetch = localStorage.getItem("scalingFactor")
 if (!scalingFactorFetch) {
-    localStorage.setItem("scalingFactor", "1.33")
-    scalingFactorFetch = "1.33"
+    localStorage.setItem("scalingFactor", "1")
+    scalingFactorFetch = "1"
 }
-scalingFactor = parseFloat(scalingFactorFetch)
+scalingFactor = baseScalingFactor*parseFloat(scalingFactorFetch)
 scalingFactorFetch = parseFloat(scalingFactorFetch)
 
 let textPadding = 3.5*scalingFactor
@@ -3851,12 +3852,197 @@ intercardinals.`
 
                 // alright. enough commenting. more code.
                 let greenDotRadius = 3*mainBodyWidth/8
+                let dotOne = [
+                    cos(radians(redMirrorAngleOne))*greenDotRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*greenDotRadius + centerOfBoard[1]]
+                let dotTwo = [
+                    cos(radians(redMirrorAngleTwo))*greenDotRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*greenDotRadius + centerOfBoard[1]]
                 displayGreenDot(cos(radians(redMirrorAngleOne))*greenDotRadius,
                     sin(radians(redMirrorAngleOne))*greenDotRadius)
                 displayGreenDot(cos(radians(redMirrorAngleTwo))*greenDotRadius,
                     sin(radians(redMirrorAngleTwo))*greenDotRadius)
 
-
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(dotOne, 15 * scalingFactor)) {
+                        if ((meleeOrRanged() === "melee") !== (redMirrorConfig < 4)) {
+                            stage = 100
+                            updateLosses(3)
+                        } else stage = 2.25
+                        if (redMirrorConfig < 4) {
+                            // in this situation, ranged pick red mirror
+                            // 2 and melee pick red mirror 1.
+                            if (meleeOrRanged() === "melee") {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " clockwise of you. \n[PASS] — Red" +
+                                        " mirrors spawned towards you." +
+                                        " \n[PASS] — You went to the one" +
+                                        " clockwise of you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " closer to you. \n[PASS] — You are" +
+                                        " supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                }
+                            } else {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " counterclockwise of you. \n[PASS] —" +
+                                        " Red mirrors spawned towards you." +
+                                        " \n[FAIL] — You went to the one" +
+                                        " counterclockwise, not clockwise," +
+                                        " of you."
+                                    textAtTop = "If mirrors spawn near" +
+                                        " you, you want to rotate clockwise," +
+                                        " not counterclockwise."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " farther from you. \n[FAIL] — You" +
+                                        " are supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "If applicable, you will" +
+                                        " always want to go to the red" +
+                                        " mirror closer to you."
+                                }
+                            }
+                        } else {
+                            // in this situation, ranged pick red mirror
+                            // 1 and melee pick red mirror 2.
+                            if (meleeOrRanged() === "melee") {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " counterclockwise of you. \n[PASS] —" +
+                                        " Red mirrors spawned towards you." +
+                                        " \n[FAIL] — You went to the one" +
+                                        " counterclockwise, not clockwise," +
+                                        " of you."
+                                    textAtTop = "If mirrors spawn near" +
+                                        " you, you want to rotate clockwise," +
+                                        " not counterclockwise."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " farther from you. \n[FAIL] — You" +
+                                        " are supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "If applicable, you will" +
+                                        " always want to go to the red" +
+                                        " mirror closer to you."
+                                }
+                            } else {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " clockwise of you. \n[PASS] — Red" +
+                                        " mirrors spawned towards you." +
+                                        " \n[PASS] — You went to the one" +
+                                        " clockwise of you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " closer to you. \n[PASS] — You are" +
+                                        " supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                }
+                            }
+                        }
+                    }
+                    if (inClickingRange(dotTwo, 15 * scalingFactor)) {
+                        if ((meleeOrRanged() === "melee") === (redMirrorConfig < 4)) {
+                            stage = 100
+                            updateLosses(3)
+                        } else stage = 2.25
+                        if (redMirrorConfig < 4) {
+                            // in this situation, ranged pick red mirror
+                            // 2 and melee pick red mirror 1.
+                            if (meleeOrRanged() === "melee") {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " counterclockwise of you. \n[PASS] —" +
+                                        " Red mirrors spawned towards you." +
+                                        " \n[FAIL] — You went to the one" +
+                                        " counterclockwise, not clockwise," +
+                                        " of you."
+                                    textAtTop = "If mirrors spawn near" +
+                                        " you, you want to rotate clockwise," +
+                                        " not counterclockwise."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " farther from you. \n[FAIL] — You" +
+                                        " are supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "If applicable, you will" +
+                                        " always want to go to the red" +
+                                        " mirror closer to you."
+                                }
+                            } else {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " clockwise of you. \n[PASS] — Red" +
+                                        " mirrors spawned towards you." +
+                                        " \n[PASS] — You went to the one" +
+                                        " clockwise of you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " closer to you. \n[PASS] — You are" +
+                                        " supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                }
+                            }
+                        } else {
+                            // in this situation, ranged pick red mirror
+                            // 1 and melee pick red mirror 2.
+                            if (meleeOrRanged() === "melee") {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " clockwise of you. \n[PASS] — Red" +
+                                        " mirrors spawned towards you." +
+                                        " \n[PASS] — You went to the one" +
+                                        " clockwise of you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " closer to you. \n[PASS] — You are" +
+                                        " supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "Select where you want to" +
+                                        " bait your red mirror."
+                                }
+                            } else {
+                                if (redMirrorConfig === 1 || redMirrorConfig === 4) {
+                                    textAtBottom = "You went to the mirror" +
+                                        " counterclockwise of you. \n[PASS] —" +
+                                        " Red mirrors spawned towards you." +
+                                        " \n[FAIL] — You went to the one" +
+                                        " counterclockwise, not clockwise," +
+                                        " of you."
+                                    textAtTop = "If mirrors spawn near" +
+                                        " you, you want to rotate clockwise," +
+                                        " not counterclockwise."
+                                } else {
+                                    textAtBottom = "You went to the mirror" +
+                                        " farther from you. \n[FAIL] — You" +
+                                        " are supposed to go to the mirror" +
+                                        " closer to you."
+                                    textAtTop = "If applicable, you will" +
+                                        " always want to go to the red" +
+                                        " mirror closer to you."
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -4416,6 +4602,11 @@ function DPSOrSupports() {
     return "DPS"
 }
 
+function DPSOrSupport() {
+    if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "support"}
+    return "DPS"
+}
+
 function lightParty() {
     if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
     return 2
@@ -4660,7 +4851,7 @@ function setupMirrorMirror() {
     // 4. red mirrors spawn opposite blue mirror
     // 5. red mirrors spawn 90º and 180º clockwise of blue mirror
     // 6. red mirrors spawn 45º and 135º clockwise of blue mirror
-    redMirrorConfig = random([1, 2, 4, 6])
+    redMirrorConfig = random([1, 2, 6])
     redMirrorAngleOne = blueMirrorAngle
     redMirrorAngleTwo = blueMirrorAngle
     rangedRedMirror = 1

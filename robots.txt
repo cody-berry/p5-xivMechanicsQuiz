@@ -4,5 +4,6 @@ Allow: /data/
 Disallow: /*.js$
 Disallow: /*.json$
 Disallow: /*.log$
+
 User-agent: Googlebot-Image
 Allow: /data/
