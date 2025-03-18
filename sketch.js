@@ -314,6 +314,8 @@ let textAtTop
 let textAtBottom
 let centerOfBoard
 
+
+
 //——————————————————————————your everyday functions——————————————————————————\\
 
 function preload() {
@@ -408,7 +410,7 @@ function setup() {
 
     textAlign(CENTER, CENTER)
 
-    if (parseInt(localStorage.getItem("coins")) > 99) {
+    if (parseInt(localStorage.getItem("coins")) > 9) {
         let link = document.getElementById('coin')
         let newFavicon = 'data/Gold Coin Bag.ico'
         let timestamp = new Date().getTime()
@@ -433,7 +435,6 @@ function setup() {
 
 function draw() {
     frameRate(60)
-
     updateVectors()
 
     // the green square at the top-left TODO
@@ -488,7 +489,6 @@ function draw() {
     // used in emergencies. also a nice treat for those who accidentally
     // pressed backtick
     displayDebugCorner()
-
 
     // make sure mousePressedLastFrame is updated
     mousePressedLastFrame = mouseIsPressed
@@ -4042,6 +4042,72 @@ intercardinals.`
                             }
                         }
                     }
+                }
+            } if (stage === 2.25) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                // reminder of long block of comments?
+                // where to click? red mirror 1 is always counterclockwise
+                // of red mirror 2.
+                // for reference:
+                // 1. red mirrors spawn around blue mirror                           \\
+                // 2. red mirrors spawn 45º and 135º counterclockwise of blue mirror \\
+                // 3. red mirrors spawn 90º and 180º counterclockwise of blue mirror \\
+                // 4. red mirrors spawn opposite blue mirror                         \\
+                // 5. red mirrors spawn 90º and 180º clockwise of blue mirror        \\
+                // 6. red mirrors spawn 45º and 135º clockwise of blue mirror        \\
+                // now for the real thing
+                // ranged:
+                // 1. we want to rotate clockwise. red mirror 2 is more clockwise, and it's still around us
+                // 2. the nearest one is 45º counterclockwise of us. it's less counterclockwise than the 135 one, so that's red mirror 2
+                // 3. the nearest one is 90º counterclockwise of us. That's also red mirror 2
+                // 4. we want to rotate clockwise. red mirror 2 is more clockwise, but it's technically more than 180º clockwise. we want red mirror 1.
+                // 5. the nearest one is 90º clockwise of us. That's more counterclockwise, so it's red mirror 1.
+                // 6. the nearest one is 45º clockwise of us. That's more counterclockwise, so it's red mirror 1.
+                // summary: if state > 3, ranged pick red mirror 1 and melee pick red mirror 2.
+                // if state <= 3, ranged pick red mirror 2 and melee pick
+                // red mirror 2.
+                // note: the variable is redMirrorConfig
+                let rangedRedMirror = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
+                let meleeRedMirror = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
+                let playerRadius = 3*mainBodyWidth/8
+                MT = [cos(radians(meleeRedMirror + random(-10, 10)))*playerRadius, sin(radians(meleeRedMirror + random(-10, 10)))*playerRadius]
+                OT = [cos(radians(meleeRedMirror + random(-10, 10)))*playerRadius, sin(radians(meleeRedMirror + random(-10, 10)))*playerRadius]
+                M1 = [cos(radians(meleeRedMirror + random(-10, 10)))*playerRadius, sin(radians(meleeRedMirror + random(-10, 10)))*playerRadius]
+                M2 = [cos(radians(meleeRedMirror + random(-10, 10)))*playerRadius, sin(radians(meleeRedMirror + random(-10, 10)))*playerRadius]
+                H1 = [cos(radians(rangedRedMirror + random(-10, 10)))*playerRadius, sin(radians(rangedRedMirror + random(-10, 10)))*playerRadius]
+                H2 = [cos(radians(rangedRedMirror + random(-10, 10)))*playerRadius, sin(radians(rangedRedMirror + random(-10, 10)))*playerRadius]
+                R1 = [cos(radians(rangedRedMirror + random(-10, 10)))*playerRadius, sin(radians(rangedRedMirror + random(-10, 10)))*playerRadius]
+                R2 = [cos(radians(rangedRedMirror + random(-10, 10)))*playerRadius, sin(radians(rangedRedMirror + random(-10, 10)))*playerRadius]
+                stage = 3
+            } if (stage === 3) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                // alright. time for the ultimate time-consumer: the red
+                // mirror green dot positions!
+                let redMirrorAngleYouAreOn
+                if (meleeOrRanged() === "melee") {
+                    redMirrorAngleYouAreOn = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
+                } else {
+                    redMirrorAngleYouAreOn = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
                 }
             }
         }
