@@ -325,15 +325,15 @@ let textAtBottom
 let centerOfBoard
 
 // sometimes the code will change and require a system update.
-let version = "0.0"
-// Version 0.0
+let version = "0.000"
+// Version 0.000
 //  - Initial release
 //  - FRU support for Utopian Sky (do not use), Diamond Dust, Mirror Mirror
 //    - nothing changed to support these
 //  - Currency coin tracking via local storage
 //  - Time tracking without local storage
 
-// Version 0.1
+// Version 0.100
 //  - Updates implemented
 //  - M8S support for Millenial Decay
 //    - nothing changed to support these
@@ -341,7 +341,8 @@ let version = "0.0"
 // version format:
 //  first number: expansion number
 //  first number after decimal: tier implementation number, starts at 0
-//  second number after decimal: 0 = main, 1-5 = more fights, 6 = new features & optimizations
+//  second number after decimal: 0 = main, 1-9 = more fights
+//  third number after decimal: 0 = main, 1-9 = mechanic
 
 
 //——————————————————————————your everyday functions——————————————————————————\\
@@ -458,14 +459,23 @@ function setup() {
     }
 
     // make sure your version is up-to-date and do any updates required
-    while (version !== "0.1") {
-        switch (version) {
-            case "0.0":
-                version = "0.1"
+    switch (version) {
+            case "0.000":
+                version = "0.100"
                 break
             default:
                 print("Your version is up to date")
         }
+    while (true) {
+        let uptodate = false
+        switch (version) {
+            case "0.000":
+                version = "0.100"
+                break
+            default:
+                uptodate = true
+        }
+        if (uptodate) break
     }
     localStorage.setItem("version", version)
 }
@@ -2040,7 +2050,7 @@ intercardinals.`
                     displayGreenDot(centerPosition[0] - centerOfBoard[0], centerPosition[1] - centerOfBoard[1])
 
                     // if you're not marked, you're already done!
-                    if (markedPlayers !== DPSOrSupports()) {
+                    if (markedPlayers !== DPSOrSupports(role)) {
                         textAtTop = "The rest of the circles have appeared. " +
                             "Move to your spot to get knocked back into the " +
                             "correct location."
@@ -2198,7 +2208,7 @@ intercardinals.`
                     let farOuterPosition
                     let outerRingPosition
                     let innerRingPosition
-                    if (markedPlayers === DPSOrSupports()) {
+                    if (markedPlayers === DPSOrSupports(role)) {
                         // we will be on the far outer position
                         farOuterPosition = [yourposition[0] + centerOfBoard[0], yourposition[1] + centerOfBoard[1]]
                         outerRingPosition = [0.834 * yourposition[0] + centerOfBoard[0], 0.834 * yourposition[1] + centerOfBoard[1]]
@@ -2216,7 +2226,7 @@ intercardinals.`
 
                     if (mousePressedButNotHeldDown()) {
                         if (inClickingRange(farOuterPosition, 10*scalingFactor)) {
-                            if (markedPlayers === DPSOrSupports()) {
+                            if (markedPlayers === DPSOrSupports(role)) {
                                 // you pass because marked players are
                                 // supposed to stay out
                                 textAtTop = "The rest of the circles have" +
@@ -2291,7 +2301,7 @@ intercardinals.`
                                 updateLosses(2)
                             }
                         } if (inClickingRange(outerRingPosition, 10*scalingFactor)) {
-                            if (markedPlayers === DPSOrSupports()) {
+                            if (markedPlayers === DPSOrSupports(role)) {
                                 // descriptions are different for each,
                                 // though they result in the same outcome
                                 textAtTop = "You ran in slightly too much." +
@@ -2317,7 +2327,7 @@ intercardinals.`
                                 updateLosses(2)
                             }
                         } if (inClickingRange(innerRingPosition, 10*scalingFactor)) {
-                            if (markedPlayers === DPSOrSupports()) {
+                            if (markedPlayers === DPSOrSupports(role)) {
                                 textAtTop = "You ran in too much, though" +
                                     " the only reason why we don't run in is" +
                                     " because it takes...more effort." +
@@ -3500,7 +3510,7 @@ intercardinals.`
                                     " wall. Light party 2 is right facing the" +
                                     " wall.\n"
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[PASS] — You're a support."
                             } else {
                                 stage = 100
@@ -3523,7 +3533,7 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're light party 2."
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[PASS] — You're a support."
                             } else {
                                 stage = 100
@@ -3546,7 +3556,7 @@ intercardinals.`
                                     " wall. Light party 2 is right facing the" +
                                     " wall.\n"
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[FAIL] — You're a support."
                                 stage = 100
                                 textAtTop += "Supports are closer to the wall" +
@@ -3569,7 +3579,7 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're light party 2."
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[FAIL] — You're a support."
                                 stage = 100
                                 textAtTop += "Supports are closer to the wall" +
@@ -3599,7 +3609,7 @@ intercardinals.`
                                     " wall. Light party 2 is right facing the" +
                                     " wall.\n"
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[PASS] — You're a support."
                             } else {
                                 stage = 100
@@ -3622,7 +3632,7 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're light party 2."
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[PASS] — You're a support."
                             } else {
                                 stage = 100
@@ -3645,7 +3655,7 @@ intercardinals.`
                                     " wall. Light party 2 is right facing the" +
                                     " wall.\n"
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[FAIL] — You're a support."
                                 stage = 100
                                 textAtTop += "Supports are closer to the wall" +
@@ -3668,7 +3678,7 @@ intercardinals.`
                             } else {
                                 textAtBottom += "\n[PASS] — You're light party 2."
                             }
-                            if (DPSOrSupports() === "supports") {
+                            if (DPSOrSupports(role) === "supports") {
                                 textAtBottom += "\n[FAIL] — You're a support."
                                 stage = 100
                                 textAtTop += "Supports are closer to the wall" +
@@ -4159,7 +4169,7 @@ intercardinals.`
         displayCharacterPositions()
 
         // now then, for the waymarks
-        let waymarkRadius = mainBodyWidth*5/13
+        let waymarkRadius = mainBodyWidth*6/13
         glowWaymark(0, 100, 80, "circle", 7*scalingFactor, cos(-90)*waymarkRadius, sin(-90)*waymarkRadius, 30*scalingFactor, "A")
         glowWaymark(0, 100, 80, "rect", 7*scalingFactor, cos(-135)*waymarkRadius, sin(-135)*waymarkRadius, 30*scalingFactor, "1")
         glowWaymark(270, 100, 80, "circle", 7*scalingFactor, cos(180)*waymarkRadius, sin(180)*waymarkRadius, 30*scalingFactor, "D")
@@ -4169,17 +4179,109 @@ intercardinals.`
         glowWaymark(60, 100, 80, "circle", 7*scalingFactor, cos(0)*waymarkRadius, sin(0)*waymarkRadius, 30*scalingFactor, "B")
         glowWaymark(60, 100, 80, "rect", 7*scalingFactor, cos(-45)*waymarkRadius, sin(-45)*waymarkRadius, 30*scalingFactor, "2")
 
+        pop()
+
+
         if (currentlySelectedMechanic === "Millenial Decay") {
             if (stage === 0) {
+                displayGreenDot(0, 0)
                 if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    stage = 0.5
 
+                    // separated by pair, listing ranged first in each pair
+                    // northwest
+                    H1 = [random(-70*scalingFactor, -40*scalingFactor), random(-70*scalingFactor, -40*scalingFactor)]
+                    M1 = [random(-40*scalingFactor, -20*scalingFactor), random(-40*scalingFactor, -20*scalingFactor)]
+
+                    // southwest
+                    H2 = [random(-70*scalingFactor, -40*scalingFactor), random(70*scalingFactor, 40*scalingFactor)]
+                    M2 = [random(-40*scalingFactor, -20*scalingFactor), random(40*scalingFactor, 20*scalingFactor)]
+
+                    // southeast
+                    R2 = [random(70*scalingFactor, 40*scalingFactor), random(70*scalingFactor, 40*scalingFactor)]
+                    OT = [random(40*scalingFactor, 20*scalingFactor), random(40*scalingFactor, 20*scalingFactor)]
+
+                    // northeast
+                    R1 = [random(70*scalingFactor, 40*scalingFactor), random(-70*scalingFactor, -40*scalingFactor)]
+                    MT = [random(40*scalingFactor, 20*scalingFactor), random(-40*scalingFactor, -20*scalingFactor)]
+
+                    return
+                }
+            } if (stage === 0.5) {
+                if (belowPositioningThreshold(0.5*scalingFactor, [
+                    [MT, realMT],
+                    [OT, realOT],
+                    [H1, realH1],
+                    [H2, realH2],
+                    [M1, realM1],
+                    [M2, realM2],
+                    [R1, realR1],
+                    [R2, realR2]
+                ])) {
+                    stage = 1
+                    textAtTop = "Get knocked back to the correct spot. This" +
+                        " quiz assumes you are using knockback immune, but" +
+                        " if you are \nlike me, you might not be using" +
+                        " knockback immune. Healers should definitely" +
+                        " consider not using KI as \nthey want to be in the" +
+                        " center anyways to heal." +
+                        " \nThis time, " + dpsOrSupportsFirst + " have been targeted."
+                    textAtBottom = "[PASS] — You can actually click."
                 }
             } if (stage === 1) {
+                let AoEsize = 120*scalingFactor // very important to get spread AoE size correct
 
+                angleMode(RADIANS)
+                // mark whoever got targeted first
+                if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                // for the rest of this mech, there will be 3 radii of dots
+                // with 30-angle and 45-angle increments
+                // the inner one is for melees
+                // the outer one is for ranged
+                // the medium one is so that you can actually get to the
+                // outer ring to the inner ring
+
+                let innerRadius = mainBodyWidth/8
+                let mediumRadius = mainBodyWidth/4
+                let outerRadius = 5*mainBodyWidth/13
+
+                let innerDots = []
+                let mediumDots = []
+                let outerDots = []
+
+                for (let angle = 0; angle < 360; angle += 15) {
+                    if (angle % 45 === 0 || angle % 30 === 0) {
+                        displaySmallGreenDot(cos(angle) * innerRadius, sin(angle) * innerRadius)
+                        displayGreenDot(cos(angle) * mediumRadius, sin(angle) * mediumRadius)
+                        displayGreenDot(cos(angle) * outerRadius, sin(angle) * outerRadius)
+
+                        innerDots.push(cos(angle) * innerRadius, sin(angle) * innerRadius)
+                        mediumDots.push(cos(angle) * mediumRadius, sin(angle) * mediumRadius)
+                        outerDots.push(cos(angle) * outerRadius, sin(angle) * outerRadius)
+                    }
+                }
             }
         }
-
-        pop()
         angleMode(RADIANS)
     }
 }
@@ -4491,6 +4593,14 @@ function updateVectors() {
     realR2.update()
 }
 
+// when all the people are within threshold of their spot, this returns true
+function belowPositioningThreshold(threshold, peopleToCheck) {
+    for (let person of peopleToCheck) {
+        if (sqrt((person[0][0] - person[1].x)**2 + (person[0][1] - person[1].y)**2) > threshold) return false
+    }
+    return true
+}
+
 //—————————————————————————————display functions—————————————————————————————\\
 
 // these puddles are always given in the format of [x, y, millisAppeared,
@@ -4545,7 +4655,10 @@ function displayStarAoE(x, y) {
     pop()
 }
 
-// target symbol is orange plus above player.
+// target symbol is orange plus above player, and a semicircle connecting to
+// the top of the arc.   ◡
+//                       |
+//                       +
 function displayTargetSymbol(x, y) {
     stroke(30, 100, 70)
     strokeWeight(2*scalingFactor)
@@ -4553,6 +4666,46 @@ function displayTargetSymbol(x, y) {
     line(x, y - 10*scalingFactor, x, y - 20*scalingFactor)
     line(x - 3*scalingFactor, y - 15*scalingFactor, x + 3*scalingFactor, y - 15*scalingFactor)
     arc(x, y - 24*scalingFactor, 8*scalingFactor, 8*scalingFactor, -PI/8, 9*PI/8)
+}
+
+// spread marker, display via gray background and then a bunch of 10-opacity
+// different-stroke-weight circles to provide a gradient effect towards the middle
+function displaySpreadMarker(x, y, d, h, s, b) {
+    noFill()
+    stroke(0, 0, b/2)
+    strokeWeight(7.5*scalingFactor)
+    circle(x, y, d)
+    stroke(h, s, b, 10)
+    strokeWeight(7*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(6.5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(6*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(5.5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(4.5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(4*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(3.5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(3*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(2.5*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(2*scalingFactor)
+    circle(x, y, d)
+    strokeWeight(1.5*scalingFactor)
+    circle(x, y, d)
+
+    if (frameCount*1.5 % d < 2*d/3) {
+        stroke(h, s, b, 30)
+        strokeWeight(3 * scalingFactor)
+        circle(x, y, (frameCount*1.5 % d)*3/2)
+    }
 }
 
 function displayShiva(position, type, messageBox, sizeOfTorso) {
@@ -4752,12 +4905,12 @@ function meleeOrRanged() {
     return "ranged"
 }
 
-function DPSOrSupports() {
+function DPSOrSupports(role) {
     if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "supports"}
     return "DPS"
 } // DPS/supports
 
-function DPSOrSupport() {
+function DPSOrSupport(role) {
     if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "support"}
     return "DPS"
 } // DPS/support
@@ -4769,6 +4922,10 @@ function lightParty() {
 
 // because it's super annoying when you have to write a switch statement
 function yourPosition() {
+    currentPosition(role)
+}
+
+function currentPosition(role) {
     switch (role) {
         case "MT":
             return MT
@@ -5111,8 +5268,7 @@ function setupMillenialDecay() {
     rotation = random(["cw", "ccw"])
     northorsouth = random(["N", "S"])
 
-    // create a random spread with MT north and everyone else randomly
-    // scattered around
+    // create a random spread with everyone north
     realMT.x = random(-50*scalingFactor, 50*scalingFactor)
     realMT.y = random(-120*scalingFactor, -60*scalingFactor)
     realOT.x = random(-50*scalingFactor, 50*scalingFactor)
@@ -5149,8 +5305,9 @@ function setupMillenialDecay() {
 
     textAtTop = "This simulator aims to help your adds, clock TR, beckon moonlight, P1 enrage, twofold tempest, lone \n" +
         "wolf's lament, champion's circuit, and P2 enrage prog parties, as well as your reclear groups, see adds \n" +
-        "once. Most PF parties are decay prog parties. Please use the Murderless Fering Decay prog.\n" +
-        "Click on the dot in the center to continue."
+        "once. Most PF parties are decay prog parties in disguise. Please use the" +
+        " Murderless Fering Decay video \nby Hector. Click on the dot in the" +
+        " center to continue."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
 
