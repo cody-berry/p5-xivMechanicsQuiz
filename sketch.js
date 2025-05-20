@@ -311,9 +311,12 @@ let redMirrorAngleTwo
 let gustImage // spreads
 let m8sP1Image
 let m8sP1Background
+let m8sP1WolfHead
+let m8sP1LineAoE
 let dpsOrSupportsFirst // who gets targetted first for spreads
-let rotation // whether the wolf heads will rotate dcw or ccw. follow rotation
+let wolfHeadRotation // whether the wolf heads will rotate dcw or ccw. follow rotation
 let northorsouth // wolf heads can spawn north or south. purely graphical
+let framesWhenKnockbackStarted // for graphical effects
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -4208,6 +4211,72 @@ intercardinals.`
                     return
                 }
             } if (stage === 0.5) {
+                if (belowPositioningThreshold(130*scalingFactor, [
+                    [MT, realMT],
+                    [OT, realOT],
+                    [H1, realH1],
+                    [H2, realH2],
+                    [M1, realM1],
+                    [M2, realM2],
+                    [R1, realR1],
+                    [R2, realR2]
+                ])) {
+                    stage = 0.66
+                    textAtBottom = "[PASS] — You can actually click."
+                }
+            } if (stage === 0.66) {
+                // display a wolf head
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                pop()
+                if (belowPositioningThreshold(45*scalingFactor, [
+                    [MT, realMT],
+                    [OT, realOT],
+                    [H1, realH1],
+                    [H2, realH2],
+                    [M1, realM1],
+                    [M2, realM2],
+                    [R1, realR1],
+                    [R2, realR2]
+                ])) {
+                    stage = 0.83
+                }
+            } if (stage === 0.83) {
+                // display 2 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 2; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
                 if (belowPositioningThreshold(0.5*scalingFactor, [
                     [MT, realMT],
                     [OT, realOT],
@@ -4226,11 +4295,34 @@ intercardinals.`
                         " consider not using KI as \nthey want to be in the" +
                         " center anyways to heal." +
                         " \nThis time, " + dpsOrSupportsFirst + " have been targeted."
-                    textAtBottom = "[PASS] — You can actually click."
                 }
             } if (stage === 1) {
-                let AoEsize = 120*scalingFactor // very important to get spread AoE size correct
+                // display 3 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 3; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
 
+                let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
                 angleMode(RADIANS)
                 // mark whoever got targeted first
                 if (dpsOrSupportsFirst === "supports") {
@@ -4261,25 +4353,554 @@ intercardinals.`
                 // the medium one is so that you can actually get to the
                 // outer ring to the inner ring
 
-                let innerRadius = mainBodyWidth/8
-                let mediumRadius = mainBodyWidth/4
+                let innerRadius = mainBodyWidth/6
                 let outerRadius = 5*mainBodyWidth/13
 
                 let innerDots = []
-                let mediumDots = []
                 let outerDots = []
 
                 for (let angle = 0; angle < 360; angle += 15) {
                     if (angle % 45 === 0 || angle % 30 === 0) {
                         displaySmallGreenDot(cos(angle) * innerRadius, sin(angle) * innerRadius)
-                        displayGreenDot(cos(angle) * mediumRadius, sin(angle) * mediumRadius)
                         displayGreenDot(cos(angle) * outerRadius, sin(angle) * outerRadius)
 
-                        innerDots.push(cos(angle) * innerRadius, sin(angle) * innerRadius)
-                        mediumDots.push(cos(angle) * mediumRadius, sin(angle) * mediumRadius)
-                        outerDots.push(cos(angle) * outerRadius, sin(angle) * outerRadius)
+                        innerDots.push([cos(angle) * innerRadius + centerOfBoard[0], sin(angle) * innerRadius + centerOfBoard[1]])
+                        outerDots.push([cos(angle) * outerRadius + centerOfBoard[0], sin(angle) * outerRadius + centerOfBoard[1]])
                     }
                 }
+
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRanges(innerDots, 7 * scalingFactor)) {
+                        if (meleeOrRanged(role) === "ranged") {
+                            stage = 100
+                            textAtTop = "You're a ranged. Ranged always go out."
+                            textAtBottom = "You went to one of the inner dots." +
+                                " \n[FAIL] — This quiz fails you if you are not" +
+                                " planning to use KI."
+                            updateLosses(1)
+                            return
+                        } else {
+                            // you're a melee
+                            // if you are not marked, then you will want to go
+                            // within a few degrees of the west/east dots
+                            // if you are marked, you need to go to one of
+                            // the intercardinals
+                            let clickedDot = inClickingRanges(innerDots, 7*scalingFactor) // always returns the position of the dot
+
+                            // for all practical purposes, we will want to
+                            // make 0,0 the center of the board. right now,
+                            // 0,0 is the top-left of the screen
+                            clickedDot = [clickedDot[0] - centerOfBoard[0],
+                                          clickedDot[1] - centerOfBoard[1]]
+
+                            // but first we need to find the angle. right
+                            // now we are in degrees
+                            let angle = round(atan2(clickedDot[1], clickedDot[0]))
+
+                            // first, rule out parts getting hit by the
+                            // line AoE (-120, -90, -60, 60, 90, 120)
+                            if (checkEqualities(angle, [-120, -90, -60, 60, 90, 120])) {
+                                stage = 100
+                                textAtTop = "Oops, this spot is clipped by the line AoE."
+                                textAtBottom = "You went to a more N/S" +
+                                    " location. \n[PASS] — You are a melee," +
+                                    " and you went to one of the inner dots." +
+                                    " \n[FAIL] — This location is clipped by" +
+                                    " the line AoE."
+                                updateLosses(1)
+                                return
+                            }
+
+
+                            textAtBottom = "\n[PASS] — You are a melee, and you went to one of the inner dots. " +
+                                "\n[PASS] — You dodged the line AoE."
+                            if (DPSOrSupports(role) === dpsOrSupportsFirst) {
+                                // this is if you are marked
+                                // only the intercardinal dots are good:
+                                //   45, 135, -135, -45
+                                // M1 takes -135
+                                // M2 takes 135
+                                // MT takes -45
+                                // OT takes 45
+
+                                // the way we're going to do this is to check what the angle is, and what your role is separately
+                                if (angle === -135) {
+                                    textAtBottom = "You went to M1's spot." + textAtBottom
+                                    if (role === "M1") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === 135) {
+                                    textAtBottom = "You went to M2's spot." + textAtBottom
+                                    if (role === "M2") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === -45) {
+                                    textAtBottom = "You went to MT's spot." + textAtBottom
+                                    if (role === "MT") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === 45) {
+                                    textAtBottom = "You went to OT's spot." + textAtBottom
+                                    if (role === "OT") stage = 1.25
+                                    else stage = 100
+                                }
+
+                                if (stage === 1.25) { // you went to your spot
+                                    textAtBottom += "\n[PASS] — You are " + textAtBottom[12] + textAtBottom[13] + "."
+                                    textAtTop = "Please wait for people to get in their spot."
+                                } if (stage === 100) { // you didn't go to your spot
+                                    textAtBottom += "\n[FAIL] — You are not " + textAtBottom[12] + textAtBottom[13] + "."
+                                    textAtTop = "You went to the completely wrong spread spot."
+                                    updateLosses(1)
+                                } if (stage === 1) { // you didn't go to a cardinal so none of the checks went through
+                                    textAtBottom = "You went to a non-spread location." + textAtBottom +
+                                        "\n[FAIL] — You are probably going to clip the other melee."
+                                    stage = 100
+                                    textAtTop = "The positioning is tight if you go there. Try to avoid doing that."
+                                    updateLosses(1)
+                                }
+                            } else {
+                                // this is if you are not marked
+                                // acceptable positions: 0º, 30º, 150º, 180º,
+                                // -150º, -30º
+                                // check which side you're on
+
+                                // we will do the same thing as when you are
+                                // marked
+                                if (checkEqualities(angle, [-30, 0, 30])) {
+                                    textAtBottom = "You went to the tank's spot." + textAtBottom
+                                    if (role === "MT" || role === "OT") stage = 1.25
+                                    else stage = 100
+                                } if (checkEqualities(angle, [150, 180, -150])) {
+                                    textAtBottom = "You went to the melee's spot." + textAtBottom
+                                    if (role === "M1" || role === "M2") stage = 1.25
+                                    else stage = 100
+                                }
+                                if (stage === 1.25) { // you went to your spot
+                                    textAtBottom += "\n[PASS] — You are hiding in the correct spot."
+                                    textAtTop = "Please wait for people to get in their spot."
+                                } if (stage === 100) { // you didn't go to your spot
+                                    textAtBottom += "\n[FAIL] — You are on the wrong side."
+                                    textAtTop = "You went to the completely wrong side."
+                                    updateLosses(1)
+                                } if (stage === 1) { // you didn't go to a cardinal so none of the checks went through
+                                    textAtBottom = "You went to a non-spread location." + textAtBottom +
+                                        "\n[FAIL] — You are probably going to clip the other melee."
+                                    stage = 100
+                                    textAtTop = "The positioning is tight if you go there. Try to avoid doing that."
+                                    updateLosses(1)
+                                }
+                            }
+                            return
+                        }
+                    }
+                    if (inClickingRanges(outerDots, 15 * scalingFactor)) {
+                        if (meleeOrRanged(role) === "melee") {
+                            stage = 100
+                            textAtTop = "You're a melee. Melee always go in."
+                            textAtBottom = "You went to one of the inner dots." +
+                                " \n[FAIL] — Melees go in."
+                            updateLosses(1)
+                            return
+                        } else {
+                            // you're a ranged
+                            // if you are not marked, then you will want to go
+                            // within a few degrees of the west/east dots
+                            // if you are marked, you need to go to one of
+                            // the intercardinals
+                            let clickedDot = inClickingRanges(outerDots, 15*scalingFactor) // always returns the position of the dot
+
+                            // for all practical purposes, we will want to
+                            // make 0,0 the center of the board. right now,
+                            // 0,0 is the top-left of the screen
+                            clickedDot = [clickedDot[0] - centerOfBoard[0],
+                                clickedDot[1] - centerOfBoard[1]]
+
+                            // but first we need to find the angle. right
+                            // now we are in degrees
+                            let angle = round(atan2(clickedDot[1], clickedDot[0]))
+
+                            // first, rule out parts getting hit by the
+                            // line AoE (-90, 90)
+                            if (checkEqualities(angle, [-90, 90])) {
+                                stage = 100
+                                textAtTop = "Oops, this spot is clipped by the line AoE."
+                                textAtBottom = "You went to a more N/S" +
+                                    " location. \n[PASS] — You are a ranged," +
+                                    " and you went to one of the outer dots." +
+                                    " \n[FAIL] — This location is clipped by" +
+                                    " the line AoE."
+                                updateLosses(1)
+                                return
+                            }
+
+
+                            textAtBottom = "\n[PASS] — You are a ranged, and you" +
+                                " went to one of the outer dots. " +
+                                "\n[PASS] — You dodged the line AoE."
+                            if (DPSOrSupports(role) === dpsOrSupportsFirst) {
+                                // this is if you are marked
+                                // only the intercardinal dots are good:
+                                //   45, 135, -135, -45
+                                // R1 takes -135
+                                // R2 takes 135
+                                // H1 takes -45
+                                // H2 takes 45
+                                // going to the 60, -60, 120, and -120 dots
+                                // is also good.
+
+                                // the way we're going to do this is to check what the angle is, and what your role is separately
+                                if (angle === -45 || angle === -60) {
+                                    textAtBottom = "You went to R1's spot." + textAtBottom
+                                    if (role === "R1") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === 45 || angle === 60) {
+                                    textAtBottom = "You went to R2's spot." + textAtBottom
+                                    if (role === "R2") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === -135 || angle === -120) {
+                                    textAtBottom = "You went to H1's spot." + textAtBottom
+                                    if (role === "H1") stage = 1.25
+                                    else stage = 100
+                                } else if (angle === 135 || angle === 120) {
+                                    textAtBottom = "You went to H2's spot." + textAtBottom
+                                    if (role === "H2") stage = 1.25
+                                    else stage = 100
+                                }
+
+                                if (stage === 1.25) { // you went to your spot
+                                    textAtBottom += "\n[PASS] — You are " + textAtBottom[12] + textAtBottom[13] + "."
+                                    textAtTop = "Please wait for people to get in their spot."
+                                } if (stage === 100) { // you didn't go to your spot
+                                    textAtBottom += "\n[FAIL] — You are not " + textAtBottom[12] + textAtBottom[13] + "."
+                                    textAtTop = "You went to the completely wrong spread spot."
+                                    updateLosses(1)
+                                } if (stage === 1) { // you didn't go to a cardinal so none of the checks went through
+                                    textAtBottom = "You went to a non-spread location." + textAtBottom +
+                                        "\n[FAIL] — Positioning is tight here."
+                                    stage = 100
+                                    textAtTop = "The positioning is tight if you go there. Try to avoid doing that."
+                                    updateLosses(1)
+                                }
+                            } else {
+                                // this is if you are not marked
+                                // acceptable positions: 0º, 30º, 150º, 180º,
+                                // -150º, -30º
+                                // check which side you're on
+
+                                // we will do the same thing as when you are
+                                // marked
+                                if (checkEqualities(angle, [150, 180, -150])) {
+                                    textAtBottom = "You went to the healer's spot." + textAtBottom
+                                    if (role === "H1" || role === "H2") stage = 1.25
+                                    else stage = 100
+                                } if (checkEqualities(angle, [-30, 0, 30])) {
+                                    textAtBottom = "You went to the ranged spot." + textAtBottom
+                                    if (role === "R1" || role === "R2") stage = 1.25
+                                    else stage = 100
+                                }
+                                if (stage === 1.25) { // you went to your spot
+                                    textAtBottom += "\n[PASS] — You are hiding in the correct spot."
+                                    textAtTop = "Please wait for people to get in their spot."
+                                } if (stage === 100) { // you didn't go to your spot
+                                    textAtBottom += "\n[FAIL] — You are on the wrong side."
+                                    textAtTop = "You went to the completely wrong side."
+                                    updateLosses(1)
+                                } if (stage === 1) { // you didn't go to a cardinal so none of the checks went through
+                                    textAtBottom = "You went to a spread location." + textAtBottom +
+                                        "\n[FAIL] — Positioning is tight here."
+                                    stage = 100
+                                    textAtTop = "The positioning is tight if you go there. Try to avoid doing that."
+                                    updateLosses(1)
+                                }
+                            }
+                            return
+                        }
+                    }
+                }
+            } if (stage === 1.25) {
+                // display 3 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 3; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
+                angleMode(RADIANS)
+                // mark whoever got targeted first
+                if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                // get everyone to the correct place
+                let innerRadius = mainBodyWidth/6
+                let outerRadius = 5*mainBodyWidth/13
+                if (dpsOrSupportsFirst === "supports") {
+                    setPositionsWithVariance(["M1", "M2"], -innerRadius, 0, 20*scalingFactor, 20*scalingFactor)
+                    setPositionsWithVariance(["R1", "R2"], outerRadius, 0, 20*scalingFactor, 20*scalingFactor)
+                    H1 = [cos(-120)*outerRadius, sin(-120)*outerRadius]
+                    H2 = [cos(120)*outerRadius, sin(120)*outerRadius]
+                    MT = [cos(-45)*innerRadius, sin(-45)*innerRadius]
+                    OT = [cos(45)*innerRadius, sin(45)*innerRadius]
+                } if (dpsOrSupportsFirst === "DPS") {
+                    setPositionsWithVariance(["MT", "OT"], innerRadius, 0, 20*scalingFactor, 20*scalingFactor)
+                    setPositionsWithVariance(["H1", "H2"], -outerRadius, 0, 20*scalingFactor, 20*scalingFactor)
+                    R1 = [cos(-60)*outerRadius, sin(-60)*outerRadius]
+                    R2 = [cos(60)*outerRadius, sin(60)*outerRadius]
+                    M1 = [cos(-135)*innerRadius, sin(-135)*innerRadius]
+                    M2 = [cos(135)*innerRadius, sin(135)*innerRadius]
+                }
+
+                setPosition(role, mouseX - centerOfBoard[0], mouseY - centerOfBoard[1])
+
+                stage = 1.5
+                return
+            } if (stage === 1.5) {
+                // display 3 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 3; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
+                angleMode(RADIANS)
+                // mark whoever got targeted first
+                if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                if (belowPositioningThreshold(0.5*scalingFactor, [
+                    [MT, realMT],
+                    [OT, realOT],
+                    [H1, realH1],
+                    [H2, realH2],
+                    [M1, realM1],
+                    [M2, realM2],
+                    [R1, realR1],
+                    [R2, realR2]
+                ])) {
+                    stage = 1.75
+                    framesWhenKnockbackStarted = frameCount
+                    return
+                }
+            } if (stage === 1.75) {
+                // display 4 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 4; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
+                angleMode(RADIANS)
+                // mark whoever got targeted first
+                if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                // animation for knockback: rotating low-opacity dark-green
+                // cone with a small opaque bright green spot going outwards
+                if (frameCount - framesWhenKnockbackStarted < 50) {
+                    let framesSinceKnockbackStarted = frameCount - framesWhenKnockbackStarted
+
+                    // rotate 10º every frame and draw 4 10º arcs
+                    // also draw a fully opaque arc on each other arc going
+                    // outwards and rotating along
+                    push()
+                    translateToCenterOfBoard()
+                    rotate(framesSinceKnockbackStarted*10)
+                    noStroke()
+                    fill(120, 100, 30, min(40, map(framesSinceKnockbackStarted, 0, 50, 500, 0)))
+                    arc(0, 0, mainBodyWidth*10, mainBodyWidth*10, 0, 10)
+                    arc(0, 0, mainBodyWidth*10, mainBodyWidth*10, 90, 100)
+                    arc(0, 0, mainBodyWidth*10, mainBodyWidth*10, 180, 190)
+                    arc(0, 0, mainBodyWidth*10, mainBodyWidth*10, 270, 280)
+                    noFill()
+                    stroke(120, 100, 100)
+                    strokeWeight(6*scalingFactor)
+                    arc(0, 0, map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), 0, 10, OPEN)
+                    arc(0, 0, map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), 90, 100, OPEN)
+                    arc(0, 0, map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), 180, 190, OPEN)
+                    arc(0, 0, map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), map(framesSinceKnockbackStarted, 0, 50, 0, mainBodyWidth), 270, 280, OPEN)
+                    pop()
+                } else if (frameCount - framesWhenKnockbackStarted < 150) {
+                    if (frameCount - framesWhenKnockbackStarted > 70) {
+                        let framesSinceKnockbackStarted = frameCount - framesWhenKnockbackStarted
+
+                        // second part of knockback animation: just draw a
+                        // circle going out. erase the one drawn 5 frames before it
+                        push()
+                        translateToCenterOfBoard()
+                        noFill()
+                        stroke(120, 100, 100, 20)
+                        strokeWeight(mainBodyWidth / 10)
+                        if (framesSinceKnockbackStarted < 110) circle(0, 0, (framesSinceKnockbackStarted - 80) * mainBodyWidth / 10)
+                        erase()
+                        if (framesSinceKnockbackStarted > 85) circle(0, 0, (framesSinceKnockbackStarted - 85) * mainBodyWidth / 10)
+                        noErase()
+                        pop()
+                    }
+                } else {
+                    // erase()
+                    // fill(0, 0, 0)
+                    // rect(0, 0, width, height)
+                    // noErase()
+                    stage = 1.8
+                }
+            } if (stage === 1.8) {
+                // this is just a stage to display the spread AoEs for 30 frames
+                if (frameCount - framesWhenKnockbackStarted > 180) stage = 2
+
+                // display 5 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                push()
+                translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                rotate(angle + 90) // facing mid
+                image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                pop()
+                for (let i = 1; i < 5; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
+                let imageSize = AoEsize*1.25 // the image has blank space at the edges
+                angleMode(RADIANS)
+                // display on whoever got targetted first
+                if (dpsOrSupportsFirst === "supports") {
+                    image(gustImage, realH1.x + centerOfBoard[0] - imageSize/2, realH1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realH2.x + centerOfBoard[0] - imageSize/2, realH2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realMT.x + centerOfBoard[0] - imageSize/2, realMT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realOT.x + centerOfBoard[0] - imageSize/2, realOT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                } if (dpsOrSupportsFirst === "DPS") {
+                    image(gustImage, realM1.x + centerOfBoard[0] - imageSize/2, realM1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realM2.x + centerOfBoard[0] - imageSize/2, realM2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realR1.x + centerOfBoard[0] - imageSize/2, realR1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    image(gustImage, realR2.x + centerOfBoard[0] - imageSize/2, realR2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                }
+                angleMode(DEGREES)
+            }
+            if (stage === 2) {
+                let innerRadius = mainBodyWidth/6
+                let mediumRadius = 2*mainBodyWidth/7
+                let outerRadius = 5*mainBodyWidth/13
             }
         }
         angleMode(RADIANS)
@@ -4601,6 +5222,55 @@ function belowPositioningThreshold(threshold, peopleToCheck) {
     return true
 }
 
+// this is just useful. basically returns (x === y[0] || x === y[1] || x ===
+// y[2]) and so on.
+function checkEqualities(x, y) {
+    for (let current of y) {
+        if (x === current) return true
+    }
+}
+
+// I'm sick and tired of trying to set someone's position but I only have a
+// string containing their name
+function setPosition(role, x, y) {
+    switch (role) {
+        case "MT":
+            MT = [x, y]
+            break
+        case "OT":
+            OT = [x, y]
+            break
+        case "M1":
+            M1 = [x, y]
+            break
+        case "M2":
+            M2 = [x, y]
+            break
+        case "H1":
+            H1 = [x, y]
+            break
+        case "H2":
+            H2 = [x, y]
+            break
+        case "R1":
+            R1 = [x, y]
+            break
+        case "R2":
+            R2 = [x, y]
+            break
+    }
+}
+
+// Why not have a function to just set a certain amount of people to a
+// certain place?
+// warning: variance is the length of the range of people. an x of 20 with a
+// variance of 10 will return 15-25, not 10-30
+function setPositionsWithVariance(roles, x, y, xVariance, yVariance) {
+    for (let role of roles) {
+        setPosition(role, x + random(-xVariance/2, xVariance/2), y + random(-yVariance/2, yVariance/2))
+    }
+}
+
 //—————————————————————————————display functions—————————————————————————————\\
 
 // these puddles are always given in the format of [x, y, millisAppeared,
@@ -4900,10 +5570,10 @@ function displayCharacterPositions() {
 
 //———————————————————————————————find your role———————————————————————————————\\
 
-function meleeOrRanged() {
+function meleeOrRanged(role) {
     if (role === "MT" || role === "OT" || role === "M1" || role === "M2") {return "melee"}
     return "ranged"
-}
+} // melee/ranged
 
 function DPSOrSupports(role) {
     if (role === "MT" || role === "OT" || role === "H1" || role === "H2") {return "supports"}
@@ -4918,11 +5588,11 @@ function DPSOrSupport(role) {
 function lightParty() {
     if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
     return 2
-}
+} // 1/2
 
 // because it's super annoying when you have to write a switch statement
 function yourPosition() {
-    currentPosition(role)
+    return currentPosition(role)
 }
 
 function currentPosition(role) {
@@ -5261,11 +5931,14 @@ function setupMillenialDecay() {
 
     mechanicStarted = millis()
 
+    framesWhenKnockbackStarted = -10000000
     gustImage = loadImage("data/Gust.png")
     m8sP1Image = loadImage("data/M8S P1 arena.png")
     m8sP1Background = loadImage("data/M8S P1 background.png")
+    m8sP1WolfHead = loadImage("data/M8S P1 wolf head.png")
+    m8sP1LineAoE = loadImage("data/M8S P1 line AoE.png")
     dpsOrSupportsFirst = random(["DPS", "supports"])
-    rotation = random(["cw", "ccw"])
+    wolfHeadRotation = random(["cw", "ccw"])
     northorsouth = random(["N", "S"])
 
     // create a random spread with everyone north
