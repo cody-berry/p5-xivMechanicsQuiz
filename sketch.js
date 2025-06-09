@@ -315,8 +315,9 @@ let m8sP1WolfHead
 let m8sP1LineAoE
 let dpsOrSupportsFirst // who gets targetted first for spreads
 let wolfHeadRotation // whether the wolf heads will rotate dcw or ccw. follow rotation
-let northorsouth // wolf heads can spawn north or south. purely graphical
+let northOrSouth // wolf heads can spawn north or south. purely graphical
 let framesWhenKnockbackStarted // for graphical effects
+let actualWolfHeadRotation // The other one is reversed, but I'm too lazy to change it
 
 // other variables
 let currentlySelectedMechanic = "Utopian Sky"
@@ -326,6 +327,7 @@ let mechanicStarted = 0
 let textAtTop
 let textAtBottom
 let centerOfBoard
+let numWinsPerCoinIncrease = 1 // number of wins per 1 coin increase
 
 // sometimes the code will change and require a system update.
 let version = "0.000"
@@ -4233,7 +4235,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4261,7 +4263,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4305,7 +4307,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4624,7 +4626,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4697,7 +4699,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4761,7 +4763,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4852,9 +4854,6 @@ intercardinals.`
                     stage = 1.8
                 }
             } if (stage === 1.8) {
-                // this is just a stage to display the spread AoEs for 30 frames
-                if (frameCount - framesWhenKnockbackStarted > 180) stage = 2
-
                 // display 5 wolf heads
                 // the way we do this is always to translate to a certain
                 // place, rotate, and then display
@@ -4863,7 +4862,7 @@ intercardinals.`
                 translateToCenterOfBoard()
                 let wolfHeadSize = 60*scalingFactor
                 let wolfHeadSpawnRadius = 6*mainBodyWidth/13
-                let angle = (northorsouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
                 push()
                 translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
                 rotate(angle + 90) // facing mid
@@ -4882,25 +4881,615 @@ intercardinals.`
 
                 let AoEsize = 140*scalingFactor // very important to get spread AoE size correct
                 let imageSize = AoEsize*1.25 // the image has blank space at the edges
-                angleMode(RADIANS)
                 // display on whoever got targetted first
-                if (dpsOrSupportsFirst === "supports") {
-                    image(gustImage, realH1.x + centerOfBoard[0] - imageSize/2, realH1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realH2.x + centerOfBoard[0] - imageSize/2, realH2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realMT.x + centerOfBoard[0] - imageSize/2, realMT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realOT.x + centerOfBoard[0] - imageSize/2, realOT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                if (dpsOrSupportsFirst === "supports") { // rotate by 15 each frame
+                    displayRotatedImage(gustImage, realH1.x + centerOfBoard[0] - imageSize/2, realH1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realH2.x + centerOfBoard[0] - imageSize/2, realH2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realMT.x + centerOfBoard[0] - imageSize/2, realMT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realOT.x + centerOfBoard[0] - imageSize/2, realOT.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
                 } if (dpsOrSupportsFirst === "DPS") {
-                    image(gustImage, realM1.x + centerOfBoard[0] - imageSize/2, realM1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realM2.x + centerOfBoard[0] - imageSize/2, realM2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realR1.x + centerOfBoard[0] - imageSize/2, realR1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
-                    image(gustImage, realR2.x + centerOfBoard[0] - imageSize/2, realR2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize)
+                    displayRotatedImage(gustImage, realM1.x + centerOfBoard[0] - imageSize/2, realM1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realM2.x + centerOfBoard[0] - imageSize/2, realM2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realR1.x + centerOfBoard[0] - imageSize/2, realR1.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
+                    displayRotatedImage(gustImage, realR2.x + centerOfBoard[0] - imageSize/2, realR2.y + centerOfBoard[1] - imageSize/2, imageSize, imageSize, random(0, 360))
                 }
-                angleMode(DEGREES)
-            }
-            if (stage === 2) {
+
+                // display the line AoE too
+                image(m8sP1LineAoE, centerOfBoard[0] - mainBodyWidth*6/13, centerOfBoard[1] - mainBodyWidth*6/13, mainBodyWidth*12/13, mainBodyWidth*12/13)
+
+                // this is just a stage to display the spread AoEs for 30 frames
+                if (frameCount - framesWhenKnockbackStarted > 180) {
+                    stage = 2
+                    textAtTop = "It's time to rotate. Click anywhere inside the green dot to move there."
+                    return
+                }
+            } if (stage === 2) {
+                // display 5 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                // do not display the first wolf head
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                // push()
+                // translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                // rotate(angle + 90) // facing mid
+                // image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                // pop()
+                for (let i = 1; i < 5; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+                
+
                 let innerRadius = mainBodyWidth/6
                 let mediumRadius = 2*mainBodyWidth/7
                 let outerRadius = 5*mainBodyWidth/13
+
+                // mark whoever got targeted second
+                angleMode(RADIANS)
+                let AoEsize = 140*scalingFactor
+                if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                // add a huge green dot
+                displayCustomizableGreenDot(yourPosition()[0], yourPosition()[1], 250*scalingFactor)
+
+                // if you click anywhere on it, move to that location
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(translateXYPositionToStandardFormat(yourPosition()), 125 * scalingFactor)) {
+                        let selectedPosition = translateXYPositionToBoardCenterFormat([mouseX, mouseY])
+
+
+                        stage = 2.5
+                        textAtTop = "Please wait for people to get into" +
+                            " their spot."
+                        textAtBottom = "You are rotating properly. \n[PASS]" +
+                            " — You are on the correct side. \n[PASS] — You" +
+                            " are not in the death wall."
+
+                        // preform a few checks on the location. make sure
+                        // it's valid
+                        // 1. position is hit by line AoE. easily doable
+                        //    orient to line AoE. if your x-position is
+                        //    greater than -3*mainBodyWidth/26 or
+                        //    less than 3*mainBodyWidth/26, you got hit.
+                        //    the line is exactly 1/4 of the arena, except
+                        //    that it is drawn at 12/13 size, resulting in 3/26.
+
+                        // 2. you crossed line AoE. use same as 1st position.
+                        //    if your x-position is greater than
+                        //    3*mainBodyWidth/26 for melees/healers or
+                        //    less than -3*mainBodyWidth/26 for tanks/melees,
+                        //    you crossed the line AoE. note this only matters
+                        //    if you have first spread aoe.
+
+                        // 3. you entered the death wall. the arena is a
+                        //    499x499 image and the death wall is 46 pixels
+                        //    away from the top. that means you entered the
+                        //    death wall if you're more than 2*46/499*mbw away
+                        //    from the center. that's 92/499*mbw radius
+
+                        // 4. the position is approved by the hedgehogs🦔🦔🦔🦔
+                        //    only applicable for 4th line AoE🦔🦔🦔🦔
+
+                        // check 1
+                        // to orient a position to the line AoE, first
+                        // convert the position to Rθ format (distance
+                        // angle), subtract the angle of the line AoE from
+                        // θ, and then convert back to xy format. then do
+                        // the check.
+                        // first, find the angle of the line AoE
+                        // note that the line AoE angle is always north at
+                        // the start. otherwise you get finnicky things
+                        // where if it's south, the other side is correct.
+                        // just...orient to the top of hte line aoe.
+
+                        // then, translate the position to Rθ format
+                        let selectedPositionRθ = translateXYPositionToRθFormat(selectedPosition)
+
+                        // subtract the angle by the angle of the line AoE
+                        let modifiedPositionRθ = [selectedPositionRθ[0], selectedPositionRθ[1] - (wolfHeadRotation === "ccw" ? 36 : -36)]
+
+                        // then in order to check anything you have to
+                        // convert it back to xy format
+                        let modifiedPosition = translateRθPositionToXYFormat(modifiedPositionRθ)
+
+                        print(selectedPosition, selectedPositionRθ, modifiedPositionRθ, modifiedPosition)
+
+                        // if the x is within 3*mainBodyWidth/26 of the
+                        // center, then tell them
+                        if (modifiedPosition[0] > -3*mainBodyWidth/26 && modifiedPosition[0] < 3*mainBodyWidth/26) {
+                            stage = 100
+                            updateLosses(1)
+                            textAtTop = "That location is clipped by the line AoE."
+                            textAtBottom = "You went into the line AoE. \n" +
+                                "[FAIL] — That location is clipped by the line AoE."
+                        }
+
+                        // check 2
+                        // we can basically use the same checks that we did
+                        // earlier
+                        // if the position is > 3*mainBodyWidth/26 for melees
+                        // and healers or < -3*mainBodyWidth/26 for tanks
+                        // and ranged, you accidentally crossed sides
+                        // going in between those ranges will fail check 1
+                        // if you had the first spread, you don't have to
+                        // avoid crossing sides
+                        if (DPSOrSupports(role) !== dpsOrSupportsFirst) {
+                            if (modifiedPosition[0] > 3 * mainBodyWidth / 26) {
+                                // Did you know that checkEqualities can also be
+                                // used for checking roles?
+                                if (checkEqualities(role, ["M1", "M2", "H1", "H2"])) {
+                                    stage = 100
+                                    updateLosses(1)
+                                    textAtTop = "Melees and healers should" +
+                                        " stay to the left of the line AoE" +
+                                        " if they have second spreads."
+                                    textAtBottom = "You went to the wrong" +
+                                        " side. \n[FAIL] — Melees and" +
+                                        " healers should stay to the left if" +
+                                        " they have the second spread."
+                                }
+                            } if (modifiedPosition[0] < -3 * mainBodyWidth / 26) {
+                                if (checkEqualities(role, ["MT", "OT", "R1", "R2"])) {
+                                    stage = 100
+                                    updateLosses(1)
+                                    textAtTop = "Tanks and ranged should" +
+                                        " stay to the left of the line AoE" +
+                                        " if they have second spreads."
+                                    textAtBottom = "You went to the wrong" +
+                                        " side. \n[FAIL] — Tanks and" +
+                                        " ranged should stay to the right if" +
+                                        " they have the second spread."
+                                }
+                            }
+                        }
+
+                        // now it's time to add the other people. ...sigh
+                        // Permutation 1: Supports First, Rotate Clockwise
+                        if (dpsOrSupportsFirst === "supports" && actualWolfHeadRotation === "cw") {
+                            // remove all variance first
+                            setPositionsWithVariance(["M1", "M2"], -innerRadius, 0, 0, 0)
+                            setPositionsWithVariance(["R1", "R2"], outerRadius, 0, 0, 0)
+
+                            setPosition("MT", MT[0] + 10*scalingFactor, 0)
+                            movePosition("OT", -10*scalingFactor, 0)
+                            movePosition("H1", 30*scalingFactor, -10*scalingFactor)
+                            setPosition("H2", 0, H2[1] + 5*scalingFactor)
+                            movePosition("M1", 45*scalingFactor, -50*scalingFactor)
+                            movePosition("M2", 10*scalingFactor, -20*scalingFactor)
+                            movePosition("R1", -20*scalingFactor, 30*scalingFactor)
+                            movePosition("R2", -100*scalingFactor, 60*scalingFactor)
+                        }
+                        // Permutation 2: Supports First, Rotate Counterclockwise
+                        if (dpsOrSupportsFirst === "supports" && actualWolfHeadRotation === "ccw") {
+                            // remove all variance first
+                            setPositionsWithVariance(["M1", "M2"], -innerRadius, 0, 0, 0)
+                            setPositionsWithVariance(["R1", "R2"], outerRadius, 0, 0, 0)
+
+                            setPosition("OT", OT[0] + 10*scalingFactor, 0)
+                            movePosition("MT", -10*scalingFactor, 0)
+                            movePosition("H2", 30*scalingFactor, 10*scalingFactor)
+                            setPosition("H1", 0, H1[1] - 5*scalingFactor)
+                            movePosition("M2", 45*scalingFactor, 50*scalingFactor)
+                            movePosition("M1", 10*scalingFactor, 20*scalingFactor)
+                            movePosition("R2", -20*scalingFactor, -30*scalingFactor)
+                            movePosition("R1", -100*scalingFactor, -60*scalingFactor)
+                        }
+                        // Permutation 3: DPS First, Rotate Clockwise
+                        if (dpsOrSupportsFirst === "DPS" && actualWolfHeadRotation === "ccw") {
+                            // remove all variance first
+                            setPositionsWithVariance(["MT", "OT"], innerRadius, 0, 0, 0)
+                            setPositionsWithVariance(["H1", "H2"], -outerRadius, 0, 0, 0)
+
+                            setPosition("M1", M1[0] - 10*scalingFactor, 0)
+                            movePosition("M2", 10*scalingFactor, 0)
+                            movePosition("R1", -30*scalingFactor, -10*scalingFactor)
+                            setPosition("R2", 0, R2[1] + 5*scalingFactor)
+                            movePosition("MT", -45*scalingFactor, -50*scalingFactor)
+                            movePosition("OT", -10*scalingFactor, -20*scalingFactor)
+                            movePosition("H1", 20*scalingFactor, 30*scalingFactor)
+                            movePosition("H2", 100*scalingFactor, 60*scalingFactor)
+                        }
+                        // Permutation 4: DPS First, Rotate Counterclockwise
+                        if (dpsOrSupportsFirst === "DPS" && actualWolfHeadRotation === "cw") {
+                            // remove all variance first
+                            setPositionsWithVariance(["MT", "OT"], innerRadius, 0, 0, 0)
+                            setPositionsWithVariance(["H1", "H2"], -outerRadius, 0, 0, 0)
+
+                            setPosition("M2", M2[0] - 10*scalingFactor, 0)
+                            movePosition("M1", 10*scalingFactor, 0)
+                            movePosition("R2", -30*scalingFactor, 10*scalingFactor)
+                            setPosition("R1", 0, R1[1] - 5*scalingFactor)
+                            movePosition("OT", -45*scalingFactor, 50*scalingFactor)
+                            movePosition("MT", -10*scalingFactor, 20*scalingFactor)
+                            movePosition("H2", 20*scalingFactor, -30*scalingFactor)
+                            movePosition("H1", 100*scalingFactor, -60*scalingFactor)
+                        }
+                        // make sure to overwrite your default spot
+                        setPosition(role, ...translateXYPositionToBoardCenterFormat([mouseX, mouseY]))
+
+                        if (stage !== 100) stage = 2.5
+                        return
+                        // the standard is always to return so that you
+                        // can't accidentally press two stages at a time
+                    }
+                }
+            } if (stage === 2.5) { // wait until everyone goes
+                // display 5 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                // do not display the first wolf head
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                // push()
+                // translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                // rotate(angle + 90) // facing mid
+                // image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                // pop()
+                for (let i = 1; i < 5; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                // mark whoever got targeted second
+                angleMode(RADIANS)
+                let AoEsize = 140*scalingFactor
+                if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                if (belowPositioningThreshold(0.5*scalingFactor, [
+                    [MT, realMT],
+                    [OT, realOT],
+                    [H1, realH1],
+                    [H2, realH2],
+                    [M1, realM1],
+                    [M2, realM2],
+                    [R1, realR1],
+                    [R2, realR2]
+                ])) {
+                    stage = 2.75
+                    return
+                }
+            } if (stage === 2.75) { // display the line AoE
+                // display 5 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                // do not display the first wolf head
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                // push()
+                // translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                // rotate(angle + 90) // facing mid
+                // image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                // pop()
+                for (let i = 2; i < 5; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+                // mark whoever got targeted second
+                angleMode(RADIANS)
+                let AoEsize = 140*scalingFactor
+                if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                let innerRadius = mainBodyWidth/6
+                let mediumRadius = 2*mainBodyWidth/7
+                let outerRadius = 5*mainBodyWidth/13
+
+                tint(0, 0, 100, 100)
+                displayRotatedImage(m8sP1LineAoE, centerOfBoard[0] - mainBodyWidth*6/13, centerOfBoard[1] - mainBodyWidth*6/13, mainBodyWidth*12/13, mainBodyWidth*12/13, (wolfHeadRotation === "ccw" ? 36 : -36))
+                stage = 3
+            } if (stage === 3) {
+                // this is basically just equivalent to stage 2
+                // display 5 wolf heads
+                // the way we do this is always to translate to a certain
+                // place, rotate, and then display
+                // do not display the first wolf head
+                tint(0, 0, 100, 50)
+                push()
+                translateToCenterOfBoard()
+                let wolfHeadSize = 60*scalingFactor
+                let wolfHeadSpawnRadius = 6*mainBodyWidth/13
+                let angle = (northOrSouth === "N" ? -90 : 90) // angle where the wolf head spawns
+                // push()
+                // translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                // rotate(angle + 90) // facing mid
+                // image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                // pop()
+                for (let i = 1; i < 5; i++) {
+                    // then rotate
+                    angle += (wolfHeadRotation === "ccw" ? 36 : -36)
+                    push()
+                    translate(cos(angle)*wolfHeadSpawnRadius, sin(angle)*wolfHeadSpawnRadius)
+                    rotate(angle + 90) // facing mid
+                    image(m8sP1WolfHead, -wolfHeadSize/2, -wolfHeadSize/2, wolfHeadSize, wolfHeadSize)
+                    pop()
+                }
+                pop()
+
+
+                let innerRadius = mainBodyWidth/6
+                let mediumRadius = 2*mainBodyWidth/7
+                let outerRadius = 5*mainBodyWidth/13
+
+                // mark whoever got targeted second
+                angleMode(RADIANS)
+                let AoEsize = 140*scalingFactor
+                if (dpsOrSupportsFirst === "DPS") {
+                    displayTargetSymbol(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1])
+                    displayTargetSymbol(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1])
+                    displayTargetSymbol(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1])
+                    displayTargetSymbol(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1])
+                    displaySpreadMarker(realH1.x + centerOfBoard[0], realH1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realH2.x + centerOfBoard[0], realH2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realMT.x + centerOfBoard[0], realMT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realOT.x + centerOfBoard[0], realOT.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                } if (dpsOrSupportsFirst === "supports") {
+                    displayTargetSymbol(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1])
+                    displayTargetSymbol(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1])
+                    displayTargetSymbol(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1])
+                    displayTargetSymbol(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1])
+                    displaySpreadMarker(realM1.x + centerOfBoard[0], realM1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realM2.x + centerOfBoard[0], realM2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR1.x + centerOfBoard[0], realR1.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                    displaySpreadMarker(realR2.x + centerOfBoard[0], realR2.y + centerOfBoard[1], AoEsize, 300, 20, 100)
+                }
+                angleMode(DEGREES)
+
+                // add a huge green dot
+                displayCustomizableGreenDot(yourPosition()[0], yourPosition()[1], 250*scalingFactor)
+
+                // if you click anywhere on it, move to that location
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange(translateXYPositionToStandardFormat(yourPosition()), 125 * scalingFactor)) {
+                        let selectedPosition = translateXYPositionToBoardCenterFormat([mouseX, mouseY])
+
+
+                        stage = 3.5
+                        textAtTop = "Please wait for people to get into" +
+                            " their spot."
+                        textAtBottom = "You are rotating properly. \n[PASS]" +
+                            " — You are on the correct side. \n[PASS] — You" +
+                            " are not in the death wall."
+
+                        // preform a few checks on the location. make sure
+                        // it's valid
+                        // 1. position is hit by line AoE. easily doable
+                        //    orient to line AoE. if your x-position is
+                        //    greater than -3*mainBodyWidth/26 or
+                        //    less than 3*mainBodyWidth/26, you got hit.
+                        //    the line is exactly 1/4 of the arena, except
+                        //    that it is drawn at 12/13 size, resulting in 3/26.
+
+                        // 2. you crossed line AoE. use same as 1st position.
+                        //    if your x-position is greater than
+                        //    3*mainBodyWidth/26 for melees/healers or
+                        //    less than -3*mainBodyWidth/26 for tanks/melees,
+                        //    you crossed the line AoE. note this only matters
+                        //    if you have first spread aoe.
+
+                        // 3. you entered the death wall. the arena is a
+                        //    499x499 image and the death wall is 46 pixels
+                        //    away from the top. that means you entered the
+                        //    death wall if you're more than 2*46/499*mbw away
+                        //    from the center. that's 92/499*mbw radius
+
+                        // 4. the position is approved by the hedgehogs🦔🦔🦔🦔
+                        //    only applicable for 4th line AoE🦔🦔🦔🦔
+
+                        // check 1
+                        // to orient a position to the line AoE, first
+                        // convert the position to Rθ format (distance
+                        // angle), subtract the angle of the line AoE from
+                        // θ, and then convert back to xy format. then do
+                        // the check.
+                        // first, find the angle of the line AoE
+                        // note that the line AoE angle is always north at
+                        // the start. otherwise you get finnicky things
+                        // where if it's south, the other side is correct.
+                        // just...orient to the top of hte line aoe.
+
+                        // then, translate the position to Rθ format
+                        let selectedPositionRθ = translateXYPositionToRθFormat(selectedPosition)
+
+                        // subtract the angle by the angle of the line AoE
+                        let modifiedPositionRθ = [selectedPositionRθ[0], selectedPositionRθ[1] - (wolfHeadRotation === "ccw" ? 72 : -72)]
+
+                        // then in order to check anything you have to
+                        // convert it back to xy format
+                        let modifiedPosition = translateRθPositionToXYFormat(modifiedPositionRθ)
+
+                        print(selectedPosition, selectedPositionRθ, modifiedPositionRθ, modifiedPosition)
+
+                        // if the x is within 3*mainBodyWidth/26 of the
+                        // center, then tell them
+                        if (modifiedPosition[0] > -3*mainBodyWidth/26 && modifiedPosition[0] < 3*mainBodyWidth/26) {
+                            stage = 100
+                            updateLosses(1)
+                            textAtTop = "That location is clipped by the line AoE."
+                            textAtBottom = "You went into the line AoE. \n" +
+                                "[FAIL] — That location is clipped by the line AoE."
+                        }
+
+                        // check 2
+                        // we can basically use the same checks that we did
+                        // earlier
+                        // if the position is > 3*mainBodyWidth/26 for melees
+                        // and healers or < -3*mainBodyWidth/26 for tanks
+                        // and ranged, you accidentally crossed sides
+                        // going in between those ranges will fail check 1
+                        // if you had the first spread, you don't have to
+                        // avoid crossing sides
+                        if (DPSOrSupports(role) !== dpsOrSupportsFirst) {
+                            if (modifiedPosition[0] > 3 * mainBodyWidth / 26) {
+                                // Did you know that checkEqualities can also be
+                                // used for checking roles?
+                                if (checkEqualities(role, ["M1", "M2", "H1", "H2"])) {
+                                    stage = 100
+                                    updateLosses(1)
+                                    textAtTop = "Melees and healers should" +
+                                        " stay to the left of the line AoE" +
+                                        " if they have second spreads."
+                                    textAtBottom = "You went to the wrong" +
+                                        " side. \n[FAIL] — Melees and" +
+                                        " healers should stay to the left if" +
+                                        " they have the second spread."
+                                }
+                            } if (modifiedPosition[0] < -3 * mainBodyWidth / 26) {
+                                if (checkEqualities(role, ["MT", "OT", "R1", "R2"])) {
+                                    stage = 100
+                                    updateLosses(1)
+                                    textAtTop = "Tanks and ranged should" +
+                                        " stay to the left of the line AoE" +
+                                        " if they have second spreads."
+                                    textAtBottom = "You went to the wrong" +
+                                        " side. \n[FAIL] — Tanks and" +
+                                        " ranged should stay to the right if" +
+                                        " they have the second spread."
+                                }
+                            }
+                        }
+
+                        // now it's time to add the other people. ...sigh
+                        // Permutation 1: Supports First, Rotate Clockwise
+                        if (dpsOrSupportsFirst === "supports" && actualWolfHeadRotation === "cw") {
+                            setPosition("MT", MT[0] + 10*scalingFactor, 0)
+                            movePosition("OT", -10*scalingFactor, 0)
+                            movePosition("H1", 30*scalingFactor, -10*scalingFactor)
+                            setPosition("H2", 0, H2[1] + 5*scalingFactor)
+                            movePosition("M1", 45*scalingFactor, -50*scalingFactor)
+                            movePosition("M2", 10*scalingFactor, -20*scalingFactor)
+                            movePosition("R1", -20*scalingFactor, 30*scalingFactor)
+                            movePosition("R2", -100*scalingFactor, 60*scalingFactor)
+                        }
+                        // Permutation 2: Supports First, Rotate Counterclockwise
+                        if (dpsOrSupportsFirst === "supports" && actualWolfHeadRotation === "ccw") {
+                            setPosition("OT", OT[0] + 10*scalingFactor, 0)
+                            movePosition("MT", -10*scalingFactor, 0)
+                            movePosition("H2", 30*scalingFactor, 10*scalingFactor)
+                            setPosition("H1", 0, H1[1] - 5*scalingFactor)
+                            movePosition("M2", 45*scalingFactor, 50*scalingFactor)
+                            movePosition("M1", 10*scalingFactor, 20*scalingFactor)
+                            movePosition("R2", -20*scalingFactor, -30*scalingFactor)
+                            movePosition("R1", -100*scalingFactor, -60*scalingFactor)
+                        }
+                        // Permutation 3: DPS First, Rotate Clockwise
+                        if (dpsOrSupportsFirst === "DPS" && actualWolfHeadRotation === "ccw") {
+                            setPosition("M1", M1[0] - 10*scalingFactor, 0)
+                            movePosition("M2", 10*scalingFactor, 0)
+                            movePosition("R1", -30*scalingFactor, -10*scalingFactor)
+                            setPosition("R2", 0, R2[1] + 5*scalingFactor)
+                            movePosition("MT", -45*scalingFactor, -50*scalingFactor)
+                            movePosition("OT", -10*scalingFactor, -20*scalingFactor)
+                            movePosition("H1", 20*scalingFactor, 30*scalingFactor)
+                            movePosition("H2", 100*scalingFactor, 60*scalingFactor)
+                        }
+                        // Permutation 4: DPS First, Rotate Counterclockwise
+                        if (dpsOrSupportsFirst === "DPS" && actualWolfHeadRotation === "cw") {
+                            setPosition("M2", M2[0] - 10*scalingFactor, 0)
+                            movePosition("M1", 10*scalingFactor, 0)
+                            movePosition("R2", -30*scalingFactor, 10*scalingFactor)
+                            setPosition("R1", 0, R1[1] - 5*scalingFactor)
+                            movePosition("OT", -45*scalingFactor, 50*scalingFactor)
+                            movePosition("MT", -10*scalingFactor, 20*scalingFactor)
+                            movePosition("H2", 20*scalingFactor, -30*scalingFactor)
+                            movePosition("H1", 100*scalingFactor, -60*scalingFactor)
+                        }
+                        // make sure to overwrite your default spot
+                        setPosition(role, ...translateXYPositionToBoardCenterFormat([mouseX, mouseY]))
+
+                        if (stage !== 100) stage = 3.5
+                        return
+                        // the standard is always to return so that you
+                        // can't accidentally press two stages at a time
+                    }
+                }
             }
         }
         angleMode(RADIANS)
@@ -5122,11 +5711,11 @@ function displayDebugCorner() {
 function updateWins(winsPerCoinIncrease) {
     localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
     localStorage.setItem(currentlySelectedMechanic + " wins", parseInt(localStorage.getItem(currentlySelectedMechanic + " wins")) + 1)
-    localStorage.setItem("coins", parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease))) + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem("coins", parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/numWinsPerCoinIncrease))) + parseInt(localStorage.getItem("coins")))
 }
 
 function updateLosses(winsPerCoinIncrease) {
-    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/winsPerCoinIncrease + 1/winsPerCoinIncrease))) - 1 + parseInt(localStorage.getItem("coins")))
+    localStorage.setItem("coins", -parseInt(ceil(parseFloat(localStorage.getItem(currentlySelectedMechanic + " streak")/numWinsPerCoinIncrease + 1/numWinsPerCoinIncrease))) - 1 + parseInt(localStorage.getItem("coins")))
     localStorage.setItem("coins", max(parseInt(localStorage.getItem("coins")), 0))
     localStorage.setItem(currentlySelectedMechanic + " streak", 0)
     localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
@@ -5180,6 +5769,28 @@ function inClickingRanges(positions, range) {
 // encapsulation function. makes code less messy
 function translateToCenterOfBoard() {
     translate(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2);
+}
+
+// translates a position from 0,0 = center of board format to 0,0 = top-left
+// of screen format
+function translateXYPositionToBoardCenterFormat(position) {
+    return [position[0] - centerOfBoard[0], position[1] - centerOfBoard[1]]
+}
+
+// translates a position from 0,0 = top-left of screen format to 0,0 =
+// center of board format
+function translateXYPositionToStandardFormat(position) {
+    return [position[0] + centerOfBoard[0], position[1] + centerOfBoard[1]]
+}
+
+// translates a position from x,y to r,θ format
+function translateXYPositionToRθFormat(position) {
+    return [sqrt(position[0]**2 + position[1]**2), atan2(position[1], position[0])]
+}
+
+// translates a position from r,θ to x,y format
+function translateRθPositionToXYFormat(position) {
+    return [cos(position[1])*position[0], sin(position[1])*position[0]]
 }
 
 function mousePressedButNotHeldDown() {
@@ -5259,6 +5870,12 @@ function setPosition(role, x, y) {
             R2 = [x, y]
             break
     }
+}
+
+// What if you want to set someone's position relative to their current
+// position? That's right. Sometiimes. That's why this function exists.
+function movePosition(role, x, y) {
+    setPosition(role, currentPosition(role)[0] + x, currentPosition(role)[1] + y)
 }
 
 // Why not have a function to just set a certain amount of people to a
@@ -5473,6 +6090,24 @@ function displayFatebreaker(position, raisedArm) {
     pop()
 }
 
+// this green dot is basically displayGreenDot, but the size is tweakable
+// use the other functions if you are lazy and do not want to specify a size
+function displayCustomizableGreenDot(x, y, size) {
+    push()
+    translateToCenterOfBoard()
+    stroke(120, 100, 100)
+
+    // if you mouse over it, dim it
+    if (sqrt((mouseX - x - (mainBodyX + mainBodyWidth/2))**2 +
+        (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < size*1/2) {
+        stroke(120, 100, 80)
+    }
+    noFill()
+    strokeWeight(scalingFactor)
+    circle(x, y, size)
+    pop()
+}
+
 // display a green dot for where to go
 function displayGreenDot(x, y) {
     push()
@@ -5568,6 +6203,15 @@ function displayCharacterPositions() {
     text("R2", realR2.x, realR2.y - scalingFactor)
 }
 
+// an image that is rotated. it's that simple
+function displayRotatedImage(i, x, y, width=i.width, height=i.height, rotation) {
+    push()
+    translate(x + width/2, y + width/2)
+    rotate(rotation)
+    image(i, -width/2, -height/2, width, height)
+    pop()
+}
+
 //———————————————————————————————find your role———————————————————————————————\\
 
 function meleeOrRanged(role) {
@@ -5650,6 +6294,8 @@ function setupUtopianSky() {
     stage = 0
     currentlySelectedMechanic = "Utopian Sky"
     currentlySelectedBackground = "FRU P1"
+
+    numWinsPerCoinIncrease = 4
 
     MT = [0, -50*scalingFactor]
     OT = [50*scalingFactor, 0]
@@ -5743,6 +6389,8 @@ function setupDiamondDust() {
     stage = 0
     currentlySelectedMechanic = "Diamond Dust"
     currentlySelectedBackground = "FRU P2"
+
+    numWinsPerCoinIncrease = 2
 
     let randomNumber = random()
     let radius = mainBodyWidth/6
@@ -5888,6 +6536,8 @@ function setupMirrorMirror() {
     currentlySelectedMechanic = "Mirror Mirror"
     currentlySelectedBackground = "FRU P2"
 
+    numWinsPerCoinIncrease = 3
+
     let css = select("html")
     css.style("background-image", "url(\"data/FRU P2 Floor.webp\")")
     css = select("body")
@@ -5937,9 +6587,14 @@ function setupMillenialDecay() {
     m8sP1Background = loadImage("data/M8S P1 background.png")
     m8sP1WolfHead = loadImage("data/M8S P1 wolf head.png")
     m8sP1LineAoE = loadImage("data/M8S P1 line AoE.png")
-    dpsOrSupportsFirst = random(["DPS", "supports"])
-    wolfHeadRotation = random(["cw", "ccw"])
-    northorsouth = random(["N", "S"])
+    // dpsOrSupportsFirst = random(["DPS", "supports"])
+    // wolfHeadRotation = random(["cw", "ccw"])
+    dpsOrSupportsFirst = "supports"
+    wolfHeadRotation = "ccw"
+    actualWolfHeadRotation = (wolfHeadRotation === "ccw" ? "cw" : "ccw")
+    northOrSouth = random(["N", "S"])
+
+    numWinsPerCoinIncrease = -1
 
     // create a random spread with everyone north
     realMT.x = random(-50*scalingFactor, 50*scalingFactor)
@@ -5967,7 +6622,7 @@ function setupMillenialDecay() {
     R1 = [realR1.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR1.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
     R2 = [realR2.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR2.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
 
-    stage = 0
+    stage = 1
     currentlySelectedMechanic = "Millenial Decay"
     currentlySelectedBackground = "M8S P1"
 
@@ -6062,6 +6717,37 @@ function glowCircle(h, s, b, weight, param1, param2, param3) {
     strokeWeight(weight*2/5)
     stroke(h, 0, 100)
     circle(param1, param2, param3)
+}
+
+function glowPoint(h, s, b, weight, param1, param2) {
+
+    strokeWeight(weight)
+    stroke(h, s, b)
+    point(param1, param2)
+
+    strokeWeight(weight*9/10)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, 50)
+    point(param1, param2)
+
+    strokeWeight(weight*4/5)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2)
+    point(param1, param2)
+
+    strokeWeight(weight*7/10)
+    stroke(h, s*1/4, b*1/4 + 300/4, 50)
+    point(param1, param2)
+
+    strokeWeight(weight*3/5)
+    stroke(h, s*1/4, b*1/4 + 300/4)
+    point(param1, param2)
+
+    strokeWeight(weight*1/2)
+    stroke(h, 0, 100, 50)
+    point(param1, param2)
+
+    strokeWeight(weight*2/5)
+    stroke(h, 0, 100)
+    point(param1, param2)
 }
 
 function glowText(h, s, b, weight, param1, param2, param3) {

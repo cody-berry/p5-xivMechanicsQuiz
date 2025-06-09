@@ -22,5 +22,3 @@ top. Please don't complain if your wanted mechanic isn't available.
 <br>Important: This code uses <b>local storage</b> to store currencies. 
 You won't see local storage in incognito browsers—and some browsers simply 
 don't support local storage. 
-
-
