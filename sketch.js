@@ -195,7 +195,7 @@ scalingFactorFetch = parseFloat(scalingFactorFetch)
 let textPadding = 3.5*scalingFactor
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
-let mechanicSelectionRows = 7 // the number of rows in "mechanic selection"
+let mechanicSelectionRows = 5 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
 let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
@@ -315,7 +315,7 @@ let m6sP1Morbol
 let m6sP1Succubus
 
 
-// Millenial Decay (M8S P1)
+// Millennial Decay (M8S P1)
 let gustImage // spreads
 let m8sP1Image
 let m8sP1Background
@@ -348,7 +348,7 @@ let version = "0.000"
 
 // Version 0.100
 //  - Updates implemented
-//  - M8S support for Millenial Decay
+//  - M8S support for Millennial Decay
 //    - nothing changed to support these
 
 // version format:
@@ -394,7 +394,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupWingmark()
+    setupDiamondDust()
 
     // there is a padding of holeSize on the sides. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -624,6 +624,19 @@ function displayLossContent() {
 function displayTopWindowContent() {
     textAlign(LEFT, BASELINE)
     noStroke()
+
+    // make buttons look like buttons
+    fill(120, 50, 50)
+    rect(topWindowX, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
+        topWindowX + topWidth/3, topWindowY + topSquareSize, cornerRounding)
+    fill(0, 100, 50)
+    rect(topWindowX + topWidth/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
+        topWindowX + topWidth*2/3, topWindowY + topSquareSize, cornerRounding)
+    fill(240, 50, 50)
+    rect(topWindowX + topWidth*2/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
+        topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
+
+
     fill(0, 0, 100)
     text("Hi! I'm trying to make simulations for various mechanics." +
         "\nI'll try not to delete any mechanic implementations if someone" +
@@ -631,6 +644,8 @@ function displayTopWindowContent() {
         "\n\n    Reset mechanic                Purge data            Change" +
         " role from " + role,
         topWindowX + textPadding, topWindowY + textPadding + textAscent())
+
+
 
     // since the buttons at the bottom are useful, just...make them useful XD
     if (mouseY < topWindowY + topSquareSize && mouseY > topWindowY + textAscent()*3 + textDescent()*3 + textPadding) {
@@ -4234,7 +4249,7 @@ intercardinals.`
         pop()
 
 
-        if (currentlySelectedMechanic === "Millenial Decay") {
+        if (currentlySelectedMechanic === "Millennial Decay") {
             if (stage === 0) {
                 displayGreenDot(0, 0)
                 if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
@@ -5544,51 +5559,78 @@ intercardinals.`
 }
 
 function displayMechanicSelection() {
-    fill(0, 0, 100)
+    // make it look like there are buttons!
+    fill(0, 0, 50)
     noStroke()
     textAlign(LEFT, TOP)
     textSize(10*scalingFactor)
-    text("M8S: Millenial Decay | \n" +
-        "\n" +
-        "M6S: Wingmark | \n" +
-        "\n" +
-        "FRU: Utopian Sky | Diamond Dust | Mirror Mirror |\n" +
+
+    // display what's underneath the button first
+    push()
+    translate(0, 3)
+    fill(0, 0, 25)
+    rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+    pop()
+
+    // then display the actual buttons
+    rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+
+
+
+    // now display the mechanic text
+    fill(0, 0, 100)
+    text("M8S: Millennial Decay \n" +
+        "M6S: Wingmark \n" +
+        "FRU: Utopian Sky   Diamond Dust   Mirror Mirror \n" +
         "\n" +
         "Who knows, maybe there'll be other mechanics soon.",
         selectionX + textPadding, selectionY + textPadding)
 
+    // now make the buttons clickable
     fill(0, 0, 0, 30)
     if (mouseX > selectionX + textPadding && mouseX < selectionX + selectionWidth + textPadding) {
-        // major update: rows are now done as "number of rows from top",
+        // major update: rows are now done as "number of rows from bottom",
         // otherwise things can get messy
 
-        // row -7
-        if (mouseY > selectionY + mechanicSelectionHeight - 91*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding) {
-            if (mouseX > selectionX + textPadding + textWidth("M8S:") &&
-                mouseX < selectionX + textPadding + textWidth("M8S: Millenial Decay ")) {
-                rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 91*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("M8S: Millenial Decay "), selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding)
-                if (mousePressedButNotHeldDown()) {
-                    setupMillenialDecay()
-                }
-            }
-        }
-        // row -6
-        if (mouseY > selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding) {
-        }
         // row -5
         if (mouseY > selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding) {
-            if (mouseX > selectionX + textPadding + textWidth("M6S:") &&
-                mouseX < selectionX + textPadding + textWidth("M6S: Wingmark ")) {
-                rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding)
+            if (mouseX > selectionX + textPadding + textWidth("M8S:") &&
+                mouseX < selectionX + textPadding + textWidth("M8S: Millennial Decay ")) {
+                rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding)
                 if (mousePressedButNotHeldDown()) {
-                    setupWingmark()
+                    setupMillennialDecay()
                 }
             }
         }
         // row -4
         if (mouseY > selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding) {
+            if (mouseX > selectionX + textPadding + textWidth("M6S:") &&
+                mouseX < selectionX + textPadding + textWidth("M6S: Wingmark ")) {
+                rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupWingmark()
+                }
+            }
         }
         // row -3
         if (mouseY > selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding) {
@@ -5600,18 +5642,18 @@ function displayMechanicSelection() {
                     setupUtopianSky()
                 }
             }
-            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky |") &&
-                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust ")) {
-                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky |"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
+            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky  ") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
                 if (mousePressedButNotHeldDown()) {
                     setupDiamondDust()
                 }
             }
-            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust |") &&
-                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust | Mirror Mirror ")) {
-                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust |"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("FRU: Utopian Sky | Diamond Dust | Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
+            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  ") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
                 if (mousePressedButNotHeldDown()) {
                     setupMirrorMirror()
                 }
@@ -6330,8 +6372,8 @@ function reset() {
     //     case "Mirror Mirror":
     //         setupMirrorMirror()
     //         break
-    //     case "Millenial Decay":
-    //         setupMillenialDecay()
+    //     case "Millennial Decay":
+    //         setupMillennialDecay()
     //         break
     //     case "Wingmark":
     //         setupWingmark()
@@ -6643,7 +6685,7 @@ ${updates}
 </pre>`)
 }
 
-function setupMillenialDecay() {
+function setupMillennialDecay() {
     erase()
     rect(0, 0, width, height)
     noErase()
@@ -6694,7 +6736,7 @@ function setupMillenialDecay() {
     R2 = [realR2.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR2.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
 
     stage = 0
-    currentlySelectedMechanic = "Millenial Decay"
+    currentlySelectedMechanic = "MillennialMillennial Decay"
     currentlySelectedBackground = "M8S P1"
 
     let css = select("html")
