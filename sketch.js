@@ -26,7 +26,7 @@ class CanvasDebugCorner {
     showBottom() {
         if (this.visible) {
             noStroke()
-            textFont(fixedWidthFont, 7*scalingFactor)
+            textFont(fixedWidthFont, 7*scalingFactor*fontScalingFactor)
 
             const LEFT_MARGIN = 10
             const DEBUG_Y_OFFSET = height - 10 /* floor of debug corner */
@@ -57,7 +57,7 @@ class CanvasDebugCorner {
     showTop() {
         if (this.visible) {
             noStroke()
-            textFont(fixedWidthFont, 7*scalingFactor)
+            textFont(fixedWidthFont, 7*scalingFactor*fontScalingFactor)
 
             const LEFT_MARGIN = 10
             const TOP_PADDING = 3 /* extra padding on top of the 1st line */
@@ -183,6 +183,7 @@ let debugCorner /* output debug text in the bottom left corner of the canvas */
 
 // displaying the windows
 let baseScalingFactor = 1.5
+let fontScalingFactor = 1
 let scalingFactor = 1
 let scalingFactorFetch = localStorage.getItem("scalingFactor")
 if (!scalingFactorFetch) {
@@ -199,7 +200,7 @@ let mechanicSelectionRows = 5 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
 let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
-let holeSize = 10*scalingFactor
+let holeSize = 3*scalingFactor
 let cornerRounding = 5*scalingFactor
 let mainBodyHeight = topSquareSize*2 + holeSize*4 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
 let scalingAdjustHeight = 50*scalingFactor
@@ -373,7 +374,7 @@ function setup() {
         topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + scalingAdjustHeight + holeSize*7)
     cnv.parent('#canvas')
     colorMode(HSB, 360, 100, 100, 100)
-    textFont(font, 7*scalingFactor)
+    textFont(font, 7*scalingFactor*fontScalingFactor)
 
     // by the time I realized I was using "rectMode(CORNERS)" I was too lazy
     // to change everything back
@@ -583,10 +584,10 @@ function displayWinContent() {
     fill(0, 0, 100)
     noStroke()
     textAlign(CENTER, CENTER)
-    textSize(12*scalingFactor)
-    text("WINS", greenSquareX + topSquareSize/2, greenSquareY + topSquareSize/4)
-    textSize(7*scalingFactor)
-    text("\n" + wins + "\nSTREAK: " + streak + "\nCOINS: " + coins, +
+    textSize(12*scalingFactor*fontScalingFactor)
+    text("WINS", greenSquareX + topSquareSize/2, greenSquareY + topSquareSize/5)
+    textSize(7*scalingFactor*fontScalingFactor)
+    text(wins + "\nSTREAK: " + streak + "\nCOINS: " + coins, +
         greenSquareX + topSquareSize/2, +
         greenSquareY + 7*topSquareSize/12)
 }
@@ -613,9 +614,9 @@ function displayLossContent() {
     fill(0, 0, 100)
     noStroke()
     textAlign(CENTER, CENTER)
-    textSize(12*scalingFactor)
+    textSize(12*scalingFactor*fontScalingFactor)
     text("WIPES", redSquareX + topSquareSize/2, redSquareY + topSquareSize/5)
-    textSize(7*scalingFactor)
+    textSize(7*scalingFactor*fontScalingFactor)
     text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\n\n", redSquareX +
         topSquareSize/2, redSquareY + 7*topSquareSize/12)
 
@@ -721,7 +722,7 @@ function displayMiddleTopWindowContent() {
     // display how long it's been since the mechanic started
     fill(0, 0, 100)
     noStroke()
-    textSize(7*scalingFactor)
+    textSize(7*scalingFactor*fontScalingFactor)
     textAlign(LEFT, TOP)
     text("It's been " + formatSeconds((millis() - mechanicStarted)/1000) + " since" +
         " the mechanic started.", middleTopX + textPadding, middleTopY + middleTopHeight -
@@ -1415,7 +1416,7 @@ function displayMainBodyContent() {
 
         // waymarks
         strokeWeight(2*scalingFactor)
-        textSize(16*scalingFactor)
+        textSize(16*scalingFactor*fontScalingFactor)
         fill(0, 60, 60)
         stroke(0, 60, 60)
         textAlign(CENTER, CENTER)
@@ -1463,7 +1464,7 @@ function displayMainBodyContent() {
         text("C", 0, 2*mainBodyWidth/7 - 3*scalingFactor)
         text("4", -mainBodyWidth/5, mainBodyWidth/5 - 3*scalingFactor)
         text("D", -2*mainBodyWidth/7, -3*scalingFactor)
-        textSize(7*scalingFactor)
+        textSize(7*scalingFactor*fontScalingFactor)
         textAlign(LEFT, BOTTOM)
 
 
@@ -4214,7 +4215,7 @@ intercardinals.`
         fill(0, 100, 100)
         noStroke()
         push()
-        textSize(50)
+        textSize(50*scalingFactor*fontScalingFactor)
         textAlign(CENTER, CENTER)
         translateToCenterOfBoard()
         scale(1, 2)
@@ -5563,7 +5564,7 @@ function displayMechanicSelection() {
     fill(0, 0, 50)
     noStroke()
     textAlign(LEFT, TOP)
-    textSize(10*scalingFactor)
+    textSize(10*scalingFactor*fontScalingFactor)
 
     // display what's underneath the button first
     push()
@@ -5668,7 +5669,7 @@ function displayMechanicSelection() {
     }
 
 
-    textSize(7*scalingFactor)
+    textSize(7*scalingFactor*fontScalingFactor)
 }
 
 function displayBottomWindowContent() {
@@ -5692,7 +5693,7 @@ function displayScalingAdjustContent() {
     textAlign(CENTER, CENTER)
     fill(0, 0, 100)
     noStroke()
-    textSize(10*scalingFactor)
+    textSize(10*scalingFactor*fontScalingFactor)
     text("Scaling Factor\nAdjust\nCurrent: " + parseInt(scalingFactorFetch*100) + "%",
         scalingAdjustX + scalingAdjustWidth/2, scalingAdjustY + scalingAdjustHeight/3)
     textAlign(LEFT, CENTER)
@@ -5703,7 +5704,7 @@ function displayScalingAdjustContent() {
         "Changes to scaling will take effect on next reload via local storage.",
         scalingAdjustX, scalingAdjustY + scalingAdjustHeight/2)
     textAlign(LEFT, BOTTOM)
-    textSize(7*scalingFactor)
+    textSize(7*scalingFactor*fontScalingFactor)
 
     // now that we're done with the text, display the buttons
     // row 1: "-50%", "-25%", "+25%", "+50%"
@@ -6290,7 +6291,7 @@ function displayCharacterPositions() {
     fill(0, 0, 100)
     stroke(0, 0, 100)
     strokeWeight(size/30)
-    textSize(size/2)
+    textSize(size*fontScalingFactor/2)
     textAlign(CENTER, CENTER)
     text("MT", realMT.x, realMT.y - scalingFactor)
     text("OT", realOT.x, realOT.y - scalingFactor)
@@ -6998,7 +6999,7 @@ function glowWaymark(h, s, b, a, rectOrCircle, weight, x, y, width, text) {
         glowCircle(h, s, b, a, weight, x, y, width)
     }
     textAlign(CENTER, CENTER)
-    textSize(2*width/3)
+    textSize(2*scalingFactor*fontScalingFactor*width/3)
     glowText(h, s, b, a, weight/2, text, x, y - width/8)
 }
 
