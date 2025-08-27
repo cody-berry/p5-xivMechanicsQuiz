@@ -195,7 +195,7 @@ scalingFactorFetch = parseFloat(scalingFactorFetch)
 let textPadding = 3.5*scalingFactor
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
 let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
-let mechanicSelectionRows = 5 // the number of rows in "mechanic selection"
+let mechanicSelectionRows = 7 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
 let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
@@ -251,14 +251,14 @@ let M1 = [0, 0]
 let M2 = [0, 0]
 let R1 = [0, 0]
 let R2 = [0, 0]
-let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], scalingFactor, 20*scalingFactor)
-let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], scalingFactor, 20*scalingFactor)
-let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], scalingFactor, 20*scalingFactor)
-let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], scalingFactor, 20*scalingFactor)
-let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], scalingFactor, 20*scalingFactor)
-let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*scalingFactor)
-let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor)
-let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor)
+let realMT = new ArrivingVector(MT[0], MT[1], MT[0], MT[1], 4*scalingFactor, 20*scalingFactor)
+let realOT = new ArrivingVector(OT[0], OT[1], OT[0], OT[1], 4*scalingFactor, 20*scalingFactor)
+let realH1 = new ArrivingVector(H1[0], H1[1], H1[0], H1[1], 4*scalingFactor, 20*scalingFactor)
+let realH2 = new ArrivingVector(H2[0], H2[1], H2[0], H2[1], 4*scalingFactor, 20*scalingFactor)
+let realM1 = new ArrivingVector(M1[0], M1[1], M1[0], M1[1], 4*scalingFactor, 20*scalingFactor)
+let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], 4*scalingFactor, 20*scalingFactor)
+let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], 4*scalingFactor, 20*scalingFactor)
+let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], 4*scalingFactor, 20*scalingFactor)
 
 // window positions
 let greenSquareX = 0
@@ -307,6 +307,14 @@ let redMirrorConfig
 let redMirrorAngleOne
 let redMirrorAngleTwo
 
+// Wingmark (M6S)
+let m6sP1Image
+let m6sP1Bomb
+let m6sP1WingedBomb
+let m6sP1Morbol
+let m6sP1Succubus
+
+
 // Millenial Decay (M8S P1)
 let gustImage // spreads
 let m8sP1Image
@@ -329,7 +337,7 @@ let textAtBottom
 let centerOfBoard
 let numWinsPerCoinIncrease = 1 // number of wins per 1 coin increase
 
-// sometimes the code will change and require a system update.
+// sometimes the code will change and require a system update like a local storage rename.
 let version = "0.000"
 // Version 0.000
 //  - Initial release
@@ -386,7 +394,7 @@ function setup() {
     debugCorner = new CanvasDebugCorner(5)
     debugCorner.visible = false
 
-    setupMillenialDecay()
+    setupWingmark()
 
     // there is a padding of holeSize on the sides. To remove this padding,
     // subtract holeSize from greenSquareX, greenSquareY, redSquareY, topWindowX,
@@ -3365,7 +3373,7 @@ intercardinals.`
 
                 if (mousePressedButNotHeldDown()) {
                     if (inClickingRange(correctRangedGreenDotPosition, 15*scalingFactor)) {
-                        if (meleeOrRanged() === "ranged") {
+                        if (meleeOrRanged(role) === "ranged") {
                             stage = 0.5
                             textAtTop = "You have gone into the correct" +
                                 " spot. Now you need to bait your blue" +
@@ -3385,7 +3393,7 @@ intercardinals.`
                                 " \n[FAIL] — You are a melee."
                         }
                     } if (inClickingRange(correctMeleeGreenDotPosition, 15*scalingFactor)) {
-                        if (meleeOrRanged() === "melee") {
+                        if (meleeOrRanged(role) === "melee") {
                             stage = 0.5
                             textAtTop = "You have gone into the correct" +
                                 " spot. Now you need to bait the boss properly."
@@ -3496,7 +3504,7 @@ intercardinals.`
                 ]
 
                 // of course, the positions are wildly different between melee and ranged
-                if (meleeOrRanged() === "ranged") {
+                if (meleeOrRanged(role) === "ranged") {
                     displaySmallGreenDot(H1Spot[0] - centerOfBoard[0], H1Spot[1] - centerOfBoard[1])
                     displaySmallGreenDot(H2Spot[0] - centerOfBoard[0], H2Spot[1] - centerOfBoard[1])
                     displaySmallGreenDot(R1Spot[0] - centerOfBoard[0], R1Spot[1] - centerOfBoard[1])
@@ -3596,7 +3604,7 @@ intercardinals.`
                             else updateLosses(3)
                         }
                     }
-                } if (meleeOrRanged() === "melee") {
+                } if (meleeOrRanged(role) === "melee") {
                     displaySmallGreenDot(MTSpot[0] - centerOfBoard[0], MTSpot[1] - centerOfBoard[1])
                     displaySmallGreenDot(OTSpot[0] - centerOfBoard[0], OTSpot[1] - centerOfBoard[1])
                     displaySmallGreenDot(M1Spot[0] - centerOfBoard[0], M1Spot[1] - centerOfBoard[1])
@@ -3916,14 +3924,14 @@ intercardinals.`
 
                 if (mousePressedButNotHeldDown()) {
                     if (inClickingRange(dotOne, 15 * scalingFactor)) {
-                        if ((meleeOrRanged() === "melee") !== (redMirrorConfig < 4)) {
+                        if ((meleeOrRanged(role) === "melee") !== (redMirrorConfig < 4)) {
                             stage = 100
                             updateLosses(3)
                         } else stage = 2.25
                         if (redMirrorConfig < 4) {
                             // in this situation, ranged pick red mirror
                             // 2 and melee pick red mirror 1.
-                            if (meleeOrRanged() === "melee") {
+                            if (meleeOrRanged(role) === "melee") {
                                 if (redMirrorConfig === 1 || redMirrorConfig === 4) {
                                     textAtBottom = "You went to the mirror" +
                                         " clockwise of you. \n[PASS] — Red" +
@@ -3964,7 +3972,7 @@ intercardinals.`
                         } else {
                             // in this situation, ranged pick red mirror
                             // 1 and melee pick red mirror 2.
-                            if (meleeOrRanged() === "melee") {
+                            if (meleeOrRanged(role) === "melee") {
                                 if (redMirrorConfig === 1 || redMirrorConfig === 4) {
                                     textAtBottom = "You went to the mirror" +
                                         " counterclockwise of you. \n[PASS] —" +
@@ -4005,14 +4013,14 @@ intercardinals.`
                         }
                     }
                     if (inClickingRange(dotTwo, 15 * scalingFactor)) {
-                        if ((meleeOrRanged() === "melee") === (redMirrorConfig < 4)) {
+                        if ((meleeOrRanged(role) === "melee") === (redMirrorConfig < 4)) {
                             stage = 100
                             updateLosses(3)
                         } else stage = 2.25
                         if (redMirrorConfig < 4) {
                             // in this situation, ranged pick red mirror
                             // 2 and melee pick red mirror 1.
-                            if (meleeOrRanged() === "melee") {
+                            if (meleeOrRanged(role) === "melee") {
                                 if (redMirrorConfig === 1 || redMirrorConfig === 4) {
                                     textAtBottom = "You went to the mirror" +
                                         " counterclockwise of you. \n[PASS] —" +
@@ -4053,7 +4061,7 @@ intercardinals.`
                         } else {
                             // in this situation, ranged pick red mirror
                             // 1 and melee pick red mirror 2.
-                            if (meleeOrRanged() === "melee") {
+                            if (meleeOrRanged(role) === "melee") {
                                 if (redMirrorConfig === 1 || redMirrorConfig === 4) {
                                     textAtBottom = "You went to the mirror" +
                                         " clockwise of you. \n[PASS] — Red" +
@@ -4155,13 +4163,52 @@ intercardinals.`
                 // alright. time for the ultimate time-consumer: the red
                 // mirror green dot positions!
                 let redMirrorAngleYouAreOn
-                if (meleeOrRanged() === "melee") {
+                if (meleeOrRanged(role) === "melee") {
                     redMirrorAngleYouAreOn = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
                 } else {
                     redMirrorAngleYouAreOn = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
                 }
             }
         }
+    }
+    // M6S start & adds background
+    if (currentlySelectedBackground === "M6S Start & Adds") {
+        angleMode(DEGREES)
+        tint(0, 0, 100, 5)
+        // the death wall is already included, so there is no reason to pad
+        // the top, left, bottom, and right to add an extra death wall
+        image(m6sP1Image, -mainBodyWidth/2, -mainBodyWidth/2,
+            mainBodyWidth, mainBodyWidth)
+        displayCharacterPositions()
+
+        // now then, for the waymarks
+        let circleWaymarkRadius = mainBodyWidth*6/24
+        let rectWaymarkRadius = mainBodyWidth*6/24*sqrt(2)
+        let waymarkAlpha = 20
+        glowWaymark(0, 100, 80, waymarkAlpha, "circle", 7*scalingFactor, cos(-90)*circleWaymarkRadius, sin(-90)*circleWaymarkRadius, 30*scalingFactor, "A")
+        glowWaymark(0, 100, 80, waymarkAlpha, "rect", 7*scalingFactor, cos(-135)*rectWaymarkRadius, sin(-135)*rectWaymarkRadius, 30*scalingFactor, "1")
+        glowWaymark(270, 100, 80, waymarkAlpha, "circle", 7*scalingFactor, cos(180)*circleWaymarkRadius, sin(180)*circleWaymarkRadius, 30*scalingFactor, "D")
+        glowWaymark(270, 100, 80, waymarkAlpha, "rect", 7*scalingFactor, cos(135)*rectWaymarkRadius, sin(135)*rectWaymarkRadius, 30*scalingFactor, "4")
+        glowWaymark(180, 100, 80, waymarkAlpha, "circle", 7*scalingFactor, cos(90)*circleWaymarkRadius, sin(90)*circleWaymarkRadius, 30*scalingFactor, "C")
+        glowWaymark(180, 100, 80, waymarkAlpha, "rect", 7*scalingFactor, cos(45)*rectWaymarkRadius, sin(45)*rectWaymarkRadius, 30*scalingFactor, "3")
+        glowWaymark(60, 100, 80, waymarkAlpha, "circle", 7*scalingFactor, cos(0)*circleWaymarkRadius, sin(0)*circleWaymarkRadius, 30*scalingFactor, "B")
+        glowWaymark(60, 100, 80, waymarkAlpha, "rect", 7*scalingFactor, cos(-45)*rectWaymarkRadius, sin(-45)*rectWaymarkRadius, 30*scalingFactor, "2")
+
+        pop()
+
+        fill(0, 100, 100)
+        noStroke()
+        push()
+        textSize(50)
+        textAlign(CENTER, CENTER)
+        translateToCenterOfBoard()
+        scale(1, 2)
+        rotate(-10)
+        text('This mechanic was abandoned', 0, 0)
+        pop()
+
+
+        angleMode(RADIANS)
     }
     // M8S P1 background
     if (currentlySelectedBackground === "M8S P1") {
@@ -5503,6 +5550,8 @@ function displayMechanicSelection() {
     textSize(10*scalingFactor)
     text("M8S: Millenial Decay | \n" +
         "\n" +
+        "M6S: Wingmark | \n" +
+        "\n" +
         "FRU: Utopian Sky | Diamond Dust | Mirror Mirror |\n" +
         "\n" +
         "Who knows, maybe there'll be other mechanics soon.",
@@ -5515,18 +5564,26 @@ function displayMechanicSelection() {
 
         // row -7
         if (mouseY > selectionY + mechanicSelectionHeight - 91*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding) {
+            if (mouseX > selectionX + textPadding + textWidth("M8S:") &&
+                mouseX < selectionX + textPadding + textWidth("M8S: Millenial Decay ")) {
+                rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 91*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("M8S: Millenial Decay "), selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupMillenialDecay()
+                }
+            }
         }
         // row -6
         if (mouseY > selectionY + mechanicSelectionHeight - 78*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding) {
         }
         // row -5
         if (mouseY > selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding) {
-            if (mouseX > selectionX + textPadding + textWidth("M8S:") &&
-                mouseX < selectionX + textPadding + textWidth("M8S: Millenial Decay ")) {
-                rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("M8S: Millenial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding)
+            if (mouseX > selectionX + textPadding + textWidth("M6S:") &&
+                mouseX < selectionX + textPadding + textWidth("M6S: Wingmark ")) {
+                rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding)
                 if (mousePressedButNotHeldDown()) {
-                    setupMillenialDecay()
+                    setupWingmark()
                 }
             }
         }
@@ -6263,19 +6320,33 @@ function currentPosition(role) {
 //——————————————————————————setup mechanic functions——————————————————————————\\
 
 function reset() {
-    switch (currentlySelectedMechanic) {
-        case "Utopian Sky":
-            setupUtopianSky()
-            break
-        case "Diamond Dust":
-            setupDiamondDust()
-            break
-        case "Mirror Mirror":
-            setupMirrorMirror()
-            break
-        case "Millenial Decay":
-            setupMillenialDecay()
-            break
+    // switch (currentlySelectedMechanic) {
+    //     case "Utopian Sky":
+    //         setupUtopianSky()
+    //         break
+    //     case "Diamond Dust":
+    //         setupDiamondDust()
+    //         break
+    //     case "Mirror Mirror":
+    //         setupMirrorMirror()
+    //         break
+    //     case "Millenial Decay":
+    //         setupMillenialDecay()
+    //         break
+    //     case "Wingmark":
+    //         setupWingmark()
+    //         break
+    // }
+
+
+    // ChatGPT generated response—now I don't have to update "reset" every time
+    let setupFunctionName = "setup" + currentlySelectedMechanic.replace(/\s/g, '');
+    let setupFunction = window[setupFunctionName];
+
+    if (typeof setupFunction === "function") {
+        setupFunction();
+    } else {
+        console.warn(`No setup function found for: ${currentlySelectedMechanic}`);
     }
 }
 
@@ -6289,7 +6360,7 @@ function setupUtopianSky() {
     mechanicStarted = millis()
 
     fruP1Image = loadImage('data/FRU P1 Floor.png')
-    utopianSkyFog = loadImage('data/fogGrain2.jpg')
+    utopianSkyFog = loadImage('data/FRU P1 Utopian Sky fogGrain2.jpg')
 
     stage = 0
     currentlySelectedMechanic = "Utopian Sky"
@@ -6582,7 +6653,7 @@ function setupMillenialDecay() {
     mechanicStarted = millis()
 
     framesWhenKnockbackStarted = -10000000
-    gustImage = loadImage("data/Gust.png")
+    gustImage = loadImage("data/M8S P1 Gust.png")
     m8sP1Image = loadImage("data/M8S P1 arena.png")
     m8sP1Background = loadImage("data/M8S P1 background.png")
     m8sP1WolfHead = loadImage("data/M8S P1 wolf head.png")
@@ -6622,7 +6693,7 @@ function setupMillenialDecay() {
     R1 = [realR1.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR1.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
     R2 = [realR2.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR2.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
 
-    stage = 1
+    stage = 0
     currentlySelectedMechanic = "Millenial Decay"
     currentlySelectedBackground = "M8S P1"
 
@@ -6657,147 +6728,236 @@ ${updates}
 </pre>`)
 }
 
+function setupWingmark() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
+    setMovementMode(defaultMovementMode)
+
+    mechanicStarted = millis()
+
+    framesWhenKnockbackStarted = -10000000
+    m6sP1Image = loadImage("data/M6S arena normal.webp")
+    m6sP1Bomb = loadImage("data/M6S bomb.png")
+    m6sP1WingedBomb = loadImage("data/M6S winged bomb.png")
+    m6sP1Morbol = loadImage("data/M6S morbol.png")
+    m6sP1Succubus = loadImage("data/M6S succubus.png")
+    m6sBoss = loadImage("data/M6S boss")
+    // dpsOrSupportsFirst = random(["DPS", "supports"])
+    // wolfHeadRotation = random(["cw", "ccw"])
+    dpsOrSupportsFirst = "supports"
+    wolfHeadRotation = "ccw"
+    actualWolfHeadRotation = (wolfHeadRotation === "ccw" ? "cw" : "ccw")
+    northOrSouth = random(["N", "S"])
+
+    // the m6SP1Image is too high quality! reduce it to half its size.
+
+    numWinsPerCoinIncrease = -1
+
+    // create a random spread with everyone south and MT north
+    realMT.x = 0
+    realMT.y = random(-70*scalingFactor, -65*scalingFactor)
+    realOT.x = random(-50*scalingFactor, 50*scalingFactor)
+    realOT.y = random(90*scalingFactor, 40*scalingFactor)
+    realH1.x = random(-50*scalingFactor, 50*scalingFactor)
+    realH1.y = random(90*scalingFactor, 40*scalingFactor)
+    realH2.x = random(-50*scalingFactor, 50*scalingFactor)
+    realH2.y = random(90*scalingFactor, 40*scalingFactor)
+    realM1.x = random(-50*scalingFactor, 50*scalingFactor)
+    realM1.y = random(90*scalingFactor, 40*scalingFactor)
+    realM2.x = random(-50*scalingFactor, 50*scalingFactor)
+    realM2.y = random(90*scalingFactor, 40*scalingFactor)
+    realR1.x = random(-50*scalingFactor, 50*scalingFactor)
+    realR1.y = random(90*scalingFactor, 40*scalingFactor)
+    realR2.x = random(-50*scalingFactor, 50*scalingFactor)
+    realR2.y = random(90*scalingFactor, 40*scalingFactor)
+    MT = [realMT.x, realMT.y]
+    OT = [realOT.x, realOT.y]
+    H1 = [realH1.x, realH1.y]
+    H2 = [realH2.x, realH2.y]
+    M1 = [realM1.x, realM1.y]
+    M2 = [realM2.x, realM2.y]
+    R1 = [realR1.x, realR1.y]
+    R2 = [realR2.x, realR2.y]
+
+    stage = 0
+    currentlySelectedMechanic = "Wingmark"
+    currentlySelectedBackground = "M6S Start & Adds"
+
+    let css = select("html")
+    css.style("background-image", "url(\"data/M6S arena normal.webp\")")
+    css = select("body")
+    css.style("background-image", "url(\"data/M6S arena normal.webp\")")
+
+    textAtTop = "Wingmark is hard because it's complex, and Wingmark is" +
+        " complex because people are incompetent.\nThis simulation aims to" +
+        " help you not be incompetent like everyone else in PF.\n\nSmall" +
+        " tip: Try to get close to bombs and succubus and away from morbols" +
+        " and winged bombs—that is \nwhere you're supposed to go to. Just" +
+        " don't die on your normals because of that."
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+This mechanic uses Murderless Fering Decay from Hector and <b>will</b> fail you for not following it completely.
+    Here it is: <a href="https://www.youtube.com/watch?v=cZ6uAQToW3w">https://www.youtube.com/watch?v=cZ6uAQToW3w</a>
+
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+        
+You are currently on the mechanic Diamond Dust.
+Click on any green dot to move to—or near—that location.
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
+}
+
+
 //———————————————————————————————glow functions———————————————————————————————\\
 
-function glowRect(h, s, b, weight, param1, param2, param3, param4, param5 = 0, param6 = 0, param7 = 0, param8 = 0) {
+function glowRect(h, s, b, a, weight, param1, param2, param3, param4, param5 = 0, param6 = 0, param7 = 0, param8 = 0) {
     strokeWeight(weight)
-    stroke(h, s, b)
+    stroke(h, s, b, a)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*9/10)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2, 50)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a/2)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*4/5)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*7/10)
-    stroke(h, s*1/4, b*1/4 + 300/4, 50)
+    stroke(h, s*1/4, b*1/4 + 300/4, a/2)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*3/5)
-    stroke(h, s*1/4, b*1/4 + 300/4)
+    stroke(h, s*1/4, b*1/4 + 300/4, a)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*1/2)
-    stroke(h, 0, 100, 50)
+    stroke(h, 0, 100, a/2)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 
     strokeWeight(weight*2/5)
-    stroke(h, 0, 100)
+    stroke(h, 0, 100, a)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
 }
 
-function glowCircle(h, s, b, weight, param1, param2, param3) {
+function glowCircle(h, s, b, a, weight, param1, param2, param3) {
     strokeWeight(weight)
-    stroke(h, s, b)
+    stroke(h, s, b, a)
     circle(param1, param2, param3)
 
     strokeWeight(weight*9/10)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2, 50)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a/2)
     circle(param1, param2, param3)
 
     strokeWeight(weight*4/5)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a)
     circle(param1, param2, param3)
 
     strokeWeight(weight*7/10)
-    stroke(h, s*1/4, b*1/4 + 300/4, 50)
+    stroke(h, s*1/4, b*1/4 + 300/4, a/2)
     circle(param1, param2, param3)
 
     strokeWeight(weight*3/5)
-    stroke(h, s*1/4, b*1/4 + 300/4)
+    stroke(h, s*1/4, b*1/4 + 300/4, a)
     circle(param1, param2, param3)
 
     strokeWeight(weight*1/2)
-    stroke(h, 0, 100, 50)
+    stroke(h, 0, 100, a/2)
     circle(param1, param2, param3)
 
     strokeWeight(weight*2/5)
-    stroke(h, 0, 100)
+    stroke(h, 0, 100, a)
     circle(param1, param2, param3)
 }
 
-function glowPoint(h, s, b, weight, param1, param2) {
-
+function glowPoint(h, s, b, a, weight, param1, param2) {
     strokeWeight(weight)
-    stroke(h, s, b)
+    stroke(h, s, b, a)
     point(param1, param2)
 
     strokeWeight(weight*9/10)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2, 50)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a/2)
     point(param1, param2)
 
     strokeWeight(weight*4/5)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a)
     point(param1, param2)
 
     strokeWeight(weight*7/10)
-    stroke(h, s*1/4, b*1/4 + 300/4, 50)
+    stroke(h, s*1/4, b*1/4 + 300/4, a/2)
     point(param1, param2)
 
     strokeWeight(weight*3/5)
-    stroke(h, s*1/4, b*1/4 + 300/4)
+    stroke(h, s*1/4, b*1/4 + 300/4, a)
     point(param1, param2)
 
     strokeWeight(weight*1/2)
-    stroke(h, 0, 100, 50)
+    stroke(h, 0, 100, a/2)
     point(param1, param2)
 
     strokeWeight(weight*2/5)
-    stroke(h, 0, 100)
+    stroke(h, 0, 100, a)
     point(param1, param2)
 }
 
-function glowText(h, s, b, weight, param1, param2, param3) {
+function glowText(h, s, b, a, weight, param1, param2, param3) {
     strokeWeight(weight)
-    stroke(h, s, b)
-    fill(h, s, b)
+    stroke(h, s, b, a)
+    fill(h, s, b, a)
     text(param1, param2, param3)
 
     strokeWeight(weight*9/10)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2, 50)
-    fill(h, s*1.5/3, b*1.5/3 + 100/2, 50)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a/2)
+    fill(h, s*1.5/3, b*1.5/3 + 100/2, a/2)
     text(param1, param2, param3)
 
     strokeWeight(weight*4/5)
-    stroke(h, s*1.5/3, b*1.5/3 + 100/2)
-    fill(h, s*1.5/3, b*1.5/3 + 100/2)
+    stroke(h, s*1.5/3, b*1.5/3 + 100/2, a)
+    fill(h, s*1.5/3, b*1.5/3 + 100/2, a)
     text(param1, param2, param3)
 
     strokeWeight(weight*7/10)
-    stroke(h, s*1/4, b*1/4 + 300/4, 50)
-    fill(h, s*1/4, b*1/4 + 300/4, 50)
+    stroke(h, s*1/4, b*1/4 + 300/4, a/2)
+    fill(h, s*1/4, b*1/4 + 300/4, a/2)
     text(param1, param2, param3)
 
     strokeWeight(weight*3/5)
-    stroke(h, s*1/4, b*1/4 + 300/4)
-    fill(h, s*1/4, b*1/4 + 300/4)
+    stroke(h, s*1/4, b*1/4 + 300/4, a)
+    fill(h, s*1/4, b*1/4 + 300/4, a)
     text(param1, param2, param3)
 
     strokeWeight(weight*1/2)
-    stroke(h, 0, 100, 50)
-    fill(h, 0, 100, 50)
+    stroke(h, 0, 100, a/2)
+    fill(h, 0, 100, a/2)
     text(param1, param2, param3)
 
     strokeWeight(weight*2/5)
-    stroke(h, 0, 100)
-    fill(h, 0, 100)
+    stroke(h, 0, 100, a)
+    fill(h, 0, 100, a)
     text(param1, param2, param3)
 }
 
-function glowWaymark(h, s, b, rectOrCircle, weight, x, y, width, text) {
+function glowWaymark(h, s, b, a, rectOrCircle, weight, x, y, width, text) {
     noFill()
     if (rectOrCircle === "rect") {
-        glowRect(h, s, b, weight, x - width/2, y - width/2, x + width/2, y + width/2)
+        glowRect(h, s, b, a, weight, x - width/2, y - width/2, x + width/2, y + width/2)
     }
     if (rectOrCircle === "circle") {
-        glowCircle(h, s, b, weight, x, y, width)
+        glowCircle(h, s, b, a, weight, x, y, width)
     }
     textAlign(CENTER, CENTER)
     textSize(2*width/3)
-    glowText(h, s, b, weight/2, text, x, y - width/8)
+    glowText(h, s, b, a, weight/2, text, x, y - width/8)
 }
 
 //—————————————————————————————————miscellany—————————————————————————————————\\
