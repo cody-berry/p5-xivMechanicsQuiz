@@ -3796,20 +3796,20 @@ intercardinals.`
                     sin(radians(blueMirrorAngle + 7))*(mirrorRadius - 20*scalingFactor)
                 ]
                 MT = [
-                    cos(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor),
-                    sin(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor)
-                ]
-                OT = [
                     cos(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor),
                     sin(radians(blueMirrorAngle - 193))*(shivaRadius + 20*scalingFactor)
                 ]
-                M1 = [
-                    cos(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor),
-                    sin(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor)
+                OT = [
+                    cos(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 167))*(shivaRadius + 20*scalingFactor)
                 ]
-                M2 = [
+                M1 = [
                     cos(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor),
                     sin(radians(blueMirrorAngle - 200))*(shivaRadius - 20*scalingFactor)
+                ]
+                M2 = [
+                    cos(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor),
+                    sin(radians(blueMirrorAngle - 160))*(shivaRadius - 20*scalingFactor)
                 ]
                 textAtTop = "Which red mirror should you go to?"
                 stage = 1.5
@@ -4173,6 +4173,7 @@ intercardinals.`
                         }
                     }
                 }
+                return
             } if (stage === 2.25) {
                 // draw a mirror mirror! 60*scalingFactor width
                 tint(200, 50, 100, 20)
@@ -4233,12 +4234,426 @@ intercardinals.`
 
                 // alright. time for the ultimate time-consumer: the red
                 // mirror green dot positions!
+
+                // find the red mirror you are on and the angle of it
                 let redMirrorAngleYouAreOn
                 if (meleeOrRanged(role) === "melee") {
                     redMirrorAngleYouAreOn = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
                 } else {
                     redMirrorAngleYouAreOn = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
                 }
+
+                let redMirrorPositionYouAreOn = [
+                    cos(radians(redMirrorAngleYouAreOn))*mirrorRadius,
+                    sin(radians(redMirrorAngleYouAreOn))*mirrorRadius]
+
+                angleMode(DEGREES)
+                // there are 5 spots:
+                // support 1 spot: left of mirror, closest to death wall
+                // support 2 spot: right of mirror, closest to death wall
+                // middle adjust spot: in front of mirror to avoid clipping
+                //   other group
+                // dps 1 spot: slightly farther than support 1 spot
+                // dps 2 spot: slightly farther than support 2 spot
+
+                // how far away are the positions from the mirror
+                let positionsRadius = 25*scalingFactor
+
+                let supportOneSpot = [...redMirrorPositionYouAreOn]
+                supportOneSpot[0] += cos(redMirrorAngleYouAreOn - 100)*positionsRadius
+                supportOneSpot[1] += sin(redMirrorAngleYouAreOn - 100)*positionsRadius
+
+                let supportTwoSpot = [...redMirrorPositionYouAreOn]
+                supportTwoSpot[0] += cos(redMirrorAngleYouAreOn + 100)*positionsRadius
+                supportTwoSpot[1] += sin(redMirrorAngleYouAreOn + 100)*positionsRadius
+
+                let dpsFlexSpot = [...redMirrorPositionYouAreOn]
+                dpsFlexSpot[0] += cos(redMirrorAngleYouAreOn - 180)*positionsRadius
+                dpsFlexSpot[1] += sin(redMirrorAngleYouAreOn - 180)*positionsRadius
+
+                let dpsOneSpot = [...redMirrorPositionYouAreOn]
+                dpsOneSpot[0] += cos(redMirrorAngleYouAreOn - 140)*positionsRadius
+                dpsOneSpot[1] += sin(redMirrorAngleYouAreOn - 140)*positionsRadius
+
+                let dpsTwoSpot = [...redMirrorPositionYouAreOn]
+                dpsTwoSpot[0] += cos(redMirrorAngleYouAreOn + 140)*positionsRadius
+                dpsTwoSpot[1] += sin(redMirrorAngleYouAreOn + 140)*positionsRadius
+
+                displaySmallGreenDot(...supportOneSpot)
+                displaySmallGreenDot(...supportTwoSpot)
+                displaySmallGreenDot(...dpsFlexSpot)
+                displaySmallGreenDot(...dpsOneSpot)
+                displaySmallGreenDot(...dpsTwoSpot)
+
+
+
+                // how do we tell who uses the flex spot and who goes to
+                // their designated spot?
+                // red mirror 2 always spawns clockwise of red mirror 1.
+                // if you are on red mirror 1, then the person clockwise of
+                // the red mirror, dps 2, will have to avoid clipping red
+                // mirror 2.
+                // if you are on red mirror 2, the person counterclockwise
+                // of the red mirror, dps 1, will have to avoid clipping
+                // red mirror 2.
+                // in summary: red mirror 1 = dps 2 on dps flex spot
+                // red mirror 2 = dps 1 on dps flex spot
+
+                // what are the checks that will be done here?
+                // support spots: check light party → support/dps
+                // dps spots: check light party → support/dps → flex or not
+                // dps flex spot: support/dps → flex or not
+
+                let redMirrorNumber
+                if (meleeOrRanged(role) === "melee") {
+                    redMirrorNumber = redMirrorConfig < 4 ? 1 : 2
+                } else {
+                    redMirrorNumber = redMirrorConfig > 3 ? 1 : 2
+                }
+
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRange([supportOneSpot[0] + centerOfBoard[0], supportOneSpot[1] + centerOfBoard[1]], 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to support 1's spot."
+                        if (lightParty() === 1) {
+                            textAtBottom += "\n[PASS] — You're light party 1."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 2."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        }
+                        if (DPSOrSupports(role) === "supports") {
+                            textAtBottom += "\n[PASS] — You're a support."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're a DPS."
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        }
+                        if (stage !== 100) stage = 3.25
+                        else updateLosses(3)
+                    }
+                    if (inClickingRange([supportTwoSpot[0] + centerOfBoard[0], supportTwoSpot[1] + centerOfBoard[1]], 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to support 2's spot."
+                        if (lightParty() === 1) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 1."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        } else {
+                            textAtBottom += "\n[PASS] — You're light party 2."
+                        }
+                        if (DPSOrSupports(role) === "supports") {
+                            textAtBottom += "\n[PASS] — You're a support."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're a DPS."
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        }
+                        if (stage !== 100) stage = 3.25
+                        else updateLosses(3)
+                    }
+                    if (inClickingRange([dpsOneSpot[0] + centerOfBoard[0], dpsOneSpot[1] + centerOfBoard[1]], 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to dps 1's non-flex spot."
+                        if (lightParty() === 1) {
+                            textAtBottom += "\n[PASS] — You're light party 1."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 2."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        }
+                        if (DPSOrSupports(role) === "supports") {
+                            textAtBottom += "\n[FAIL] — You're a support."
+                            stage = 100
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        } else {
+                            textAtBottom += "\n[PASS] — You're a DPS."
+                        }
+                        if (redMirrorNumber === 1) {
+                            textAtBottom += "\n[PASS] — Your cone is not" +
+                                " about to murder the other group."
+                        } else {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — Your cone is about" +
+                                " to murder the other group."
+                            textAtTop = "Go to the spot directly towards the" +
+                                " center from the red mirror if your cone" +
+                                " will murder the other group."
+                        }
+                        if (stage !== 100) stage = 3.25
+                        else updateLosses(3)
+                    }
+                    if (inClickingRange([dpsTwoSpot[0] + centerOfBoard[0], dpsTwoSpot[1] + centerOfBoard[1]], 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to dps 2's non-flex spot."
+                        if (lightParty() === 1) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — You're light party 1."
+                            textAtTop = "Light party 1 is left facing the" +
+                                " wall. Light party 2 is right facing the" +
+                                " wall.\n"
+                        } else {
+                            textAtBottom += "\n[PASS] — You're light party 2."
+                        }
+                        if (DPSOrSupports(role) === "supports") {
+                            textAtBottom += "\n[FAIL] — You're a support."
+                            stage = 100
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        } else {
+                            textAtBottom += "\n[PASS] — You're a DPS."
+                        }
+                        if (redMirrorNumber === 1) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — Your cone is about" +
+                                " to murder the other group."
+                            textAtTop = "Go to the spot directly towards the" +
+                                " center from the red mirror if your cone" +
+                                " will murder the other group."
+                        } else {
+                            textAtBottom += "\n[PASS] — Your cone is not" +
+                                " about to murder the other group."
+                        }
+                        if (stage !== 100) stage = 3.25
+                        else updateLosses(3)
+                    }
+                    if (inClickingRange([dpsFlexSpot[0] + centerOfBoard[0], dpsFlexSpot[1] + centerOfBoard[1]], 7*scalingFactor)) {
+                        textAtTop = ""
+                        textAtBottom = "You went to the dps flex spot."
+                        if (DPSOrSupports(role) === "supports") {
+                            textAtBottom += "\n[FAIL] — You're a support."
+                            stage = 100
+                            textAtTop += "Supports are closer to the wall" +
+                                " than DPS."
+                        } else {
+                            textAtBottom += "\n[PASS] — You're a DPS."
+                        }
+                        if (redMirrorNumber === lightParty()) {
+                            stage = 100
+                            textAtBottom += "\n[FAIL] — It's the other DPS" +
+                                " that would've been about to murder the" +
+                                " opposite group."
+                            textAtTop = "Go to the spot directly towards the" +
+                                " center from the red mirror if your cone" +
+                                " will murder the other group."
+                        } else {
+                            textAtBottom += "\n[PASS] — Your cone is not" +
+                                " about to murder the other group."
+                        }
+                        if (stage !== 100) stage = 3.25
+                        else updateLosses(3)
+                    }
+                }
+
+                angleMode(RADIANS)
+            } if (stage === 3.25) {
+                textAtTop = "Just a little more animations and showing the" +
+                    " cones and you'll be there!"
+
+                let meleeRedMirrorAngle = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
+                let rangedRedMirrorAngle = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
+
+                let meleeRedMirrorNumber = redMirrorConfig < 4 ? 1 : 2
+                let rangedRedMirrorNumber = redMirrorConfig > 3 ? 1 : 2
+
+                let meleeRedMirrorPosition = [
+                    cos(radians(meleeRedMirrorAngle)) * mirrorRadius,
+                    sin(radians(meleeRedMirrorAngle)) * mirrorRadius]
+                let rangedRedMirrorPosition = [
+                    cos(radians(rangedRedMirrorAngle)) * mirrorRadius,
+                    sin(radians(rangedRedMirrorAngle)) * mirrorRadius]
+
+                angleMode(DEGREES)
+
+                let positionsRadius = 25 * scalingFactor
+
+                MT = [...meleeRedMirrorPosition]
+                MT[0] += cos(meleeRedMirrorAngle - 100) * positionsRadius
+                MT[1] += sin(meleeRedMirrorAngle - 100) * positionsRadius
+
+                OT = [...meleeRedMirrorPosition]
+                OT[0] += cos(meleeRedMirrorAngle + 100) * positionsRadius
+                OT[1] += sin(meleeRedMirrorAngle + 100) * positionsRadius
+
+                M1 = [...meleeRedMirrorPosition]
+                M1[0] += cos(meleeRedMirrorAngle - (meleeRedMirrorNumber === 1 ? 140 : 180)) * positionsRadius
+                M1[1] += sin(meleeRedMirrorAngle - (meleeRedMirrorNumber === 1 ? 140 : 180)) * positionsRadius
+
+                M2 = [...meleeRedMirrorPosition]
+                M2[0] += cos(meleeRedMirrorAngle + (meleeRedMirrorNumber === 2 ? 140 : 180)) * positionsRadius
+                M2[1] += sin(meleeRedMirrorAngle + (meleeRedMirrorNumber === 2 ? 140 : 180)) * positionsRadius
+
+
+                H1 = [...rangedRedMirrorPosition]
+                H1[0] += cos(rangedRedMirrorAngle - 100) * positionsRadius
+                H1[1] += sin(rangedRedMirrorAngle - 100) * positionsRadius
+
+                H2 = [...rangedRedMirrorPosition]
+                H2[0] += cos(rangedRedMirrorAngle + 100) * positionsRadius
+                H2[1] += sin(rangedRedMirrorAngle + 100) * positionsRadius
+
+                R1 = [...rangedRedMirrorPosition]
+                R1[0] += cos(rangedRedMirrorAngle - (rangedRedMirrorNumber === 1 ? 140 : 180)) * positionsRadius
+                R1[1] += sin(rangedRedMirrorAngle - (rangedRedMirrorNumber === 1 ? 140 : 180)) * positionsRadius
+
+                R2 = [...rangedRedMirrorPosition]
+                R2[0] += cos(rangedRedMirrorAngle + (rangedRedMirrorNumber === 2 ? 140 : 180)) * positionsRadius
+                R2[1] += sin(rangedRedMirrorAngle + (rangedRedMirrorNumber === 2 ? 140 : 180)) * positionsRadius
+
+                angleMode(RADIANS)
+
+
+                stage = 3.5
+
+            } if (stage === 3.5) {
+                // draw a mirror mirror! 60*scalingFactor width
+                tint(200, 50, 100, 20)
+                let mirrorLocation = [
+                    cos(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleOne))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+                mirrorLocation = [
+                    cos(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[0],
+                    sin(radians(redMirrorAngleTwo))*mirrorRadius + centerOfBoard[1]]
+                image(redMirror, mirrorLocation[0] - mirrorSize/2, mirrorLocation[1] - mirrorSize/2, mirrorSize, mirrorSize)
+
+                // only finish with this stage once everyone has
+                // gotten into their positions
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    let meleeRedMirrorAngle = redMirrorConfig < 4 ? redMirrorAngleOne : redMirrorAngleTwo
+                    let rangedRedMirrorAngle = redMirrorConfig > 3 ? redMirrorAngleOne : redMirrorAngleTwo
+
+
+                    let baseX = cos(radians(meleeRedMirrorAngle))*mirrorRadius
+                    let baseY = sin(radians(meleeRedMirrorAngle))*mirrorRadius
+
+                    // donut
+                    fill(200, 70, 100, 100)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(3)
+                    beginShape()
+                    for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/2 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/2 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    beginContour()
+                    for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/10 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/10 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    endContour()
+                    endShape(CLOSE)
+
+
+
+                    baseX = cos(radians(rangedRedMirrorAngle))*mirrorRadius
+                    baseY = sin(radians(rangedRedMirrorAngle))*mirrorRadius
+
+                    // donut
+                    fill(200, 70, 100, 100)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(3)
+                    beginShape()
+                    for (let i = 0; i < TWO_PI; i += TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/2 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/2 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    beginContour()
+                    for (let i = TWO_PI; i > 0; i -= TWO_PI/10000) {
+                        let x = cos(i)*mainBodyWidth/10 + baseX + centerOfBoard[0]
+                        let y = sin(i)*mainBodyWidth/10 + baseY + centerOfBoard[1]
+                        vertex(x, y)
+                    }
+                    endContour()
+                    endShape(CLOSE)
+
+
+
+                    baseX = cos(radians(meleeRedMirrorAngle))*mirrorRadius
+                    baseY = sin(radians(meleeRedMirrorAngle))*mirrorRadius
+
+                    // display proteans
+                    fill(60, 100, 100, 60)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(5)
+                    for (let player of [MT, OT, M1, M2]) {
+                        let angle = atan2(player[1] - baseY, player[0] - baseX)
+
+                        arc(centerOfBoard[0] + baseX, centerOfBoard[1] + baseY,
+                            1500*scalingFactor, 1500*scalingFactor, angle - PI/8, angle + PI/8, PIE)
+                    }
+
+
+
+                    baseX = cos(radians(rangedRedMirrorAngle))*mirrorRadius
+                    baseY = sin(radians(rangedRedMirrorAngle))*mirrorRadius
+
+                    // display proteans
+                    fill(60, 100, 100, 60)
+                    stroke(0, 0, 100, 100)
+                    strokeWeight(5)
+                    for (let player of [H1, H2, R1, R2]) {
+                        let angle = atan2(player[1] - baseY, player[0] - baseX)
+
+                        arc(centerOfBoard[0] + baseX, centerOfBoard[1] + baseY,
+                            1500*scalingFactor, 1500*scalingFactor, angle - PI/8, angle + PI/8, PIE)
+                    }
+
+                    // reference code, inherited from Diamond Dust. it
+                    // displays proteans on cardinals or intercardinals
+                    // strokeWeight(5*scalingFactor)
+                    // if (AoEsSpawnedOn === "cardinal") {
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, -PI/8, PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 3*PI/8, 5*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 7*PI/8, 9*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 11*PI/8, 13*PI/8, PIE)
+                    // } if (AoEsSpawnedOn === "intercardinal") {
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, PI/8, 3*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 5*PI/8, 7*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 9*PI/8, 11*PI/8, PIE)
+                    //     arc(mainBodyX + mainBodyWidth/2, mainBodyY + mainBodyHeight/2,
+                    //         1000*scalingFactor, 1000*scalingFactor, 13*PI/8, 15*PI/8, PIE)
+                    // }
+
+                    frameRate(1)
+
+                    stage = 3.75
+                    return
+                }
+            } if (stage === 3.75) {
+                erase()
+                rect(0, 0, width, height)
+                noErase()
+                updateWins(numWinsPerCoinIncrease)
+                stage = 99
+                textAtTop = "Congrats! You beat this mechanic."
+                textAtBottom = "[CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
             }
         }
     }
@@ -6740,6 +7155,8 @@ function setupDiamondDust() {
 
     instructions.html(`<pre>
 numpad 1 → freeze sketch
+
+This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79" target="_blank">NAUR strats</a>
         
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
@@ -6780,10 +7197,9 @@ function setupMirrorMirror() {
     // 4. red mirrors spawn opposite blue mirror
     // 5. red mirrors spawn 90º and 180º clockwise of blue mirror
     // 6. red mirrors spawn 45º and 135º clockwise of blue mirror
-    redMirrorConfig = random([1, 2, 6])
+    redMirrorConfig = random([1, 2, 3, 4, 5, 6])
     redMirrorAngleOne = blueMirrorAngle
     redMirrorAngleTwo = blueMirrorAngle
-    rangedRedMirror = 1
     if (redMirrorConfig === 1) {
         redMirrorAngleOne -= 45
         redMirrorAngleTwo += 45
@@ -6840,7 +7256,7 @@ function setupMirrorMirror() {
     instructions.html(`<pre>
 numpad 1 → freeze sketch
         
-This mechanic uses NAUR strats: https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79
+This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79" target="_blank">NAUR strats</a>
 
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
@@ -6873,10 +7289,10 @@ function setupMillennialDecay() {
     m8sP1Background = loadImage("data/M8S P1 background.png")
     m8sP1WolfHead = loadImage("data/M8S P1 wolf head.png")
     m8sP1LineAoE = loadImage("data/M8S P1 line AoE.png")
-    // dpsOrSupportsFirst = random(["DPS", "supports"])
-    // wolfHeadRotation = random(["cw", "ccw"])
-    dpsOrSupportsFirst = "supports"
-    wolfHeadRotation = "ccw"
+    dpsOrSupportsFirst = random(["DPS", "supports"])
+    wolfHeadRotation = random(["cw", "ccw"])
+    // dpsOrSupportsFirst = "supports"
+    // wolfHeadRotation = "ccw"
     actualWolfHeadRotation = (wolfHeadRotation === "ccw" ? "cw" : "ccw")
     northOrSouth = random(["N", "S"])
 
@@ -6909,7 +7325,7 @@ function setupMillennialDecay() {
     R2 = [realR2.x*5/6 + random(-10*scalingFactor, 10*scalingFactor), realR2.y*5/6 + random(-10*scalingFactor, 10*scalingFactor)]
 
     stage = 0
-    currentlySelectedMechanic = "MillennialMillennial Decay"
+    currentlySelectedMechanic = "Millennial Decay"
     currentlySelectedBackground = "M8S P1"
 
     let css = select("html")
@@ -6965,8 +7381,6 @@ function setupWingmark() {
     wolfHeadRotation = "ccw"
     actualWolfHeadRotation = (wolfHeadRotation === "ccw" ? "cw" : "ccw")
     northOrSouth = random(["N", "S"])
-
-    // the m6SP1Image is too high quality! reduce it to half its size.
 
     numWinsPerCoinIncrease = -1
 
