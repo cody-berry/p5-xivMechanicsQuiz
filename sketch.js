@@ -195,17 +195,18 @@ scalingFactorFetch = parseFloat(scalingFactorFetch)
 
 let textPadding = 3.5*scalingFactor
 let topSquareSize = 50*scalingFactor // the size of the top corner squares
-let topWidth = 250*scalingFactor  // the width of the window at the top, not including the top corner squares
+let topWidth = 250*scalingFactor  // the width of the window at the top, not
+// including the top corner squares
 let mechanicSelectionRows = 5 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
 let middleTopHeight = 60*scalingFactor // the height of the window just above the main body
 let bottomHeight = 50*scalingFactor // the height of the window at the bottom
 let holeSize = 3*scalingFactor
 let cornerRounding = 5*scalingFactor
-let mainBodyHeight = topSquareSize*2 + holeSize*4 + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
-let scalingAdjustHeight = 50*scalingFactor
+let mainBodyHeight = topSquareSize*2 + 40*scalingFactor + topWidth // the height of the main window. since the main window has to be square, a different calculation is used.
+let scalingAdjustHeight = 55*scalingFactor
 let windowWidth = topSquareSize*2 + holeSize*2 + topWidth
-let mainBodyWidth = windowWidth + holeSize*2
+let mainBodyWidth = mainBodyHeight
 let middleTopWidth = windowWidth
 let bottomWidth = windowWidth
 let selectionWidth = windowWidth
@@ -351,6 +352,7 @@ let version = "0.000"
 //  - Updates implemented
 //  - M8S support for Millennial Decay
 //    - nothing changed to support these
+//  - Huge hotbar revamp!
 
 // version format:
 //  first number: expansion number
@@ -418,7 +420,7 @@ function setup() {
     topWindowY = holeSize
     middleTopX = holeSize + bonusWidth/2
     middleTopY = topWindowY + topSquareSize + holeSize
-    mainBodyX = bonusWidth/2
+    mainBodyX = bonusWidth/2 - 2*(10*scalingFactor - holeSize) // the main body width assumes a hole size of 10*scalingFactor
     mainBodyY = middleTopY + middleTopHeight + holeSize
     bottomWindowX = holeSize + bonusWidth/2
     bottomWindowY = mainBodyY + mainBodyHeight + holeSize
@@ -623,93 +625,138 @@ function displayLossContent() {
 }
 
 function displayTopWindowContent() {
-    textAlign(LEFT, BASELINE)
+    textAlign(LEFT, CENTER)
     noStroke()
 
     // make buttons look like buttons
+
+    push()
+    translate(0, -1.5*scalingFactor) // currently, this just needs to be moved
+    // a little bit up
+
+    // add the underside
+    fill(120, 50, 30)
+    if (stage > 98) fill(120, 50, 30+sin(frameCount/50)*20)
+    rect(topWindowX + textPadding, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanic") + textPadding*3, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    fill(0, 100, 30)
+    rect(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    fill(240, 50, 30)
+    rect(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*7, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*9, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+
+
+    // then the part where you can press. don't display if it's pressed on
+
+    push()
+    translate(0, -2.6*scalingFactor)
+
+    push()
+    if (mouseInBoundingBox(topWindowX + textPadding, topWindowY + 33*scalingFactor,
+        topWindowX + textWidth("Reset mechanic") + textPadding*3,
+        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+        mouseIsPressed) {translate(0, scalingFactor)}
     fill(120, 50, 50)
-    rect(topWindowX, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
-        topWindowX + topWidth/3, topWindowY + topSquareSize, cornerRounding)
-    fill(0, 100, 50)
-    rect(topWindowX + topWidth/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
-        topWindowX + topWidth*2/3, topWindowY + topSquareSize, cornerRounding)
-    fill(240, 50, 50)
-    rect(topWindowX + topWidth*2/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding,
-        topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
-
-
+    if (stage > 98) fill(120, 50, 60+sin(frameCount/50)*30)
+    rect(topWindowX + textPadding, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanic") + textPadding*3, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
     fill(0, 0, 100)
-    text("Hi! I'm trying to make simulations for various mechanics." +
-        "\nI'll try not to delete any mechanic implementations if someone" +
-        "\nwants them again. Earliest mechanic: Utopian Sky from FRU." +
-        "\n\n    Reset mechanic                Purge data            Change" +
-        " role from " + role,
-        topWindowX + textPadding, topWindowY + textPadding + textAscent())
+    noStroke()
+    text("Reset mechanic", topWindowX + textPadding*2, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    pop()
+
+    push()
+    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 33*scalingFactor,
+            topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6,
+            topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+        mouseIsPressed) {translate(0, scalingFactor)}
+    fill(0, 100, 50)
+    rect(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    fill(0, 0, 100)
+    text("Purge data", topWindowX + textWidth("Reset mechanic") + textPadding*5, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    pop()
+
+    push()
+    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*4, topWindowY + 33*scalingFactor,
+            topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*6,
+            topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+        mouseIsPressed) {translate(0, scalingFactor)}
+    fill(240, 50, 50)
+    rect(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*7, topWindowY + 35*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*9, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    fill(0, 0, 100)
+    text("Change role from " + role, topWindowX + textWidth("Reset mechanicPurge data") + textPadding*8, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    pop()
+    pop()
+    pop()
+
+
+
+    textAlign(LEFT, BASELINE)
+    fill(0, 0, 100)
+    text("Hi! I'm trying to make simulations for various mechanics. " +
+        "I'll try not to delete any mechanic implementations if someone"  +
+        "wants them again. Earliest mechanic: Utopian Sky from FRU.",
+        topWindowX + textPadding, topWindowY + textPadding + textAscent(), topWidth - textPadding*2)
 
 
 
     // since the buttons at the bottom are useful, just...make them useful XD
-    if (mouseY < topWindowY + topSquareSize && mouseY > topWindowY + textAscent()*3 + textDescent()*3 + textPadding) {
-        fill(0, 0, 0, 30)
+    if (mouseInBoundingBox(topWindowX + textPadding, topWindowY + 33*scalingFactor,
+        topWindowX + textWidth("Reset mechanic") + textPadding*3,
+        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+        if (mousePressedButNotHeldDown()) // so long as the mouse wasn't held down, reset the mechanic
+            reset()
+        return
+    }
 
-        if (mouseX > topWindowX && mouseX < topWindowX + topWidth/3) {
-            rect(topWindowX, topWindowY + textAscent() * 3 + textDescent() * 3 + textPadding, topWindowX + topWidth / 3, topWindowY + topSquareSize, cornerRounding)
-
-            if (mouseIsPressed) {
-                // so long as the mouse wasn't held down, reset the mechanic
-                if (!mousePressedLastFrame) {
-                    reset()
-                }
-            }
+    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 33*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6,
+        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+        if (mousePressedButNotHeldDown()) {
+            localStorage.setItem(currentlySelectedMechanic + " wins", "0")
+            localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
+            localStorage.setItem(currentlySelectedMechanic + " streak", "0")
             return
         }
+    }
 
-        if (mouseX > topWindowX + topWidth/3 && mouseX < topWindowX + 2*topWidth/3) {
-            rect(topWindowX + topWidth/3, topWindowY + textAscent() * 3 + textDescent() * 3 + textPadding, topWindowX + 2*topWidth/3, topWindowY + topSquareSize, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                localStorage.setItem(currentlySelectedMechanic + " wins", "0")
-                localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
-                localStorage.setItem(currentlySelectedMechanic + " streak", "0")
-                return
+    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*4, topWindowY + 33*scalingFactor,
+        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*6,
+        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+        if (mousePressedButNotHeldDown()) {
+            // so long as the mouse wasn't held down, change roles
+            switch (role) {
+                case "MT":
+                    role = "OT"
+                    break
+                case "OT":
+                    role = "H1"
+                    break
+                case "H1":
+                    role = "H2"
+                    break
+                case "H2":
+                    role = "M1"
+                    break
+                case "M1":
+                    role = "M2"
+                    break
+                case "M2":
+                    role = "R1"
+                    break
+                case "R1":
+                    role = "R2"
+                    break
+                case "R2":
+                    role = "MT"
+                    break
             }
-        }
-
-        if (mouseX > topWindowX + 2*topWidth/3 && mouseX < topWindowX + topWidth) {
-            rect(topWindowX + 2*topWidth/3, topWindowY + textAscent()*3 + textDescent()*3 + textPadding, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
-            if (mouseIsPressed) {
-                // so long as the mouse wasn't held down, change roles
-                if (!mousePressedLastFrame) {
-                    switch (role) {
-                        case "MT":
-                            role = "OT"
-                            break
-                        case "OT":
-                            role = "H1"
-                            break
-                        case "H1":
-                            role = "H2"
-                            break
-                        case "H2":
-                            role = "M1"
-                            break
-                        case "M1":
-                            role = "M2"
-                            break
-                        case "M2":
-                            role = "R1"
-                            break
-                        case "R1":
-                            role = "R2"
-                            break
-                        case "R2":
-                            role = "MT"
-                            break
-                    }
-                    // you can't cheat by switching roles mid-mech!
-                    reset()
-                    return
-                }
-            }
+            // you can't cheat by switching roles mid-mech!
+            reset()
+            return
         }
     }
     textAlign(CENTER, CENTER)
@@ -717,7 +764,8 @@ function displayTopWindowContent() {
 
 function displayMiddleTopWindowContent() {
     fill(0, 0, 100)
-    text(textAtTop, middleTopX + textPadding, middleTopY + textPadding)
+    textWrap(WORD)
+    text(textAtTop, middleTopX + textPadding, middleTopY + textPadding, middleTopWidth - textPadding*2)
 
     // display how long it's been since the mechanic started
     fill(0, 0, 100)
@@ -814,7 +862,7 @@ function displayMainBodyContent() {
                         OT = [spreadRadius*0.707, -spreadRadius*0.707]
 
                         textAtTop = "You just went to your clock spot. Run" +
-                            " in or stay where you are. \n" +
+                            " in or stay where you are. " +
                             "Since your partners haven't moved yet, if your" +
                             " clone has a lowered arm, don't move. Yet.\n\n" +
                             "Clones actually appear at the edge of the" +
@@ -822,7 +870,7 @@ function displayMainBodyContent() {
                         textAtBottom = "You went to your clock" +
                             " spot.\n[PASS] — You remembered whether it was" +
                             " stack or spread...right? Well, now it's foggy," +
-                            " so you can't \ntell anymore."
+                            " so you can't tell anymore."
 
                         // make the arena foggy
                         erase()
@@ -977,7 +1025,7 @@ function displayMainBodyContent() {
                             // otherwise you failed
                             textAtTop = "You ran in prematurely. While this" +
                                 " in and of itself may not cause a wipe, it" +
-                                " will confuse\nother people and it will" +
+                                " will confuse other people and it will" +
                                 " generally lead to a wipe. Please don't" +
                                 " take the risk."
                             textAtBottom = "You ran in. \n[FAIL] — Your" +
@@ -1014,7 +1062,7 @@ function displayMainBodyContent() {
                             // you failed
                             textAtTop = "You ran in too late. This will" +
                                 " cause confusion for you, the person" +
-                                " opposite you, and everyone\nelse who ran" +
+                                " opposite you, and everyone else who ran" +
                                 " in. Try to move as soon as you can."
                             textAtBottom = "You stayed where you are." +
                                 " \n[FAIL] — Your clone's arm is raised."
@@ -1042,9 +1090,9 @@ function displayMainBodyContent() {
                             // you passed for now
                             textAtTop = "3 of your partners have just moved" +
                                 " in. Click on the spot you will go." +
-                                " \n(Though this is a trivial decision part," +
+                                "  (Though this is a trivial decision part," +
                                 " it helps to gain perspective. It may be" +
-                                " better to \nview your screen in a weird way" +
+                                " better to view your screen in a weird way" +
                                 " based on how you will orient your camera.)"
                             textAtBottom = "You stayed where you are." +
                                 " \n[PASS] — Your clone's arm is lowered."
@@ -1205,7 +1253,7 @@ function displayMainBodyContent() {
                             // you failed
                             textAtTop = "You ran in too late. This will" +
                                 " cause confusion for you, the person" +
-                                " opposite you, and everyone\nelse who ran" +
+                                " opposite you, and everyone else who ran" +
                                 " in. Try to move as soon as you can."
                             textAtBottom = "You stayed where you are." +
                                 " \n[FAIL] — The person opposite you moved in."
@@ -1344,7 +1392,7 @@ function displayMainBodyContent() {
                         if (spreadOrStack === "spread") {
                             textAtTop = "Congratulations! You made it" +
                                 " through everything, although this is one" +
-                                " of the easier mechanics \nto do when not" +
+                                " of the easier mechanics to do when not" +
                                 " timed."
                             textAtBottom = "You went to your spread spot." +
                                 " \n[PASS] It's spreads. [CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
@@ -1353,7 +1401,7 @@ function displayMainBodyContent() {
                         } else {
                             textAtTop = "You went to the wrong position. If" +
                                 " you're having trouble, you might want to" +
-                                " be a healer. They\ndon't have to worry" +
+                                " be a healer. They don't have to worry" +
                                 " about spread or stack. (joking)"
                             textAtBottom = "You went to your spread spot." +
                                 " \n[FAIL] It's stacks."
@@ -1368,7 +1416,7 @@ function displayMainBodyContent() {
                         if (spreadOrStack === "spread" && !(role === "H1" || role === "H2")) {
                             textAtTop = "You went to the wrong position. If" +
                                 " you're having trouble, you might want to" +
-                                " be a healer. They\ndon't have to worry" +
+                                " be a healer. They don't have to worry" +
                                 " about spread or stack. (joking)"
                             textAtBottom = "You went to your stack spot." +
                                 " \n[FAIL] It's spreads."
@@ -1377,7 +1425,7 @@ function displayMainBodyContent() {
                         } else {
                             textAtTop = "Congratulations! You made it" +
                                 " through everything, although this is one" +
-                                " of the easier mechanics \nto do when not" +
+                                " of the easier mechanics to do when not" +
                                 " timed."
                             textAtBottom = "You went to your stack spot." +
                                 " \n[PASS] It's stacks. [CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
@@ -1571,9 +1619,9 @@ function displayMainBodyContent() {
                     stage = 1
                     textAtTop = "The AoEs have just appeared. Go in or out" +
                         " according to the castbar and whether you got" +
-                        " marked, and \nmake sure to go the correct" +
+                        " marked, and make sure to go the correct" +
                         " direction. All directions are included for ease of" +
-                        " implementation.\nThe green dots are made smaller" +
+                        " implementation. The green dots are made smaller" +
                         " so that you can't click on two.\n\nThis time, " + markedPlayers +
                         " have been targeted."
                     textAtBottom = "[PASS] — You are waiting in your spot."
@@ -1636,7 +1684,7 @@ function displayMainBodyContent() {
                         if (inClickingRanges(innerCirclePositions, 5 * scalingFactor)) {
                             textAtTop = "You didn't dodge the cleave properly." +
                                 " The message box is located near the north of" +
-                                " the arena for display \npurposes. "
+                                " the arena for display purposes. "
                             textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
                             stage = 100
                             updateLosses(2)
@@ -1645,7 +1693,7 @@ function displayMainBodyContent() {
                         if (inClickingRanges(outerCirclePositions, 5 * scalingFactor)) {
                             textAtTop = "You didn't dodge the cleave properly." +
                                 " The message box is located near the north of" +
-                                " the arena for display \npurposes. "
+                                " the arena for display purposes. "
                             textAtBottom = "You went out.\n[FAIL] — \"Reap\" is a donut."
                             stage = 100
                             updateLosses(2)
@@ -1657,7 +1705,7 @@ function displayMainBodyContent() {
                         if (inClickingRanges(innerDonutPositions, 5 * scalingFactor)) {
                             textAtTop = "You didn't dodge the cleave properly." +
                                 " The message box is located near the north of" +
-                                " the arena for display \npurposes. "
+                                " the arena for display purposes. "
                             textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
                             stage = 100
                             updateLosses(2)
@@ -1666,7 +1714,7 @@ function displayMainBodyContent() {
                         if (inClickingRanges(outerDonutPositions, 5 * scalingFactor)) {
                             textAtTop = "You didn't dodge the cleave properly." +
                                 " The message box is located near the north of" +
-                                " the arena for display \npurposes. "
+                                " the arena for display purposes. "
                             textAtBottom = "You went in.\n[FAIL] — \"Cleave\" is a circle."
                             stage = 100
                             updateLosses(2)
@@ -1757,9 +1805,9 @@ function displayMainBodyContent() {
                         if (youClickedOn === AoEsSpawnedOn) {
                             textAtTop = `Marked players are supposed to go ` +
                                 `opposite the AoEs. If AoEs spawned on two ` +
-                                `intercardinals, you will \nwant to go to cardinals ` +
+                                `intercardinals, you will want to go to cardinals ` +
                                 `if you're marked, and if AoEs spawned on two cardinals, ` +
-                                `you will want to go to the \nintercardinals.`
+                                `you will want to go to the intercardinals.`
                             textAtBottom = "You went to a(n) " + youClickedOn +
                                 ".\n" + textAtBottom + "\n[FAIL] — AoEs" +
                                 " spawned on the " + AoEsSpawnedOn + "s."
@@ -2323,7 +2371,7 @@ intercardinals.`
                                     "\n" +
                                     "[NOTE] — It is technically okay to not" +
                                     " run in so long as the first AoE did" +
-                                    " not spawn on you, but it is better \nto" +
+                                    " not spawn on you, but it is better to" +
                                     " pre-position for the next mechanic." +
                                     " Besides, it's difficult to code."
                                 stage = 100
@@ -2335,7 +2383,7 @@ intercardinals.`
                                 // though they result in the same outcome
                                 textAtTop = "You ran in slightly too much." +
                                     " Though this will not necessarily cause" +
-                                    " a wipe, this may cause the parts of\n" +
+                                    " a wipe, this may cause the parts of " +
                                     "the star AoE running parellel to the" +
                                     " edge to clip other people."
                                 textAtBottom = "[FAIL] — You ran in."
@@ -2349,7 +2397,7 @@ intercardinals.`
                                     "\n" +
                                     "[NOTE] — It is technically okay to not" +
                                     " run in so long as the first AoE did" +
-                                    " not spawn on you, but it is better \nto" +
+                                    " not spawn on you, but it is better to" +
                                     " pre-position for the next mechanic." +
                                     " Besides, it's difficult to code."
                                 stage = 100
@@ -2360,7 +2408,7 @@ intercardinals.`
                                 textAtTop = "You ran in too much, though" +
                                     " the only reason why we don't run in is" +
                                     " because it takes...more effort." +
-                                    " \nThat's all, it wouldn't cause a" +
+                                    " That's all, it wouldn't cause a" +
                                     " wipe, but it's better to avoid it."
                                 textAtBottom = "[FAIL] — You ran in."
                                 stage = 100
@@ -2541,7 +2589,7 @@ intercardinals.`
                         } else {
                             textAtTop = "You went to the wrong light party." +
                                 " Light party 1 always takes the red and" +
-                                " purple waymarks, and light \nparty 2 always" +
+                                " purple waymarks, and light party 2 always" +
                                 " takes the yellow and blue waymarks."
                             textAtBottom = "You went to the wrong light" +
                                 " party. \n[PASS] — You went to one of the" +
@@ -2585,7 +2633,7 @@ intercardinals.`
                         } else {
                             textAtTop = "You went to the wrong light party." +
                                 " Light party 1 always takes the red and" +
-                                " purple waymarks, and light \nparty 2 always" +
+                                " purple waymarks, and light party 2 always" +
                                 " takes the yellow and blue waymarks."
                             textAtBottom = "You went to the wrong light" +
                                 " party. \n[PASS] — You went to one of the" +
@@ -2926,7 +2974,7 @@ intercardinals.`
                             updateLosses(2)
                             textAtTop = "You are supposed to rotate away" +
                                 " from Shiva. If it's a cursed pattern, you" +
-                                " will want to rotate as\nfar clockwise as" +
+                                " will want to rotate as far clockwise as" +
                                 " you can."
                             textAtBottom = "You rotated 90º clockwise. \n" +
                                 "[FAIL] — Shiva is not counterclockwise of you."
@@ -2976,7 +3024,7 @@ intercardinals.`
                         updateLosses(2)
                         textAtTop = "You are never supposed to go 157.5º" +
                             " counterclockwise. In case it is a cursed" +
-                            " pattern, you're supposed \nto rotate clockwise," +
+                            " pattern, you're supposed to rotate clockwise," +
                             " not counterclockwise."
                         textAtBottom = "You went 22.5º clockwise of the" +
                             " other group. \n[FAIL] — This location is never" +
@@ -3044,7 +3092,7 @@ intercardinals.`
                             updateLosses(2)
                             textAtTop = "You are supposed to rotate away" +
                                 " from Shiva. Even if it is a cursed" +
-                                " pattern, this is the \nwrong way to rotate."
+                                " pattern, this is the wrong way to rotate."
                             textAtBottom = "You went to the position" +
                                 " 90º counterclockwise of you. \n[FAIL] —" +
                                 " Shiva is not clockwise of you."
@@ -3151,7 +3199,7 @@ intercardinals.`
                     stage = 5
                     textAtTop = "Look at the message box on Shiva's head to" +
                         " figure out where to go. You're on thin ice" +
-                        " here—so be\ncareful!"
+                        " here—so be careful!"
                     textAtBottom = "Everyone's finished sliding. Speaking of" +
                         " which, have you ever tripped on ice before?"
                     puddles = [puddles[2], puddles[3]]
@@ -3402,8 +3450,11 @@ intercardinals.`
                             updateLosses(3)
                             textAtTop = "If you are a melee, you must go" +
                                 " opposite the blue mirror. Usually the" +
-                                " tanks pull the boss opposite the \nmirror," +
-                                " though it always helps to do it yourself."
+                                " tanks pull the boss opposite the mirror," +
+                                " though it always helps to do it yourself." +
+                                " \n\nEdit: I partially forgot, but it is" +
+                                " required to pull the boss opposite or else" +
+                                " the two donuts overlap."
                             textAtBottom = "You went at the blue mirror." +
                                 " \n[PASS] — You went to the blue mirror." +
                                 " \n[FAIL] — You are a melee."
@@ -3648,6 +3699,8 @@ intercardinals.`
                                 if (stage !== 100) stage = 1.25
                                 else updateLosses(3)
                             }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
                         if (inClickingRange(OTSpot, 10*scalingFactor)) {
                             textAtTop = ""
@@ -3671,6 +3724,8 @@ intercardinals.`
                                 if (stage !== 100) stage = 1.25
                                 else updateLosses(3)
                             }
+                            if (stage !== 100) stage = 1.25
+                            else updateLosses(3)
                         }
                         if (inClickingRange(M1Spot, 10*scalingFactor)) {
                             textAtTop = ""
@@ -4238,14 +4293,14 @@ intercardinals.`
 
         // now then, for the waymarks
         let waymarkRadius = mainBodyWidth*6/13
-        glowWaymark(0, 100, 80, "circle", 7*scalingFactor, cos(-90)*waymarkRadius, sin(-90)*waymarkRadius, 30*scalingFactor, "A")
-        glowWaymark(0, 100, 80, "rect", 7*scalingFactor, cos(-135)*waymarkRadius, sin(-135)*waymarkRadius, 30*scalingFactor, "1")
-        glowWaymark(270, 100, 80, "circle", 7*scalingFactor, cos(180)*waymarkRadius, sin(180)*waymarkRadius, 30*scalingFactor, "D")
-        glowWaymark(270, 100, 80, "rect", 7*scalingFactor, cos(135)*waymarkRadius, sin(135)*waymarkRadius, 30*scalingFactor, "4")
-        glowWaymark(180, 100, 80, "circle", 7*scalingFactor, cos(90)*waymarkRadius, sin(90)*waymarkRadius, 30*scalingFactor, "C")
-        glowWaymark(180, 100, 80, "rect", 7*scalingFactor, cos(45)*waymarkRadius, sin(45)*waymarkRadius, 30*scalingFactor, "3")
-        glowWaymark(60, 100, 80, "circle", 7*scalingFactor, cos(0)*waymarkRadius, sin(0)*waymarkRadius, 30*scalingFactor, "B")
-        glowWaymark(60, 100, 80, "rect", 7*scalingFactor, cos(-45)*waymarkRadius, sin(-45)*waymarkRadius, 30*scalingFactor, "2")
+        glowWaymark(0, 100, 80, 100, "circle", 7*scalingFactor, cos(-90)*waymarkRadius, sin(-90)*waymarkRadius, 30*scalingFactor, "A")
+        glowWaymark(0, 100, 80, 100, "rect", 7*scalingFactor, cos(-135)*waymarkRadius, sin(-135)*waymarkRadius, 30*scalingFactor, "1")
+        glowWaymark(270, 100, 80, 100, "circle", 7*scalingFactor, cos(180)*waymarkRadius, sin(180)*waymarkRadius, 30*scalingFactor, "D")
+        glowWaymark(270, 100, 80, 100, "rect", 7*scalingFactor, cos(135)*waymarkRadius, sin(135)*waymarkRadius, 30*scalingFactor, "4")
+        glowWaymark(180, 100, 80, 100, "circle", 7*scalingFactor, cos(90)*waymarkRadius, sin(90)*waymarkRadius, 30*scalingFactor, "C")
+        glowWaymark(180, 100, 80, 100, "rect", 7*scalingFactor, cos(45)*waymarkRadius, sin(45)*waymarkRadius, 30*scalingFactor, "3")
+        glowWaymark(60, 100, 80, 100, "circle", 7*scalingFactor, cos(0)*waymarkRadius, sin(0)*waymarkRadius, 30*scalingFactor, "B")
+        glowWaymark(60, 100, 80, 100, "rect", 7*scalingFactor, cos(-45)*waymarkRadius, sin(-45)*waymarkRadius, 30*scalingFactor, "2")
 
         pop()
 
@@ -4355,9 +4410,9 @@ intercardinals.`
                     stage = 1
                     textAtTop = "Get knocked back to the correct spot. This" +
                         " quiz assumes you are using knockback immune, but" +
-                        " if you are \nlike me, you might not be using" +
+                        " if you are like me, you might not be using" +
                         " knockback immune. Healers should definitely" +
-                        " consider not using KI as \nthey want to be in the" +
+                        " consider not using KI as they want to be in the" +
                         " center anyways to heal." +
                         " \nThis time, " + dpsOrSupportsFirst + " have been targeted."
                 }
@@ -5568,31 +5623,31 @@ function displayMechanicSelection() {
 
     // display what's underneath the button first
     push()
-    translate(0, 3)
+    translate(0, 3*scalingFactor)
     fill(0, 0, 25)
     rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     pop()
 
     // then display the actual buttons
     rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, 5)
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
 
 
 
@@ -5685,113 +5740,214 @@ function displayBottomWindowContent() {
     rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
 
     fill(0, 0, 100)
-    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding)
+    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding, bottomWindowX + bottomWidth - textPadding)
 }
 
 function displayScalingAdjustContent() {
     // display whatever the current scaling factor is
-    textAlign(CENTER, CENTER)
+    textAlign(LEFT, TOP)
     fill(0, 0, 100)
     noStroke()
     textSize(10*scalingFactor*fontScalingFactor)
-    text("Scaling Factor\nAdjust\nCurrent: " + parseInt(scalingFactorFetch*100) + "%",
-        scalingAdjustX + scalingAdjustWidth/2, scalingAdjustY + scalingAdjustHeight/3)
-    textAlign(LEFT, CENTER)
-    text("     -50%             -25%  " +
-        "                                  +25%          +50%\n" +
-        "     -10%              -1%           " +
-        "                           +1%          +10%\n\n" +
-        "Changes to scaling will take effect on next reload via local storage.",
-        scalingAdjustX, scalingAdjustY + scalingAdjustHeight/2)
-    textAlign(LEFT, BOTTOM)
+    text("Scaling factor adjust. Current: " + parseInt(scalingFactorFetch*100) + "%",
+        scalingAdjustX + textPadding, scalingAdjustY + textPadding)
+    textAlign(RIGHT, TOP)
+    text("Reload to take effect",
+        scalingAdjustX + scalingAdjustWidth - textPadding, scalingAdjustY + textPadding)
+    textAlign(CENTER, TOP)
     textSize(7*scalingFactor*fontScalingFactor)
 
     // now that we're done with the text, display the buttons
     // row 1: "-50%", "-25%", "+25%", "+50%"
-    fill(0, 0, 0, 50)
-    if (mouseY > scalingAdjustY && mouseY < scalingAdjustY + 13*scalingFactor) {
-        // -50%
-        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
-            rect(scalingAdjustX, scalingAdjustY, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.5
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // -25%
-        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.25
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +25%
-        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.25
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
-        }
-        // +50%
-        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
-            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 13*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.5
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
+    fill(0, 50, 30)
+    noStroke()
+    push()
+    translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    rect(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    fill(120, 50, 30)
+    rect(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    rect(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+
+    translate(0, -2*scalingFactor)
+    fill(0, 50, 50)
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent()) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    fill(0, 0, 100)
+    noStroke()
+    text("-50%", scalingAdjustX + textPadding*1.5 + textWidth("-%%%")/2, scalingAdjustY + textPadding*2.5 + 13*scalingFactor)
+    pop()
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent()) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    fill(0, 0, 100)
+    text("-25%", scalingAdjustX + textPadding*3.5 + textWidth("-%%%")*1.5, scalingAdjustY + textPadding*2.5 + 13*scalingFactor)
+    pop()
+    fill(120, 50, 50)
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent()) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    fill(0, 0, 100)
+    text("+25%", scalingAdjustX + textPadding*5.5 + textWidth("-%%%")*2.5, scalingAdjustY + textPadding*2.5 + 13*scalingFactor)
+    pop()
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent()) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent(), cornerRounding)
+    fill(0, 0, 100)
+    text("+50%", scalingAdjustX + textPadding*7.5 + textWidth("-%%%")*3.5, scalingAdjustY + textPadding*2.5 + 13*scalingFactor)
+    pop()
+    pop()
+    // -50%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent())) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch -= 0.5
+            scalingFactorFetch = max(scalingFactorFetch, 0.25)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
         }
     }
+    // -25%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent())) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch -= 0.25
+            scalingFactorFetch = max(scalingFactorFetch, 0.25)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
+        }
+    }
+    // +25%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent())) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch += 0.25
+            scalingFactorFetch = min(scalingFactorFetch, 10)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
+        }
+    }
+    // +50%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*2 + 13*scalingFactor,
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*3 + 13*scalingFactor + textAscent() + textDescent())) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch += 0.5
+            scalingFactorFetch = min(scalingFactorFetch, 10)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
+        }
+    }
+
+
     // row 2: "-10%", "-1%", "+1%", "+10%"
-    if (mouseY > scalingAdjustY + 13*scalingFactor && mouseY < scalingAdjustY + 26*scalingFactor) {
-        // -10%
-        if (mouseX > scalingAdjustX && mouseX < scalingAdjustX + scalingAdjustWidth/5) {
-            rect(scalingAdjustX, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.1
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
+    fill(0, 50, 30)
+    push()
+    translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    rect(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    fill(120, 50, 30)
+    rect(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    rect(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+
+    translate(0, -2*scalingFactor)
+    fill(0, 50, 50)
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    fill(0, 0, 100)
+    text("-10%", scalingAdjustX + textPadding*1.5 + textWidth("-%%%")/2, scalingAdjustY + textPadding*4.5 + 13*scalingFactor + textAscent() + textDescent())
+    pop()
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    fill(0, 0, 100)
+    text("-1%", scalingAdjustX + textPadding*3.5 + textWidth("-%%%")*1.5, scalingAdjustY + textPadding*4.5 + 13*scalingFactor + textAscent() + textDescent())
+    pop()
+    fill(120, 50, 50)
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    fill(0, 0, 100)
+    text("+1%", scalingAdjustX + textPadding*5.5 + textWidth("-%%%")*2.5, scalingAdjustY + textPadding*4.5 + 13*scalingFactor + textAscent() + textDescent())
+    pop()
+    push()
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2) && mouseIsPressed)
+        translate(0, scalingFactor)
+    rect(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2, cornerRounding)
+    fill(0, 0, 100)
+    text("+10%", scalingAdjustX + textPadding*7.5 + textWidth("-%%%")*3.5, scalingAdjustY + textPadding*4.5 + 13*scalingFactor + textAscent() + textDescent())
+    pop()
+    pop()
+    // -10%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*2 + textWidth("-%%%"), scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2)) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch -= 0.1
+            scalingFactorFetch = max(scalingFactorFetch, 0.25)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
         }
-        // -1%
-        if (mouseX > scalingAdjustX + scalingAdjustWidth/5 && mouseX < scalingAdjustX + 2*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 2*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch -= 0.01
-                scalingFactorFetch = max(scalingFactorFetch, 0.25)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
+    }
+    // -1%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*3 + textWidth("-%%%"), scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*4 + textWidth("-%%%")*2, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2)) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch -= 0.01
+            scalingFactorFetch = max(scalingFactorFetch, 0.25)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
         }
-        // +1%
-        if (mouseX > scalingAdjustX + 3*scalingAdjustWidth/5 && mouseX < scalingAdjustX + 4*scalingAdjustWidth/5) {
-            rect(scalingAdjustX + 3*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.01
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
+    }
+    // +1%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*5 + textWidth("-%%%")*2, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*6 + textWidth("-%%%")*3, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2)) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch += 0.01
+            scalingFactorFetch = min(scalingFactorFetch, 10)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
         }
-        // +10%
-        if (mouseX > scalingAdjustX + 4*scalingAdjustWidth/5 && mouseX < scalingAdjustX + scalingAdjustWidth) {
-            rect(scalingAdjustX + 4*scalingAdjustWidth/5, scalingAdjustY + 13*scalingFactor, scalingAdjustX + scalingAdjustWidth, scalingAdjustY + 26*scalingFactor, cornerRounding)
-            if (mousePressedButNotHeldDown()) {
-                scalingFactorFetch += 0.1
-                scalingFactorFetch = min(scalingFactorFetch, 10)
-                localStorage.setItem("scalingFactor", scalingFactorFetch)
-                return
-            }
+    }
+    // +10%
+    if (mouseInBoundingBox(scalingAdjustX + textPadding*7 + textWidth("-%%%")*3, scalingAdjustY + textPadding*4 + 13*scalingFactor + textAscent() + textDescent(),
+        scalingAdjustX + textPadding*8 + textWidth("-%%%")*4, scalingAdjustY + textPadding*5 + 13*scalingFactor + textAscent()*2 + textDescent()*2)) {
+        if (mousePressedButNotHeldDown()) {
+            scalingFactorFetch += 0.1
+            scalingFactorFetch = min(scalingFactorFetch, 10)
+            localStorage.setItem("scalingFactor", scalingFactorFetch)
+            return
         }
     }
 }
@@ -5807,6 +5963,14 @@ function displayDebugCorner() {
 }
 
 //—————————————————————————————utility functions—————————————————————————————\\
+
+// wrap text around after a certain length. can add newlines, but always
+// keeps existing ones
+function wrapText(textToWrap, maxWidth) {
+    let currentText = ""
+    let currentLine = ""
+    let lines = split(split(textToWrap, " "), "\n")
+}
 
 function updateWins(winsPerCoinIncrease) {
     localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
@@ -5843,7 +6007,9 @@ function setMovementMode(mode) {
 }
 
 // adds leading zeros to "string" until it reaches targetLen (blunt-force
-// strategy. wait, is it even called "blunt force"?)
+// strategy. wait, is it even called "blunt force"?
+// 4 months later: "NVM IT'S CALLED BRUTE FORCE OH MY FUCKING GOD
+// ARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRGH)
 function addLeadingZero(string, targetLen) {
     let s = string + ""
     while (s.length < targetLen) {
@@ -5986,6 +6152,12 @@ function setPositionsWithVariance(roles, x, y, xVariance, yVariance) {
     for (let role of roles) {
         setPosition(role, x + random(-xVariance/2, xVariance/2), y + random(-yVariance/2, yVariance/2))
     }
+}
+
+// uses identical parameters as rect, currently. x1 must be left of x2, y1
+// must be up of y2.
+function mouseInBoundingBox(x1, y1, x2, y2) {
+    if (mouseX > x1 && mouseX < x2 && mouseY > y1 && mouseY < y2) return true
 }
 
 //—————————————————————————————display functions—————————————————————————————\\
@@ -6446,9 +6618,9 @@ function setupUtopianSky() {
     css.style("background-image", "url(\"data/FRU P1/BG.png\")")
 
     textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
-        " time to test just that.\nAlso, please do remember that it's " + spreadOrStack +
+        " time to test just that. Also, please do remember that it's " + spreadOrStack +
         "s first.\n\nThe way the simulation works can be a bit confusing." +
-        " You'll get the hang of it eventually.\nReady? Click on the green" +
+        " You'll get the hang of it eventually. Ready? Click on the green" +
         " dot in the center."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
@@ -6658,9 +6830,9 @@ function setupMirrorMirror() {
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
 
     textAtTop = "You just finished Diamond Dust—but you have no idea where" +
-        " to go for the next mechanic, Mirror Mirror! \nOr maybe you do have" +
+        " to go for the next mechanic, Mirror Mirror! Or maybe you do have" +
         " an idea. Whether you do or don't, this simulator should help you" +
-        " reinforce your \nunderstanding.\n\nPlease select which cardinal or" +
+        " reinforce your understanding. Please select which cardinal or" +
         " intercardinal you should go to."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
@@ -6745,10 +6917,10 @@ function setupMillennialDecay() {
     css = select("body")
     css.style("background-image", "url(\"data/M8S P1 background.png\")")
 
-    textAtTop = "This simulator aims to help your adds, clock TR, beckon moonlight, P1 enrage, twofold tempest, lone \n" +
-        "wolf's lament, champion's circuit, and P2 enrage prog parties, as well as your reclear groups, see adds \n" +
+    textAtTop = "This simulator aims to help your adds, clock TR, beckon moonlight, P1 enrage, twofold tempest, lone " +
+        "wolf's lament, champion's circuit, and P2 enrage prog parties, as well as your reclear groups, see adds " +
         "once. Most PF parties are decay prog parties in disguise. Please use the" +
-        " Murderless Fering Decay video \nby Hector. Click on the dot in the" +
+        " Murderless Fering Decay video by Hector. Click on the dot in the" +
         " center to continue."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
@@ -6834,10 +7006,10 @@ function setupWingmark() {
     css.style("background-image", "url(\"data/M6S arena normal.webp\")")
 
     textAtTop = "Wingmark is hard because it's complex, and Wingmark is" +
-        " complex because people are incompetent.\nThis simulation aims to" +
+        " complex because people are incompetent. This simulation aims to" +
         " help you not be incompetent like everyone else in PF.\n\nSmall" +
         " tip: Try to get close to bombs and succubus and away from morbols" +
-        " and winged bombs—that is \nwhere you're supposed to go to. Just" +
+        " and winged bombs—that is where you're supposed to go to. Just" +
         " don't die on your normals because of that."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
@@ -6863,7 +7035,7 @@ ${updates}
 
 //———————————————————————————————glow functions———————————————————————————————\\
 
-function glowRect(h, s, b, a, weight, param1, param2, param3, param4, param5 = 0, param6 = 0, param7 = 0, param8 = 0) {
+function glowRect(h, s, b, a, weight, param1, param2, param3, param4, param5 = 0, param6 = param5, param7 = param6, param8 = param7) {
     strokeWeight(weight)
     stroke(h, s, b, a)
     rect(param1, param2, param3, param4, param5, param6, param7, param8)
@@ -6999,7 +7171,7 @@ function glowWaymark(h, s, b, a, rectOrCircle, weight, x, y, width, text) {
         glowCircle(h, s, b, a, weight, x, y, width)
     }
     textAlign(CENTER, CENTER)
-    textSize(2*scalingFactor*fontScalingFactor*width/3)
+    textSize(2*scalingFactor*fontScalingFactor*width/4)
     glowText(h, s, b, a, weight/2, text, x, y - width/8)
 }
 
