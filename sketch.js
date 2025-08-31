@@ -194,8 +194,8 @@ scalingFactor = baseScalingFactor*parseFloat(scalingFactorFetch)
 scalingFactorFetch = parseFloat(scalingFactorFetch)
 
 let textPadding = 3.5*scalingFactor
-let topSquareSize = 50*scalingFactor // the size of the top corner squares
-let topWidth = 250*scalingFactor  // the width of the window at the top, not
+let topSquareSize = 40*scalingFactor // the size of the top corner squares
+let topWidth = 270*scalingFactor  // the width of the window at the top, not
 // including the top corner squares
 let mechanicSelectionRows = 5 // the number of rows in "mechanic selection"
 let mechanicSelectionHeight = mechanicSelectionRows*13*scalingFactor + textPadding*2
@@ -562,15 +562,11 @@ function draw() {
 function displayWinContent() {
     let wins = parseInt(localStorage.getItem(currentlySelectedMechanic + " wins"))
     let streak = parseInt(localStorage.getItem(currentlySelectedMechanic + " streak"))
-    let coins = parseInt(localStorage.getItem("coins"))
     if (isNaN(wins)) {
         localStorage.setItem(currentlySelectedMechanic + " wins", "0")
     }
     if (isNaN(streak)) {
         localStorage.setItem(currentlySelectedMechanic + " streak", "0")
-    }
-    if (isNaN(coins)) {
-        localStorage.setItem("coins", "0")
     }
 
     // display in the form of:
@@ -589,15 +585,19 @@ function displayWinContent() {
     textSize(12*scalingFactor*fontScalingFactor)
     text("WINS", greenSquareX + topSquareSize/2, greenSquareY + topSquareSize/5)
     textSize(7*scalingFactor*fontScalingFactor)
-    text(wins + "\nSTREAK: " + streak + "\nCOINS: " + coins, +
+    text(wins + "\nSTREAK: " + streak, +
         greenSquareX + topSquareSize/2, +
         greenSquareY + 7*topSquareSize/12)
 }
 
 function displayLossContent() {
     let wipes = parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes"))
+    let coins = parseInt(localStorage.getItem("coins"))
     if (isNaN(wipes)) {
         localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
+    }
+    if (isNaN(coins)) {
+        localStorage.setItem("coins", "0")
     }
 
     // display in the form of:
@@ -605,7 +605,7 @@ function displayLossContent() {
     // 🟥              🟥
     // 🟥    WIPES     🟥
     // 🟥      0       🟥
-    // 🟥              🟥
+    // 🟥  COINS: 290  🟥
     // 🟥              🟥
     // 🟥              🟥
     // 🟥🟥🟥🟥🟥🟥🟥🟥
@@ -619,102 +619,112 @@ function displayLossContent() {
     textSize(12*scalingFactor*fontScalingFactor)
     text("WIPES", redSquareX + topSquareSize/2, redSquareY + topSquareSize/5)
     textSize(7*scalingFactor*fontScalingFactor)
-    text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\n\n", redSquareX +
+    text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\nCOINS: " + coins, redSquareX +
         topSquareSize/2, redSquareY + 7*topSquareSize/12)
 
 }
 
 function displayTopWindowContent() {
-    textAlign(LEFT, CENTER)
+    textAlign(LEFT, TOP)
     noStroke()
 
     // make buttons look like buttons
 
+    textFont(font)
+
     push()
-    translate(0, -1.5*scalingFactor) // currently, this just needs to be moved
-    // a little bit up
+    translate(0, 4*scalingFactor) // currently, this just needs to be moved
+    // a little bit down
+    translate((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4, 0) // center it too
 
     // add the underside
     fill(120, 50, 30)
     if (stage > 98) fill(120, 50, 30+sin(frameCount/50)*20)
-    rect(topWindowX + textPadding, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanic") + textPadding*3, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    rect(topWindowX + textPadding, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("Restart") + textPadding*3, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 100, 30)
-    rect(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
-    fill(240, 50, 30)
-    rect(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*7, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*9, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    rect(topWindowX + textWidth("Restart") + textPadding*4, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("RestartPurge data") + textPadding*6, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
+    fill(240, 50, 35)
+    if (DPSOrSupports(role) === "DPS") if (meleeOrRanged(role) === "melee") {fill(0, 80, 30); stroke(0, 80, 30)}
+    else {fill(320, 80, 30); stroke(320, 80, 30)}
+    else if (meleeOrRanged(role) === "melee") {fill(220, 70, 30); stroke(220, 70, 30)}
+    else {fill(120, 70, 30); stroke(120, 70, 30)}
+    noStroke()
+    rect(topWindowX + textWidth("RestartPurge data") + textPadding*7, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("RestartPurge dataChange role from " + role) + textPadding*9, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
 
 
-    // then the part where you can press. don't display if it's pressed on
+    // then the part where you can press. move down if pressed on
 
     push()
-    translate(0, -2.6*scalingFactor)
+    translate(0, -2.6*scalingFactor) // distance of surface and base of button
 
     push()
-    if (mouseInBoundingBox(topWindowX + textPadding, topWindowY + 33*scalingFactor,
-        topWindowX + textWidth("Reset mechanic") + textPadding*3,
-        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textPadding, topWindowY + 20*scalingFactor,
+            (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("Restart") + textPadding*3,
+        topWindowY + 22*scalingFactor + textAscent() + textPadding) &&
         mouseIsPressed) {translate(0, scalingFactor)}
     fill(120, 50, 50)
-    if (stage > 98) fill(120, 50, 60+sin(frameCount/50)*30)
-    rect(topWindowX + textPadding, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanic") + textPadding*3, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    if (stage > 98) fill(120, 50, 60+sin(frameCount/50)*30) // make it more noticeable if you should restart
+    rect(topWindowX + textPadding, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("Restart") + textPadding*3, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
     noStroke()
-    text("Reset mechanic", topWindowX + textPadding*2, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    text("Restart", topWindowX + textPadding*2, topWindowY + 22*scalingFactor + (textPadding)/2)
     pop()
 
     push()
-    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 33*scalingFactor,
-            topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6,
-            topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("Restart") + textPadding*4, topWindowY + 20*scalingFactor,
+        (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge data") + textPadding*6,
+            topWindowY + 22*scalingFactor + textAscent() + textPadding) &&
         mouseIsPressed) {translate(0, scalingFactor)}
     fill(0, 100, 50)
-    rect(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+    rect(topWindowX + textWidth("Restart") + textPadding*4, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("RestartPurge data") + textPadding*6, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
-    text("Purge data", topWindowX + textWidth("Reset mechanic") + textPadding*5, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    text("Purge data", topWindowX + textWidth("Restart") + textPadding*5, topWindowY + 22*scalingFactor + (textPadding)/2)
     pop()
 
     push()
-    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*4, topWindowY + 33*scalingFactor,
-            topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*6,
-            topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding) &&
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge data") + textPadding*7, topWindowY + 20*scalingFactor,
+            (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge dataChange role from " + role) + textPadding*9,
+            topWindowY + 22*scalingFactor + textAscent() + textPadding) &&
         mouseIsPressed) {translate(0, scalingFactor)}
     fill(240, 50, 50)
-    rect(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*7, topWindowY + 35*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*9, topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding, cornerRounding)
+
+    // the button's color is the color of the role you are on
+    if (DPSOrSupports(role) === "DPS") if (meleeOrRanged(role) === "melee") {fill(0, 80, 60); stroke(0, 80, 60)}
+    else {fill(320, 80, 60); stroke(320, 80, 60)}
+    else if (meleeOrRanged(role) === "melee") {fill(220, 70, 50); stroke(220, 70, 50)}
+    else {fill(120, 70, 50); stroke(120, 70, 50)}
+
+    noStroke()
+    rect(topWindowX + textWidth("RestartPurge data") + textPadding*7, topWindowY + 22*scalingFactor,
+        topWindowX + textWidth("RestartPurge dataChange role from " + role) + textPadding*9, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
-    text("Change role from " + role, topWindowX + textWidth("Reset mechanicPurge data") + textPadding*8, topWindowY + 35*scalingFactor + (textAscent() + textDescent() + textPadding)/2)
+    text("Change role from " + role, topWindowX + textWidth("RestartPurge data") + textPadding*8, topWindowY + 22*scalingFactor + (textPadding)/2)
+    stroke(0, 0, 100)
+
+    // bold the role that you are on
+    strokeWeight(scalingFactor*0.3)
+    text(role, topWindowX + textWidth("RestartPurge dataChange role from ") + textPadding*8, topWindowY + 22*scalingFactor + (textPadding)/2)
     pop()
     pop()
     pop()
-
-
-
-    textAlign(LEFT, BASELINE)
-    fill(0, 0, 100)
-    text("Hi! I'm trying to make simulations for various mechanics. " +
-        "I'll try not to delete any mechanic implementations if someone"  +
-        "wants them again. Earliest mechanic: Utopian Sky from FRU.",
-        topWindowX + textPadding, topWindowY + textPadding + textAscent(), topWidth - textPadding*2)
-
 
 
     // since the buttons at the bottom are useful, just...make them useful XD
-    if (mouseInBoundingBox(topWindowX + textPadding, topWindowY + 33*scalingFactor,
-        topWindowX + textWidth("Reset mechanic") + textPadding*3,
-        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textPadding, topWindowY + 20*scalingFactor,
+        (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("Restart") + textPadding*3,
+        topWindowY + 22*scalingFactor + textAscent() + textPadding)) {
         if (mousePressedButNotHeldDown()) // so long as the mouse wasn't held down, reset the mechanic
             reset()
-        return
     }
 
-    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanic") + textPadding*4, topWindowY + 33*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge data") + textPadding*6,
-        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("Restart") + textPadding*4, topWindowY + 20*scalingFactor,
+        (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge data") + textPadding*6,
+        topWindowY + 22*scalingFactor + textAscent() + textPadding)) {
         if (mousePressedButNotHeldDown()) {
             localStorage.setItem(currentlySelectedMechanic + " wins", "0")
             localStorage.setItem(currentlySelectedMechanic + " wipes", "0")
@@ -723,9 +733,9 @@ function displayTopWindowContent() {
         }
     }
 
-    if (mouseInBoundingBox(topWindowX + textWidth("Reset mechanicPurge data") + textPadding*4, topWindowY + 33*scalingFactor,
-        topWindowX + textWidth("Reset mechanicPurge dataChange role from " + role) + textPadding*6,
-        topWindowY + 35*scalingFactor + textAscent() + textDescent() + textPadding)) {
+    if (mouseInBoundingBox((textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge data") + textPadding*7, topWindowY + 20*scalingFactor,
+        (textWidth("RestartPurge dataChange role from " + role) + textPadding*5)/4 + topWindowX + textWidth("RestartPurge dataChange role from " + role) + textPadding*9,
+        topWindowY + 22*scalingFactor + textAscent() + textPadding)) {
         if (mousePressedButNotHeldDown()) {
             // so long as the mouse wasn't held down, change roles
             switch (role) {
@@ -759,6 +769,19 @@ function displayTopWindowContent() {
             return
         }
     }
+
+    textFont(font)
+
+
+
+    textAlign(LEFT, BASELINE)
+    fill(0, 0, 100)
+    text("Hi! I'm Codybear, and I like making simulations when it's not raid" +
+        " night. Scroll down for a list of mechanics! It's at the very bottom.",
+        topWindowX + textPadding, topWindowY + textPadding + textAscent(), topWidth - textPadding*2)
+
+
+
     textAlign(CENTER, CENTER)
 }
 
@@ -6050,6 +6073,8 @@ function displayMechanicSelection() {
         selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     pop()
 
     // then display the actual buttons
@@ -6063,6 +6088,8 @@ function displayMechanicSelection() {
         selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
+    rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+        selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
 
 
 
@@ -6070,7 +6097,7 @@ function displayMechanicSelection() {
     fill(0, 0, 100)
     text("M8S: Millennial Decay \n" +
         "M6S: Wingmark \n" +
-        "FRU: Utopian Sky   Diamond Dust   Mirror Mirror \n" +
+        "FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant \n" +
         "\n" +
         "Who knows, maybe there'll be other mechanics soon.",
         selectionX + textPadding, selectionY + textPadding)
@@ -6127,6 +6154,14 @@ function displayMechanicSelection() {
                     selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
                 if (mousePressedButNotHeldDown()) {
                     setupMirrorMirror()
+                }
+            }
+            if (mouseX > selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror  ") &&
+                mouseX < selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant ")) {
+                rect(selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
+                    selectionX + textPadding + textWidth("FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding)
+                if (mousePressedButNotHeldDown()) {
+                    setupLightRampant()
                 }
             }
         }
@@ -7440,6 +7475,73 @@ Click on one of the buttons at the top to do what it says.
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
+}
+
+function setupLightRampant() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
+    setMovementMode(defaultMovementMode)
+
+    mechanicStarted = millis()
+
+    fruP2Image = loadImage('data/FRU P2/Floor.webp')
+
+    let puddles = [random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"]), random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"])]
+    while (puddles[1] === puddles[0]) {
+        print(puddles[0])
+        puddles[1] = random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"])
+    }
+    print(puddles)
+
+    MT = [cos(-PI/2 - PI/3)*70*scalingFactor, sin(-PI/2 - PI/3)*70*scalingFactor]
+    OT = [cos(-PI/2 - PI/9)*70*scalingFactor, sin(-PI/2 - PI/9)*70*scalingFactor]
+    H1 = [cos(-PI/2 + PI/9)*70*scalingFactor, sin(-PI/2 + PI/9)*70*scalingFactor]
+    H2 = [cos(-PI/2 + PI/3)*70*scalingFactor, sin(-PI/2 + PI/3)*70*scalingFactor]
+    M1 = [cos(PI/2 - PI/9)*70*scalingFactor, sin(PI/2 - PI/9)*70*scalingFactor]
+    M2 = [cos(PI/2 - PI/3)*70*scalingFactor, sin(PI/2 - PI/3)*70*scalingFactor]
+    R1 = [cos(PI/2 + PI/3)*70*scalingFactor, sin(PI/2 + PI/3)*70*scalingFactor]
+    R2 = [cos(PI/2 + PI/9)*70*scalingFactor, sin(PI/2 + PI/9)*70*scalingFactor]
+
+    stage = 0
+    currentlySelectedMechanic = "Light Rampant"
+    currentlySelectedBackground = "FRU P2"
+
+    numWinsPerCoinIncrease = 3
+
+    let css = select("html")
+    css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
+    css = select("body")
+    css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
+
+    textAtTop = "You just finished Diamond Dust—but you have no idea where" +
+        " to go for the next mechanic, Mirror Mirror! Or maybe you do have" +
+        " an idea. Whether you do or don't, this simulator should help you" +
+        " reinforce your understanding. Please select which cardinal or" +
+        " intercardinal you should go to."
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79" target="_blank">NAUR strats</a>
+So it's 4/4 light rampant.
+
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+        
+You are currently on the mechanic Diamond Dust.
+Click on any green dot to move to—or near—that location.
+There isn't a timing feature on this mechanic——yet, that is. There will be soon.
+You cannot track wins and losses yet. Once there is a system, wins and losses 
+ from separate mechanics will be saved to local storage but counted separately.
 This is a quiz, so make sure you've studied.
 
 ${updates}
