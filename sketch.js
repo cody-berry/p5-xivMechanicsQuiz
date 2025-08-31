@@ -341,18 +341,20 @@ let numWinsPerCoinIncrease = 1 // number of wins per 1 coin increase
 
 // sometimes the code will change and require a system update like a local storage rename.
 let version = "0.000"
-// Version 0.000
+// Version 0.00
 //  - Initial release
 //  - FRU support for Utopian Sky (do not use), Diamond Dust, Mirror Mirror
 //    - nothing changed to support these
 //  - Currency coin tracking via local storage
 //  - Time tracking without local storage
 
-// Version 0.100
+// Version 0.10
 //  - Updates implemented
 //  - M8S support for Millennial Decay
 //    - nothing changed to support these
 //  - Huge hotbar revamp!
+//  - FRU support for Light Rampant
+//    - nothing changed to support these
 
 // version format:
 //  first number: expansion number
@@ -500,6 +502,12 @@ function draw() {
     frameRate(1000)
     updateVectors()
 
+    // the main body window.
+    fill(234, 34, 24, 0.5)
+    noStroke()
+    // rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
+    displayMainBodyContent()
+
     // the green square at the top-left TODO
     fill(120, 80, 50)
     noStroke()
@@ -517,12 +525,6 @@ function draw() {
     noStroke()
     rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
     displayLossContent()
-
-    // the main body window.
-    fill(234, 34, 24, 0.5)
-    noStroke()
-    // rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
-    displayMainBodyContent()
 
     // the mechanic section window
     fill(234, 34, 24)
@@ -632,6 +634,9 @@ function displayTopWindowContent() {
 
     textFont(font)
 
+    // text needs to be translated up to be centered
+    let textTranslation = -1.2*scalingFactor
+
     push()
     translate(0, 4*scalingFactor) // currently, this just needs to be moved
     // a little bit down
@@ -671,6 +676,7 @@ function displayTopWindowContent() {
         topWindowX + textWidth("Restart") + textPadding*3, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
     noStroke()
+    translate(0, textTranslation)
     text("Restart", topWindowX + textPadding*2, topWindowY + 22*scalingFactor + (textPadding)/2)
     pop()
 
@@ -683,6 +689,7 @@ function displayTopWindowContent() {
     rect(topWindowX + textWidth("Restart") + textPadding*4, topWindowY + 22*scalingFactor,
         topWindowX + textWidth("RestartPurge data") + textPadding*6, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
+    translate(0, textTranslation)
     text("Purge data", topWindowX + textWidth("Restart") + textPadding*5, topWindowY + 22*scalingFactor + (textPadding)/2)
     pop()
 
@@ -703,6 +710,7 @@ function displayTopWindowContent() {
     rect(topWindowX + textWidth("RestartPurge data") + textPadding*7, topWindowY + 22*scalingFactor,
         topWindowX + textWidth("RestartPurge dataChange role from " + role) + textPadding*9, topWindowY + 22*scalingFactor + textAscent() + textPadding, cornerRounding/2)
     fill(0, 0, 100)
+    translate(0, textTranslation)
     text("Change role from " + role, topWindowX + textWidth("RestartPurge data") + textPadding*8, topWindowY + 22*scalingFactor + (textPadding)/2)
     stroke(0, 0, 100)
 
@@ -7067,8 +7075,8 @@ function setupUtopianSky() {
     css = select("body")
     css.style("background-image", "url(\"data/FRU P1/BG.png\")")
 
-    textAtTop = "How fast can you really execute Utopian Sky? Because it's" +
-        " time to test just that. Also, please do remember that it's " + spreadOrStack +
+    textAtTop = "This is my first simulation and it is sloppy. Also," +
+        " please remember that it's " + spreadOrStack +
         "s first.\n\nThe way the simulation works can be a bit confusing." +
         " You'll get the hang of it eventually. Ready? Click on the green" +
         " dot in the center."
@@ -7081,7 +7089,6 @@ numpad 1 → freeze sketch
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
-        Warning: not implemented.
         
 You are currently on the mechanic Utopian Sky.
 Click on any green dot to move to that location. Clicking on the green
@@ -7196,7 +7203,6 @@ This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzX
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
-        Warning: not implemented.
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to that location. Clicking on the green
@@ -7280,10 +7286,10 @@ function setupMirrorMirror() {
     css = select("body")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
 
-    textAtTop = "You just finished Diamond Dust—but you have no idea where" +
-        " to go for the next mechanic, Mirror Mirror! Or maybe you do have" +
-        " an idea. Whether you do or don't, this simulator should help you" +
-        " reinforce your understanding. Please select which cardinal or" +
+    textAtTop = "My static couldn't find a single simulation for Mirror" +
+        " Mirror! I implemented this one so that I could understand the" +
+        " mechanic better. It would be nice" +
+        " if there were a 3D sim, though. Please click which cardinal or" +
         " intercardinal you should go to."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
@@ -7296,7 +7302,6 @@ This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzX
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
-        Warning: not implemented.
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
@@ -7368,11 +7373,10 @@ function setupMillennialDecay() {
     css = select("body")
     css.style("background-image", "url(\"data/M8S P1 background.png\")")
 
-    textAtTop = "This simulator aims to help your adds, clock TR, beckon moonlight, P1 enrage, twofold tempest, lone " +
-        "wolf's lament, champion's circuit, and P2 enrage prog parties, as well as your reclear groups, see adds " +
-        "once. Most PF parties are decay prog parties in disguise. Please use the" +
-        " Murderless Fering Decay video by Hector. Click on the dot in the" +
-        " center to continue."
+    textAtTop = "PF parties have gotten better at Millennial Decay, but" +
+        " it might still be a problem for people who are new to the" +
+        " fight. Please use the Murderless Fering Decay video by Hector." +
+        " Click on the dot in the center to continue."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
 
@@ -7454,9 +7458,8 @@ function setupWingmark() {
     css = select("body")
     css.style("background-image", "url(\"data/M6S arena normal.webp\")")
 
-    textAtTop = "Wingmark is hard because it's complex, and Wingmark is" +
-        " complex because people are incompetent. This simulation aims to" +
-        " help you not be incompetent like everyone else in PF.\n\nSmall" +
+    textAtTop = "Wingmark is hard because I like to die when I get a" +
+        " bomb/winged bomb plus a morbol/succubus. End of pull. \nSmall" +
         " tip: Try to get close to bombs and succubus and away from morbols" +
         " and winged bombs—that is where you're supposed to go to. Just" +
         " don't die on your normals because of that."
@@ -7519,11 +7522,9 @@ function setupLightRampant() {
     css = select("body")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
 
-    textAtTop = "You just finished Diamond Dust—but you have no idea where" +
-        " to go for the next mechanic, Mirror Mirror! Or maybe you do have" +
-        " an idea. Whether you do or don't, this simulator should help you" +
-        " reinforce your understanding. Please select which cardinal or" +
-        " intercardinal you should go to."
+    textAtTop = "I couldn't find a top-down simulator for Light Rampant, so" +
+        " I implemented one here. Click on the dot in the center to" +
+        " continue."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
 
