@@ -262,6 +262,26 @@ let realM2 = new ArrivingVector(M2[0], M2[1], M2[0], M2[1], scalingFactor, 20*sc
 let realR1 = new ArrivingVector(R1[0], R1[1], R1[0], R1[1], scalingFactor, 20*scalingFactor)
 let realR2 = new ArrivingVector(R2[0], R2[1], R2[0], R2[1], scalingFactor, 20*scalingFactor)
 
+let speedrun = false
+if (speedrun) {
+    realMT.slowdown = 100000*scalingFactor
+    realOT.slowdown = 100000*scalingFactor
+    realH1.slowdown = 100000*scalingFactor
+    realH2.slowdown = 100000*scalingFactor
+    realM1.slowdown = 100000*scalingFactor
+    realM2.slowdown = 100000*scalingFactor
+    realR1.slowdown = 100000*scalingFactor
+    realR2.slowdown = 100000*scalingFactor
+    realMT.speed = 100000*scalingFactor
+    realOT.speed = 100000*scalingFactor
+    realH1.speed = 100000*scalingFactor
+    realH2.speed = 100000*scalingFactor
+    realM1.speed = 100000*scalingFactor
+    realM2.speed = 100000*scalingFactor
+    realR1.speed = 100000*scalingFactor
+    realR2.speed = 100000*scalingFactor
+}
+
 // window positions
 let greenSquareX = 0
 let greenSquareY = 0
@@ -308,6 +328,18 @@ let blueMirrorAngle
 let redMirrorConfig
 let redMirrorAngleOne
 let redMirrorAngleTwo
+
+// Light Rampant (FRU P2)
+let lightRampantTetherOne
+let lightRampantTetherTwo
+let lightRampantTetherThree
+let lightRampantTetherFour
+let lightRampantTetherFive
+let lightRampantTetherSix
+let westPuddlePlayer
+let eastPuddlePlayer
+let northSouthOrbSpawn
+let lightsteeped
 
 // Wingmark (M6S)
 let m6sP1Image
@@ -429,7 +461,7 @@ function setup() {
     selectionX = holeSize + bonusWidth/2
     selectionY = bottomWindowY + bottomHeight + holeSize
     scalingAdjustX = holeSize + bonusWidth/2
-    scalingAdjustY = selectionY + mechanicSelectionHeight + holeSize
+    scalingAdjustY = selectionY + mechanicSelectionHeight + holeSize - 26*scalingFactor
 
     // greenSquareX = 0
     // greenSquareY = 0
@@ -502,6 +534,19 @@ function draw() {
     frameRate(1000)
     updateVectors()
 
+    // translate(-width/2, -height/2)
+    // orbitControl()
+    //
+    // background(0)
+    //
+    // fill(0, 0, 50)
+    // push()
+    // translate(mouseX, mouseY, 0)
+    // sphere(10)
+    // pop()
+    //
+    // ambientLight(0, 0, 100)
+
     // the main body window.
     fill(234, 34, 24, 0.5)
     noStroke()
@@ -529,7 +574,7 @@ function draw() {
     // the mechanic section window
     fill(234, 34, 24)
     noStroke()
-    rect(selectionX, selectionY, selectionX + selectionWidth, selectionY + mechanicSelectionHeight, cornerRounding)
+    rect(selectionX, selectionY, selectionX + selectionWidth, selectionY + mechanicSelectionHeight - 26*scalingFactor, cornerRounding)
     displayMechanicSelection()
 
     // the middle-top window
@@ -796,7 +841,87 @@ function displayTopWindowContent() {
 function displayMiddleTopWindowContent() {
     fill(0, 0, 100)
     textWrap(WORD)
-    text(textAtTop, middleTopX + textPadding, middleTopY + textPadding, middleTopWidth - textPadding*2)
+    if (currentlySelectedMechanic === "Light Rampant") {
+        text(textAtTop, middleTopX + textPadding, middleTopY + textPadding, middleTopWidth - textPadding*2 - 100*scalingFactor)
+
+
+        // making space for lightsteeped debuffs display
+        noStroke()
+        fill(0, 0, 0)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor, middleTopY + textPadding, middleTopX + middleTopWidth - textPadding, middleTopY + middleTopHeight - textPadding)
+
+        fill(120, 70, 80)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 6*scalingFactor, 10*scalingFactor)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 6*scalingFactor, 10*scalingFactor)
+
+        fill(220, 70, 80)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 6*scalingFactor, 10*scalingFactor)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 6*scalingFactor, 10*scalingFactor)
+
+        fill(0, 70, 80)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 6*scalingFactor, 10*scalingFactor)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 6*scalingFactor, 10*scalingFactor)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 6*scalingFactor, 10*scalingFactor)
+        circle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 6*scalingFactor, 10*scalingFactor)
+
+
+        // debuff—rectangle, triangle at bottom
+        fill(60, 30, 100)
+        stroke(60, 30, 100)
+        strokeWeight(1)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor, middleTopY + textPadding, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor, middleTopY + textPadding, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor, middleTopY + textPadding, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor, middleTopY + textPadding, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor, middleTopY + middleTopHeight/2, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor, middleTopY + middleTopHeight/2, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor, middleTopY + middleTopHeight/2, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        rect(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor, middleTopY + middleTopHeight/2, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor, middleTopY + textPadding + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor, middleTopY + textPadding + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor, middleTopY + textPadding + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor, middleTopY + textPadding + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 10*scalingFactor, middleTopY + textPadding + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+        triangle(middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 20*scalingFactor, middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 10*scalingFactor, middleTopY + middleTopHeight/2 + 15*scalingFactor)
+
+
+        // name of player—role
+        fill(0, 0, 100)
+        stroke(0, 0, 100)
+        strokeWeight(1/3*scalingFactor)
+        textSize(5*fontScalingFactor*scalingFactor)
+        textAlign(CENTER, CENTER)
+        text("H1", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text("H2", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text("MT", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text("OT", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor - 6*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text("R1", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text("R2", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text("M1", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text("M2", middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor - 6*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+
+        // text shadow—make it visible
+        push()
+        translate(scalingFactor/6, scalingFactor/3)
+        fill(0)
+        noStroke()
+        textSize(10*fontScalingFactor*scalingFactor)
+        text(lightsteeped["H1"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text(lightsteeped["H2"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text(lightsteeped["MT"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text(lightsteeped["OT"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 5*scalingFactor, middleTopY + textPadding + 5*scalingFactor)
+        text(lightsteeped["R1"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 12*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text(lightsteeped["R2"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 37*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text(lightsteeped["M1"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 63*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+        text(lightsteeped["M2"], middleTopX + middleTopWidth - textPadding - 100*scalingFactor + 88*scalingFactor + 5*scalingFactor, middleTopY + middleTopHeight/2 + 5*scalingFactor)
+
+
+        // number on lightsteeped debuff—number of stacks
+    }
+    else text(textAtTop, middleTopX + textPadding, middleTopY + textPadding, middleTopWidth - textPadding*2)
 
     // display how long it's been since the mechanic started
     fill(0, 0, 100)
@@ -1666,6 +1791,31 @@ function displayMainBodyContent() {
                 circle(firstCircles[0][0] + centerOfBoard[0], firstCircles[0][1] + centerOfBoard[1], 150*scalingFactor)
                 circle(firstCircles[1][0] + centerOfBoard[0], firstCircles[1][1] + centerOfBoard[1], 150*scalingFactor)
 
+                // make sure we know if we got targeted. we'll have a
+                // target marker if we are
+                stroke(30, 100, 70)
+                strokeWeight(2)
+                if (markedPlayers === "DPS") {
+                    displayTargetSymbol(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1])
+                    displayTargetSymbol(M2[0] + centerOfBoard[0], M2[1] + centerOfBoard[1])
+                    displayTargetSymbol(R1[0] + centerOfBoard[0], R1[1] + centerOfBoard[1])
+                    displayTargetSymbol(R2[0] + centerOfBoard[0], R2[1] + centerOfBoard[1])
+                    displaySpreadMarker(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(M2[0] + centerOfBoard[0], M2[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(R1[0] + centerOfBoard[0], R1[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(R2[0] + centerOfBoard[0], R2[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                } else {
+                    displayTargetSymbol(H1[0] + centerOfBoard[0], H1[1] + centerOfBoard[1])
+                    displayTargetSymbol(H2[0] + centerOfBoard[0], H2[1] + centerOfBoard[1])
+                    displayTargetSymbol(OT[0] + centerOfBoard[0], OT[1] + centerOfBoard[1])
+                    displayTargetSymbol(MT[0] + centerOfBoard[0], MT[1] + centerOfBoard[1])
+                    displaySpreadMarker(H1[0] + centerOfBoard[0], H1[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(H2[0] + centerOfBoard[0], H2[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(OT[0] + centerOfBoard[0], OT[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                    displaySpreadMarker(MT[0] + centerOfBoard[0], MT[1] + centerOfBoard[1], 100*scalingFactor, 300, 20, 100)
+                }
+
+
                 if (inOrOut === "in") {
                     displayShiva([0, -mainBodyWidth/5], "clone", "Reap!", 15*scalingFactor)
                 } if (inOrOut === "out") {
@@ -1689,21 +1839,10 @@ function displayMainBodyContent() {
                     displaySmallGreenDot(cos(i)*radii[3], sin(i)*radii[3])
                 }
 
-                // make sure we know if we got targeted. we'll have a
-                // target marker if we are
-                stroke(30, 100, 70)
-                strokeWeight(2)
-                if (markedPlayers === "DPS") {
-                    displayTargetSymbol(M1[0] + centerOfBoard[0], M1[1] + centerOfBoard[1])
-                    displayTargetSymbol(M2[0] + centerOfBoard[0], M2[1] + centerOfBoard[1])
-                    displayTargetSymbol(R1[0] + centerOfBoard[0], R1[1] + centerOfBoard[1])
-                    displayTargetSymbol(R2[0] + centerOfBoard[0], R2[1] + centerOfBoard[1])
-                } else {
-                    displayTargetSymbol(H1[0] + centerOfBoard[0], H1[1] + centerOfBoard[1])
-                    displayTargetSymbol(H2[0] + centerOfBoard[0], H2[1] + centerOfBoard[1])
-                    displayTargetSymbol(OT[0] + centerOfBoard[0], OT[1] + centerOfBoard[1])
-                    displayTargetSymbol(MT[0] + centerOfBoard[0], MT[1] + centerOfBoard[1])
-                }
+                push()
+                translateToCenterOfBoard()
+                displayCharacterPositions()
+                pop()
 
                 // click check time!
                 if (mousePressedButNotHeldDown() &&
@@ -4687,6 +4826,1368 @@ intercardinals.`
                 textAtBottom = "[CLEARED, " + formatSeconds((millis() - mechanicStarted)/1000) + "]"
             }
         }
+        if (currentlySelectedMechanic === "Light Rampant") {
+            let AoEsize = 90*scalingFactor
+            if (stage === 0) {
+                displayShiva([0, 0], "clone", null, 15*scalingFactor)
+
+                displayGreenDot(0, 0)
+
+                if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    stage = 1
+                    textAtTop = "Tethers + puddles have appeared. If you are" +
+                        " a puddle player, please click whether you should" +
+                        " go East or West. If you are a tether, select which" +
+                        " tower you should go to."
+                    textAtBottom = "[PASS] — You are waiting in your spot."
+                    return
+                }
+            } if (stage === 1) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // display spread symbols around puddle players
+                displayTargetSymbol(...currentRealPosition(westPuddlePlayer))
+                displayTargetSymbol(...currentRealPosition(eastPuddlePlayer))
+                displaySpreadMarker(...currentRealPosition(westPuddlePlayer), AoEsize, 300, 20, 100)
+                displaySpreadMarker(...currentRealPosition(eastPuddlePlayer), AoEsize, 300, 20, 100)
+                displayCharacterPositions()
+
+                // display the towers—light blue color
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+
+                // for each tower, rotate a PI/3rd for every tower
+                let hexagonPositions = []
+                let towerRadius = 140*scalingFactor
+                let hexagonRadius = 60*scalingFactor
+                for (let i = 4.5; i < 10; i++) {
+                    let x = cos(i*PI/3)*towerRadius
+                    let y = sin(i*PI/3)*towerRadius
+                    strokeWeight(5)
+                    circle(x, y, 50*scalingFactor)
+                    strokeWeight(15)
+                    point(x, y)
+
+                    x = cos(i*PI/3)*hexagonRadius
+                    y = sin(i*PI/3)*hexagonRadius
+                    hexagonPositions.push([x, y])
+                }
+                pop()
+                for (let position of hexagonPositions) displayGreenDot(...position)
+
+                // puddle positions are 160*scalingFactor left and right
+                let puddlePositions = [[-160*scalingFactor, 0], [160*scalingFactor, 0]]
+                for (let position of puddlePositions) displayGreenDot(...position)
+
+
+                // convert the tower and puddle positions into a format that
+                // is compatible with mouseX and mouseY checking format.
+                for (let i = 0; i < hexagonPositions.length; i++) {let temp = [...hexagonPositions[i]]; hexagonPositions[i] = translateXYPositionToBoardCenterFormat(temp)}
+                for (let i = 0; i < puddlePositions.length; i++) {let temp = [...puddlePositions[i]]; puddlePositions[i] = translateXYPositionToBoardCenterFormat(temp)}
+
+                if (mousePressedButNotHeldDown()) {
+                    if (inClickingRanges([...hexagonPositions, ...puddlePositions], 10*scalingFactor)) {
+                        let position = translateXYPositionToStandardFormat(inClickingRanges([...hexagonPositions, ...puddlePositions], 15*scalingFactor))
+
+                        setPosition(lightRampantTetherOne, ...translateXYPositionToStandardFormat(hexagonPositions[0]))
+                        setPosition(lightRampantTetherTwo, ...translateXYPositionToStandardFormat(hexagonPositions[1]))
+                        setPosition(lightRampantTetherThree, ...translateXYPositionToStandardFormat(hexagonPositions[2]))
+                        setPosition(lightRampantTetherFour, ...translateXYPositionToStandardFormat(hexagonPositions[3]))
+                        setPosition(lightRampantTetherFive, ...translateXYPositionToStandardFormat(hexagonPositions[4]))
+                        setPosition(lightRampantTetherSix, ...translateXYPositionToStandardFormat(hexagonPositions[5]))
+
+                        setPosition(westPuddlePlayer, ...translateXYPositionToStandardFormat(puddlePositions[0]))
+                        setPosition(eastPuddlePlayer, ...translateXYPositionToStandardFormat(puddlePositions[1]))
+
+                        let correctPosition = yourPosition()
+                        let correctSpotID = ""
+                        if (lightRampantTetherOne === role) correctSpotID = "N hexagon position"
+                        if (lightRampantTetherTwo === role) correctSpotID = "NE hexagon position"
+                        if (lightRampantTetherThree === role) correctSpotID = "SE hexagon position"
+                        if (lightRampantTetherFour === role) correctSpotID = "S hexagon position"
+                        if (lightRampantTetherFive === role) correctSpotID = "SW hexagon position"
+                        if (lightRampantTetherSix === role) correctSpotID = "NW hexagon position"
+                        if (westPuddlePlayer === role) correctSpotID = "W puddle spot"
+                        if (eastPuddlePlayer === role) correctSpotID = "E puddle spot"
+
+                        if (correctPosition[0] === position[0] && correctPosition[1] === position[1]) stage = 2
+                        else {stage = 100; updateLosses(0)}
+
+                        let hadTether = [westPuddlePlayer, eastPuddlePlayer].includes(role)
+                        hadTether = !hadTether
+
+                        let clickedOnTetherSpot = abs(position[1]) > 0.1*scalingFactor
+
+                        let spotID = ""
+                        if (inClickingRange(hexagonPositions[0], 15*scalingFactor)) spotID = "N hexagon position"
+                        if (inClickingRange(hexagonPositions[1], 15*scalingFactor)) spotID = "NE hexagon position"
+                        if (inClickingRange(hexagonPositions[2], 15*scalingFactor)) spotID = "SE hexagon position"
+                        if (inClickingRange(hexagonPositions[3], 15*scalingFactor)) spotID = "S hexagon position"
+                        if (inClickingRange(hexagonPositions[4], 15*scalingFactor)) spotID = "SW hexagon position"
+                        if (inClickingRange(hexagonPositions[5], 15*scalingFactor)) spotID = "NW hexagon position"
+                        if (inClickingRange(puddlePositions[0], 15*scalingFactor)) spotID = "W puddle spot"
+                        if (inClickingRange(puddlePositions[1], 15*scalingFactor)) spotID = "E puddle spot"
+
+                        if (!hadTether && !clickedOnTetherSpot) {
+                            if (stage === 100) {
+                                textAtTop = "You went to the wrong puddle" +
+                                    " spot. Westmost player goes west and" +
+                                    " eastmost player goes east, and if 2" +
+                                    " people in the same column get marked," +
+                                    " the DPS goes left and the support goes" +
+                                    " right."
+                            }
+                        } if (hadTether && !clickedOnTetherSpot) {
+                            if (stage === 100) {
+                                textAtTop = "You had a tether but you went" +
+                                    " to a spot for puddle players."
+                            }
+                        } if (!hadTether && clickedOnTetherSpot) {
+                            if (stage === 100) {
+                                textAtTop = "You had a puddle but you went" +
+                                    " to a spot for tether players."
+                            }
+                        } if (hadTether && clickedOnTetherSpot) {
+                            if (stage === 100) {
+                                textAtTop = "You clicked on the wrong tether" +
+                                    " spot. Just in case you didn't know, we" +
+                                    " are creating a hexagon currently, not" +
+                                    " assigning which tower to go to."
+                            }
+                        }
+
+                        if (stage === 100) {
+                            textAtBottom = "You went to the " + spotID + ". \n" +
+                                "[FAIL] — You should have gone to the " + correctSpotID + "."
+                        } else {
+                            textAtBottom = "You went to the " + spotID + ". \n" +
+                                "[PASS] — You were supposed to go to the " + correctSpotID + "."
+                            textAtTop = "Which tower spot should you go to?"
+                        }
+
+                        setPosition(role, ...position)
+                    }
+                }
+            } if (stage === 2) {
+                // skip this stage if puddled
+                if ([eastPuddlePlayer, westPuddlePlayer].includes(role)) {
+                    textAtTop = "Please wait for people to get into their" +
+                        " spots."
+                    stage = 2.25
+                }
+
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // display spread symbols around puddle players
+                displayTargetSymbol(...currentRealPosition(westPuddlePlayer))
+                displayTargetSymbol(...currentRealPosition(eastPuddlePlayer))
+                displaySpreadMarker(...currentRealPosition(westPuddlePlayer), AoEsize, 300, 20, 100)
+                displaySpreadMarker(...currentRealPosition(eastPuddlePlayer), AoEsize, 300, 20, 100)
+                displayCharacterPositions()
+
+                // display the towers—light blue color
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+
+                // for each tower, rotate a PI/3rd for every tower
+                let towerPositions = []
+                let towerRadius = 140*scalingFactor
+                let dotRadius = 150*scalingFactor
+                for (let i = 4.5; i < 10; i++) {
+                    let x = cos(i*PI/3)*towerRadius
+                    let y = sin(i*PI/3)*towerRadius
+                    strokeWeight(5)
+                    circle(x, y, 50*scalingFactor)
+                    strokeWeight(15)
+                    point(x, y)
+
+                    x = cos(i*PI/3)*dotRadius
+                    y = sin(i*PI/3)*dotRadius
+                    towerPositions.push([x, y])
+                }
+                pop()
+                for (let position of towerPositions) displayGreenDot(...position)
+
+                for (let i = 0; i < towerPositions.length; i++) {let temp = [...towerPositions[i]]; towerPositions[i] = translateXYPositionToBoardCenterFormat(temp)}
+
+
+                if (inClickingRanges(towerPositions, 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    setPosition(lightRampantTetherOne, ...translateXYPositionToStandardFormat(towerPositions[3]))
+                    setPosition(lightRampantTetherTwo, ...translateXYPositionToStandardFormat(towerPositions[5]))
+                    setPosition(lightRampantTetherThree, ...translateXYPositionToStandardFormat(towerPositions[2]))
+                    setPosition(lightRampantTetherFour, ...translateXYPositionToStandardFormat(towerPositions[0]))
+                    setPosition(lightRampantTetherFive, ...translateXYPositionToStandardFormat(towerPositions[4]))
+                    setPosition(lightRampantTetherSix, ...translateXYPositionToStandardFormat(towerPositions[1]))
+
+                    let correctPosition = yourPosition()
+
+                    let correctSpotID = ""
+                    let hexagonSpotID = ""
+                    if (lightRampantTetherOne === role) {
+                        correctSpotID = "S tower"
+                        hexagonSpotID = "N hexagon position"
+                    }
+                    if (lightRampantTetherTwo === role) {
+                        correctSpotID = "NW tower"
+                        hexagonSpotID = "NE hexagon position"
+                    }
+                    if (lightRampantTetherThree === role) {
+                        correctSpotID = "SE tower"
+                        hexagonSpotID = "SE hexagon position"
+                    }
+                    if (lightRampantTetherFour === role) {
+                        correctSpotID = "N tower"
+                        hexagonSpotID = "S hexagon position"
+                    }
+                    if (lightRampantTetherFive === role) {
+                        correctSpotID = "SW tower"
+                        hexagonSpotID = "SW hexagon position"
+                    }
+                    if (lightRampantTetherSix === role) {
+                        correctSpotID = "NE tower"
+                        hexagonSpotID = "NW hexagon position"
+                    }
+
+                    let clickedPosition = translateXYPositionToStandardFormat(inClickingRanges(towerPositions, 10*scalingFactor))
+                    let spotID = ""
+                    if (inClickingRange(towerPositions[0], 15*scalingFactor)) spotID = "N tower"
+                    if (inClickingRange(towerPositions[1], 15*scalingFactor)) spotID = "NE tower"
+                    if (inClickingRange(towerPositions[2], 15*scalingFactor)) spotID = "SE tower"
+                    if (inClickingRange(towerPositions[3], 15*scalingFactor)) spotID = "S tower"
+                    if (inClickingRange(towerPositions[4], 15*scalingFactor)) spotID = "SW tower"
+                    if (inClickingRange(towerPositions[5], 15*scalingFactor)) spotID = "NW tower"
+
+                    if (clickedPosition[0] === correctPosition[0] && clickedPosition[1] === correctPosition[1]) {
+                        stage = 2.5
+                        textAtTop = "Please wait for people to get into" +
+                            " their spots. "
+                        textAtBottom = "You went to the " + spotID + ".\n[PASS] — " + hexagonSpotID + " rotates to the " + correctSpotID + "."
+                    } else {
+                        stage = 100
+                        textAtTop = "You were supposed to go to the " + correctSpotID + "."
+                        textAtBottom = "You went to the " + spotID + ".\n[FAIL] — " + hexagonSpotID + " rotates to the " + correctSpotID + "."
+                        updateLosses(0)
+                    }
+
+                    setPosition(role, ...clickedPosition)
+                }
+            } if (stage === 2.25) {
+                stage = 2.5
+
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // display spread symbols around puddle players
+                displayTargetSymbol(...currentRealPosition(westPuddlePlayer))
+                displayTargetSymbol(...currentRealPosition(eastPuddlePlayer))
+                displaySpreadMarker(...currentRealPosition(westPuddlePlayer), AoEsize, 300, 20, 100)
+                displaySpreadMarker(...currentRealPosition(eastPuddlePlayer), AoEsize, 300, 20, 100)
+                displayCharacterPositions()
+
+                // display the towers—light blue color
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+
+                // for each tower, rotate a PI/3rd for every tower
+                let towerPositions = []
+                let towerRadius = 140*scalingFactor
+                let dotRadius = 150*scalingFactor
+                for (let i = 4.5; i < 10; i++) {
+                    let x = cos(i*PI/3)*towerRadius
+                    let y = sin(i*PI/3)*towerRadius
+                    strokeWeight(5)
+                    circle(x, y, 50*scalingFactor)
+                    strokeWeight(15)
+                    point(x, y)
+
+                    x = cos(i*PI/3)*dotRadius
+                    y = sin(i*PI/3)*dotRadius
+                    towerPositions.push([x, y])
+                }
+                pop()
+
+                for (let i = 0; i < towerPositions.length; i++) {let temp = [...towerPositions[i]]; towerPositions[i] = translateXYPositionToBoardCenterFormat(temp)}
+
+                setPosition(lightRampantTetherOne, ...translateXYPositionToStandardFormat(towerPositions[3]))
+                setPosition(lightRampantTetherTwo, ...translateXYPositionToStandardFormat(towerPositions[5]))
+                setPosition(lightRampantTetherThree, ...translateXYPositionToStandardFormat(towerPositions[2]))
+                setPosition(lightRampantTetherFour, ...translateXYPositionToStandardFormat(towerPositions[0]))
+                setPosition(lightRampantTetherFive, ...translateXYPositionToStandardFormat(towerPositions[4]))
+                setPosition(lightRampantTetherSix, ...translateXYPositionToStandardFormat(towerPositions[1]))
+            } if (stage === 2.5) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // display spread symbols around puddle players
+                displayTargetSymbol(...currentRealPosition(westPuddlePlayer))
+                displayTargetSymbol(...currentRealPosition(eastPuddlePlayer))
+                displaySpreadMarker(...currentRealPosition(westPuddlePlayer), AoEsize, 300, 20, 100)
+                displaySpreadMarker(...currentRealPosition(eastPuddlePlayer), AoEsize, 300, 20, 100)
+                displayCharacterPositions()
+
+                // display the towers—light blue color
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+
+                // for each tower, rotate a PI/3rd for every tower
+                let towerRadius = 140*scalingFactor
+                let towers = []
+                for (let i = 4.5; i < 10; i++) {
+                    let x = cos(i*PI/3)*towerRadius
+                    let y = sin(i*PI/3)*towerRadius
+                    strokeWeight(5)
+                    circle(x, y, 50*scalingFactor)
+                    strokeWeight(15)
+                    point(x, y)
+
+                    towers.push([x, y])
+                }
+                pop()
+
+
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 2.75
+                    puddles.push([...towers[0], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+                    puddles.push([...towers[1], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+                    puddles.push([...towers[2], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+                    puddles.push([...towers[3], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+                    puddles.push([...towers[4], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+                    puddles.push([...towers[5], millis(), 50*scalingFactor, [60, 10, 100, 50]])
+
+                    lightsteeped[lightRampantTetherOne] += 1
+                    lightsteeped[lightRampantTetherTwo] += 1
+                    lightsteeped[lightRampantTetherThree] += 1
+                    lightsteeped[lightRampantTetherFour] += 1
+                    lightsteeped[lightRampantTetherFive] += 1
+                    lightsteeped[lightRampantTetherSix] += 1
+                }
+            } if (stage === 2.75) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+
+                // make the new puddles from the west and east players
+                setPosition(westPuddlePlayer, -50*scalingFactor, 0)
+                setPosition(eastPuddlePlayer, 50*scalingFactor, 0)
+
+                // make the first puddle
+                if (puddles.length === 6) {
+                    puddles.push([...currentRealPosition(westPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                    puddles.push([...currentRealPosition(eastPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                }
+
+                // and the second
+                if (puddles.length === 8 && currentRealPosition(westPuddlePlayer)[0] > -110*scalingFactor) {
+                    puddles.push([...currentRealPosition(westPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                    puddles.push([...currentRealPosition(eastPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                }
+
+                // and the third
+                if (puddles.length === 10 && currentRealPosition(westPuddlePlayer)[0] > -60*scalingFactor) {
+                    puddles.push([...currentRealPosition(westPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                    puddles.push([...currentRealPosition(eastPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                }
+
+                // puddles 0-5 are replaced by orbs
+                if (millis() - puddles[0][2] > 500 && puddles.length === 12) {
+                    stage = 3
+
+                    // the tower explosion "puddles" replaced by the
+                    // orbs. these are not puddles, but they're circles that
+                    // expand until they reach full size, so puddles are used
+                    for (let i = 0; i < 6; i++) puddles[i][4] = [0, 0, 100, 0]
+                    if (northSouthOrbSpawn === "N") for (let i = 0; i < 6; i+=2) {puddles[i][4] = [0, 0, 100, 50]; puddles[i][2] = millis()}
+                    if (northSouthOrbSpawn === "S") for (let i = 1; i < 6; i+=2) {puddles[i][4] = [0, 0, 100, 50]; puddles[i][2] = millis()}
+
+                    textAtTop = "The first three puddles have dropped and" +
+                        " the towers have resolved. Are you going N or S?"
+                }
+                pop()
+            } if (stage === 3) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                // go N or S?
+                let N = [0, -160*scalingFactor]
+                let S = [0, 160*scalingFactor]
+
+                displayGreenDot(...N)
+                displayGreenDot(...S)
+
+                N = translateXYPositionToBoardCenterFormat(N)
+                S = translateXYPositionToBoardCenterFormat(S)
+
+                if (inClickingRanges([N, S], 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    let clickedNorth = inClickingRanges([N, S], 10*scalingFactor)[1] < centerOfBoard[1]
+
+                    N = translateXYPositionToStandardFormat(N)
+                    S = translateXYPositionToStandardFormat(S)
+                    setPositionsWithVariance([
+                        lightRampantTetherTwo,
+                        lightRampantTetherFour,
+                        lightRampantTetherSix,
+                        westPuddlePlayer
+                    ], ...N, 40*scalingFactor, 20*scalingFactor)
+                    setPositionsWithVariance([
+                        lightRampantTetherOne,
+                        lightRampantTetherThree,
+                        lightRampantTetherFive,
+                        eastPuddlePlayer
+                    ], ...S, 40*scalingFactor, 20*scalingFactor)
+
+                    let supposedToClickNorth = yourPosition()[1] < 0
+
+                    setPositionsWithVariance([role], 0,
+                        (clickedNorth ? -160*scalingFactor : 160*scalingFactor),
+                        60*scalingFactor, 20*scalingFactor)
+
+                    if (clickedNorth !== supposedToClickNorth) {
+                        stage = 100
+                        updateLosses(0)
+                        textAtTop = "Northmost towers meet up north and" +
+                            " southmost towers meet up south, and the" +
+                            " puddles turn left after the third so that the" +
+                            " west puddle ends up at the north and the east" +
+                            " puddle ends up at the south. "
+                        textAtBottom = "You went " + (clickedNorth ? "North.\n"
+                            : "South.\n") + "[FAIL] — You should've gone " +
+                            (supposedToClickNorth ? "North." : "South.")
+                    } else {
+                        stage = 3.25
+                        textAtTop = "Please wait for everyone to move."
+                        textAtBottom = "You went " + (clickedNorth ? "North.\n"
+                                : "South.\n") + "[PASS] — You were supposed" +
+                            " to go " + (supposedToClickNorth ? "North." : "South.")
+                        for (let i = 0; i < 6; i++) {
+                            // orbs finish spawning now
+                            puddles[i][4][3] = 50
+
+                            // make the orbs that just spawned look new
+                            if (northSouthOrbSpawn === "N" && (i % 2 === 1)) {
+                                puddles[i][2] = millis()
+                            }
+                            if (northSouthOrbSpawn === "S" && (i % 2 === 0)) {
+                                puddles[i][2] = millis()
+                            }
+                        }
+                    }
+                }
+            } if (stage === 3.25) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                // fourth puddle
+                if (puddles.length === 12 && currentRealPosition(westPuddlePlayer)[1] < -45*scalingFactor) {
+                    puddles.push([...currentRealPosition(westPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                    puddles.push([...currentRealPosition(eastPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                }
+
+                // fifth puddle
+                if (puddles.length === 14 && currentRealPosition(westPuddlePlayer)[1] < -90*scalingFactor) {
+                    puddles.push([...currentRealPosition(westPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                    puddles.push([...currentRealPosition(eastPuddlePlayer), millis(), 100*scalingFactor, [0, 0, 80, 50]])
+                }
+
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor*50) && (abs(realMT.y - MT[1]) < scalingFactor*50)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor*50) && (abs(realOT.y - OT[1]) < scalingFactor*50)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor*50) && (abs(realH1.y - H1[1]) < scalingFactor*50)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor*50) && (abs(realH2.y - H2[1]) < scalingFactor*50)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor*50) && (abs(realM1.y - M1[1]) < scalingFactor*50)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor*50) && (abs(realM2.y - M2[1]) < scalingFactor*50)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor*50) && (abs(realR1.y - R1[1]) < scalingFactor*50)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor*50) && (abs(realR2.y - R2[1]) < scalingFactor*50))) {
+                    stage = 3.5
+                    for (let i = 0; i < 6; i++) {
+                        // show AoEs
+                        if (northSouthOrbSpawn === "N" && (i % 2 === 0)) {
+                            puddles.push([...puddles[i]])
+                            puddles[puddles.length-1][2] = millis()
+                            puddles[puddles.length-1][3] = 200*scalingFactor
+                            puddles[puddles.length-1][4] = [20, 60, 80, 20]
+                        }
+                        if (northSouthOrbSpawn === "S" && (i % 2 === 1)) {
+                            puddles.push([...puddles[i]])
+                            puddles[puddles.length-1][2] = millis()
+                            puddles[puddles.length-1][3] = 200*scalingFactor
+                            puddles[puddles.length-1][4] = [20, 60, 80, 20]
+                        }
+                    }
+                }
+            } if (stage === 3.5) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                if (northSouthOrbSpawn === "N") for (let i = 0; i < 6; i+=2) puddles[i][4][2] = sin(millis()/300)*10 + 90
+                else for (let i = 1; i < 6; i+=2) puddles[i][4][2] = sin(millis()/200)*10 + 90
+
+
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    // group with AoE on them rotates far clockwise out of the
+                    // AoE. the other gorup rotates slightly.
+                    if (northSouthOrbSpawn === "N") {
+                        setPositionsWithVariance([lightRampantTetherTwo, lightRampantTetherFour,
+                            lightRampantTetherSix, westPuddlePlayer],
+                            115 * scalingFactor, -100 * scalingFactor,
+                            30 * scalingFactor, 30 * scalingFactor)
+                        setPositionsWithVariance([lightRampantTetherOne, lightRampantTetherThree,
+                            lightRampantTetherFive, eastPuddlePlayer],
+                            -20 * scalingFactor, 140 * scalingFactor,
+                            30 * scalingFactor, 10 * scalingFactor)
+                    } else {
+                        setPositionsWithVariance([lightRampantTetherOne, lightRampantTetherThree,
+                            lightRampantTetherFive, eastPuddlePlayer],
+                            -115 * scalingFactor, 100 * scalingFactor,
+                            30 * scalingFactor, 30 * scalingFactor)
+                        setPositionsWithVariance([lightRampantTetherTwo, lightRampantTetherFour,
+                            lightRampantTetherSix, westPuddlePlayer],
+                            20 * scalingFactor, -140 * scalingFactor,
+                            30 * scalingFactor, 10 * scalingFactor)
+                    }
+                    stage = 3.6
+                }
+            } if (stage === 3.6) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                if (northSouthOrbSpawn === "N") for (let i = 0; i < 6; i+=2) puddles[i][4][2] = sin(millis()/300)*10 + 90
+                else for (let i = 1; i < 6; i+=2) puddles[i][4][2] = sin(millis()/200)*10 + 90
+
+                // once everyone's gotten close enough, second AoEs appear
+                if (((abs(realMT.x - MT[0]) < 100*scalingFactor) && (abs(realMT.y - MT[1]) < 100*scalingFactor)) &&
+                    ((abs(realOT.x - OT[0]) < 100*scalingFactor) && (abs(realOT.y - OT[1]) < 100*scalingFactor)) &&
+                    ((abs(realH1.x - H1[0]) < 100*scalingFactor) && (abs(realH1.y - H1[1]) < 100*scalingFactor)) &&
+                    ((abs(realH2.x - H2[0]) < 100*scalingFactor) && (abs(realH2.y - H2[1]) < 100*scalingFactor)) &&
+                    ((abs(realM1.x - M1[0]) < 100*scalingFactor) && (abs(realM1.y - M1[1]) < 100*scalingFactor)) &&
+                    ((abs(realM2.x - M2[0]) < 100*scalingFactor) && (abs(realM2.y - M2[1]) < 100*scalingFactor)) &&
+                    ((abs(realR1.x - R1[0]) < 100*scalingFactor) && (abs(realR1.y - R1[1]) < 100*scalingFactor)) &&
+                    ((abs(realR2.x - R2[0]) < 100*scalingFactor) && (abs(realR2.y - R2[1]) < 100*scalingFactor)) &&
+                    puddles.length === 19) {
+                    stage = 3.7
+                    for (let i = 0; i < 6; i++) {
+                        if (northSouthOrbSpawn === "N" && (i % 2 === 1)) {
+                            puddles.push([...puddles[i]])
+                            puddles[puddles.length-1][2] = millis()
+                            puddles[puddles.length-1][3] = 200*scalingFactor
+                            puddles[puddles.length-1][4] = [20, 60, 80, 20]
+                        }
+                        if (northSouthOrbSpawn === "S" && (i % 2 === 0)) {
+                            puddles.push([...puddles[i]])
+                            puddles[puddles.length-1][2] = millis()
+                            puddles[puddles.length-1][3] = 200*scalingFactor
+                            puddles[puddles.length-1][4] = [20, 60, 80, 20]
+                        }
+                    }
+                }
+            } if (stage === 3.7) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                for (let i = 0; i < 6; i++) puddles[i][4][2] = sin(millis()/300)*10 + 90
+
+                // once everyone's gotten close enough, LPs go off
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < 100/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < 100/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < 100/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < 100/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < 100/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < 100/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < 100/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < 100/2))) {
+                    stage = 3.8
+
+                    // these are LP stacks, and they look close enough.
+                    puddles.push([...currentPosition(lightRampantTetherOne), millis(), 50*scalingFactor, [60, 20, 100, 50]])
+                    puddles.push([...currentPosition(lightRampantTetherTwo), millis(), 50*scalingFactor, [60, 20, 100, 50]])
+
+
+                    lightsteeped[lightRampantTetherOne] += 1
+                    lightsteeped[lightRampantTetherTwo] += 1
+                    lightsteeped[lightRampantTetherThree] += 1
+                    lightsteeped[lightRampantTetherFour] += 1
+                    lightsteeped[lightRampantTetherFive] += 1
+                    lightsteeped[lightRampantTetherSix] += 1
+                    lightsteeped[westPuddlePlayer] += 1
+                    lightsteeped[eastPuddlePlayer] += 1
+                }
+            } if (stage === 3.8) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+
+                for (let i = 0; i < 6; i++) puddles[i][4][2] = sin(millis()/300)*10 + 90
+
+                // once it's been long enough, the LP stacks start to
+                // disappear, and the orbs start to explode
+                if (millis() - puddles[puddles.length-1][2] > 500) {
+                    // decrease alpha
+                    puddles[puddles.length-2][4][3] /= 1.5
+                    puddles[puddles.length-1][4][3] /= 1.5
+
+                    // increase radius of orbs
+                    for (let i = 0; i < 6; i++) {
+                        // make the orbs that spawned first expand into the size of the AoE
+                        if (northSouthOrbSpawn === "N" && (i % 2 === 0)) {
+                            puddles[i][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 50*scalingFactor, 200*scalingFactor, true)
+                            puddles[i][4][1] = map(millis() - puddles[puddles.length-1][2], 500, 800, 0, 80, true)
+                            puddles[i][4][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 50, 100, true)
+                        }
+                        if (northSouthOrbSpawn === "S" && (i % 2 === 1)) {
+                            puddles[i][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 50*scalingFactor, 200*scalingFactor, true)
+                            puddles[i][4][1] = map(millis() - puddles[puddles.length-1][2], 500, 800, 0, 80, true)
+                            puddles[i][4][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 50, 100, true)
+                        }
+
+                        // AoEs disappear
+                        puddles[16][4][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 20, 0, true)
+                        puddles[17][4][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 20, 0, true)
+                        puddles[18][4][3] = map(millis() - puddles[puddles.length-1][2], 500, 800, 20, 0, true)
+
+                        // first puddles disappear
+                        puddles[6][4][3] = 0
+                        puddles[7][4][3] = 0
+                    }
+                }
+
+                // then the stage advances
+                if (millis() - puddles[puddles.length-1][2] > 1000) {
+                    stage = 3.95
+
+                    // stack AoEs disappear
+                    puddles.splice(puddles.length-2, 2)
+
+                    // orbs disappear
+                    puddles.splice(northSouthOrbSpawn === "S" ? 1 : 0, 1)
+                    puddles.splice(northSouthOrbSpawn === "S" ? 2 : 1, 1)
+                    puddles.splice(northSouthOrbSpawn === "S" ? 3 : 2, 1)
+
+                    // AoEs disappear
+                    puddles.splice(13, 3)
+
+                    erase()
+                    fill(100)
+                    rect(-1000, -1000, 10000, 10000)
+                    noErase()
+
+                    // group with second AoE on them rotates far clockwise out of the
+                    // AoE. the other group rotates slightly.
+                    if (northSouthOrbSpawn === "S") {
+                        setPositionsWithVariance([lightRampantTetherTwo, lightRampantTetherFour,
+                            lightRampantTetherSix, westPuddlePlayer],
+                            115 * scalingFactor, -100 * scalingFactor,
+                            30 * scalingFactor, 30 * scalingFactor)
+                        setPositionsWithVariance([lightRampantTetherOne, lightRampantTetherThree,
+                            lightRampantTetherFive, eastPuddlePlayer],
+                            -20 * scalingFactor, 140 * scalingFactor,
+                            30 * scalingFactor, 10 * scalingFactor)
+                    } else {
+                        setPositionsWithVariance([lightRampantTetherOne, lightRampantTetherThree,
+                            lightRampantTetherFive, eastPuddlePlayer],
+                            -115 * scalingFactor, 100 * scalingFactor,
+                            30 * scalingFactor, 30 * scalingFactor)
+                        setPositionsWithVariance([lightRampantTetherTwo, lightRampantTetherFour,
+                            lightRampantTetherSix, westPuddlePlayer],
+                            20 * scalingFactor, -140 * scalingFactor,
+                            30 * scalingFactor, 10 * scalingFactor)
+                    }
+
+                    // second puddles disappear
+                    puddles[5][4][3] = 0
+                    puddles[6][4][3] = 0
+                }
+            } if (stage === 3.95) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+                for (let i = 0; i < 3; i++) puddles[i][4][2] = sin(millis()/300)*10 + 90
+
+                // once everyone's gotten close enough, second orbs go off
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < 100/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < 100/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < 100/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < 100/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < 100/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < 100/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < 100/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < 100/2))) {
+                    stage = 3.97
+
+                    // add a millisecond marker
+                    puddles.push([0, 0, millis(), 0, [0, 0, 0, 0]])
+                }
+            } if (stage === 3.97) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+                // increase radius of orbs
+                for (let i = 0; i < 3; i++) {
+                    // make the orbs that spawned first expand into the size of the AoE
+                    puddles[i][3] = map(millis() - puddles[puddles.length-1][2], 0, 300, 50*scalingFactor, 200*scalingFactor, true)
+                    puddles[i][4][1] = map(millis() - puddles[puddles.length-1][2], 0, 300, 0, 80, true)
+                    puddles[i][4][3] = map(millis() - puddles[puddles.length-1][2], 0, 300, 50, 100, true)
+
+                    // AoEs disappear
+                    puddles[13][4][3] = map(millis() - puddles[puddles.length-1][2], 0, 300, 20, 0, true)
+                    puddles[14][4][3] = map(millis() - puddles[puddles.length-1][2], 0, 300, 20, 0, true)
+                    puddles[15][4][3] = map(millis() - puddles[puddles.length-1][2], 0, 300, 20, 0, true)
+
+                    // third puddles disappear
+                    puddles[7][4][3] = 0
+                    puddles[8][4][3] = 0
+                }
+
+                // when it's been long enough, advance to next stage
+                if (millis() - puddles[puddles.length-1][2] > 500) {
+                    stage = 3.99
+
+                    // orbs disappear
+                    puddles.splice(0, 3)
+
+                    // AoEs disappear
+                    puddles.splice(10, 3)
+
+                    // fourth puddles disappear
+                    puddles[6][4][3] = 0
+                    puddles[7][4][3] = 0
+
+                    erase()
+                    fill(0)
+                    rect(-1000, -1000, 10000, 10000)
+                    noErase()
+                }
+            } if (stage === 3.99) {
+                noFill()
+                stroke(60, 20, 90)
+                strokeWeight(3*scalingFactor)
+                push()
+                translateToCenterOfBoard()
+
+                // tether = hexagon. 6 people have tethers and tethers are
+                // never tangled.
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // then, do that again with a lower strokeweight and a whiter
+                // stroke
+                stroke(0, 0, 100, 50)
+                strokeWeight(2*scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+
+                // again, but completely white this time
+                stroke(0, 0, 100)
+                strokeWeight(scalingFactor)
+                beginShape()
+                vertex(...currentRealPosition(lightRampantTetherOne))
+                vertex(...currentRealPosition(lightRampantTetherTwo))
+                vertex(...currentRealPosition(lightRampantTetherThree))
+                vertex(...currentRealPosition(lightRampantTetherFour))
+                vertex(...currentRealPosition(lightRampantTetherFive))
+                vertex(...currentRealPosition(lightRampantTetherSix))
+                endShape(CLOSE)
+                displayCharacterPositions()
+                pop()
+                // final puddles disappear!
+                print(puddles)
+                if (millis() - puddles[puddles.length-1][2] > 1000) {
+                    stage = 4
+                    puddles = []
+                    textAtTop = "Check your Lightsteeped debuff, then go" +
+                        " into the center or slightly out of the tower. Your " +
+                        " Lightsteeped debuff is displayed on the right of" +
+                        " the arena—the entire party's is displayed to the" +
+                        " right of this. "
+                }
+            } if (stage === 4) {
+                // no tethers anymore!
+
+                // display 4-person tower in the center
+                // light blue color! basically the same as display in stages
+                // 1-2, but tower only in center and there are 4 dots in the
+                // center to represent a 4-person tower
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+                push()
+                translateToCenterOfBoard()
+                circle(0, 0, 50*scalingFactor)
+
+                strokeWeight(15)
+
+                // the dots will be placed dotXY away from the center in
+                // both x and y. This is a customization variable designed
+                // so that it's easier to make these slightly further or
+                // closer during development :)
+                let dotXY = 8*scalingFactor
+                point(-dotXY, -dotXY)
+                point(dotXY, dotXY)
+                point(dotXY, -dotXY)
+                point(-dotXY, dotXY)
+
+                displayCharacterPositions()
+                pop()
+            }
+            for (let puddle of puddles) {
+                noStroke()
+                displayPuddle(puddle)
+            }
+            if (stage > 3 && stage < 4) frameRate(100)
+        }
     }
     // M6S start & adds background
     if (currentlySelectedBackground === "M6S Start & Adds") {
@@ -4716,7 +6217,7 @@ intercardinals.`
         fill(0, 100, 100)
         noStroke()
         push()
-        textSize(50*scalingFactor*fontScalingFactor)
+        textSize(30*scalingFactor*fontScalingFactor)
         textAlign(CENTER, CENTER)
         translateToCenterOfBoard()
         scale(1, 2)
@@ -5528,8 +7029,8 @@ intercardinals.`
 
                 // if you click anywhere on it, move to that location
                 if (mousePressedButNotHeldDown()) {
-                    if (inClickingRange(translateXYPositionToStandardFormat(yourPosition()), 125 * scalingFactor)) {
-                        let selectedPosition = translateXYPositionToBoardCenterFormat([mouseX, mouseY])
+                    if (inClickingRange(translateXYPositionToBoardCenterFormat(yourPosition()), 125 * scalingFactor)) {
+                        let selectedPosition = translateXYPositionToStandardFormat([mouseX, mouseY])
 
 
                         stage = 2.5
@@ -5699,7 +7200,7 @@ intercardinals.`
                             movePosition("H1", 100*scalingFactor, -60*scalingFactor)
                         }
                         // make sure to overwrite your default spot
-                        setPosition(role, ...translateXYPositionToBoardCenterFormat([mouseX, mouseY]))
+                        setPosition(role, ...translateXYPositionToStandardFormat([mouseX, mouseY]))
 
                         if (stage !== 100) stage = 2.5
                         return
@@ -5891,8 +7392,8 @@ intercardinals.`
 
                 // if you click anywhere on it, move to that location
                 if (mousePressedButNotHeldDown()) {
-                    if (inClickingRange(translateXYPositionToStandardFormat(yourPosition()), 125 * scalingFactor)) {
-                        let selectedPosition = translateXYPositionToBoardCenterFormat([mouseX, mouseY])
+                    if (inClickingRange(translateXYPositionToBoardCenterFormat(yourPosition()), 125 * scalingFactor)) {
+                        let selectedPosition = translateXYPositionToStandardFormat([mouseX, mouseY])
 
 
                         stage = 3.5
@@ -6046,7 +7547,7 @@ intercardinals.`
                             movePosition("H1", 100*scalingFactor, -60*scalingFactor)
                         }
                         // make sure to overwrite your default spot
-                        setPosition(role, ...translateXYPositionToBoardCenterFormat([mouseX, mouseY]))
+                        setPosition(role, ...translateXYPositionToStandardFormat([mouseX, mouseY]))
 
                         if (stage !== 100) stage = 3.5
                         return
@@ -6073,8 +7574,8 @@ function displayMechanicSelection() {
     fill(0, 0, 25)
     rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, cornerRounding)
-    rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
+    // rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+    //     selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
@@ -6088,8 +7589,8 @@ function displayMechanicSelection() {
     // then display the actual buttons
     rect(selectionX + textPadding + textWidth("M8S:"), selectionY + mechanicSelectionHeight - 65*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("M8S: Millennial Decay "), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding, cornerRounding)
-    rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
-        selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
+    // rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+    //     selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU:"), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
         selectionX + textPadding + textWidth("FRU: Utopian Sky "), selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding, cornerRounding)
     rect(selectionX + textPadding + textWidth("FRU: Utopian Sky  "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding,
@@ -6103,11 +7604,9 @@ function displayMechanicSelection() {
 
     // now display the mechanic text
     fill(0, 0, 100)
-    text("M8S: Millennial Decay \n" +
-        "M6S: Wingmark \n" +
-        "FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant \n" +
-        "\n" +
-        "Who knows, maybe there'll be other mechanics soon.",
+    text("M8S: Millennial Decay \n\n" +
+        // "M6S: Wingmark \n" +
+        "FRU: Utopian Sky   Diamond Dust   Mirror Mirror   Light Rampant \n",
         selectionX + textPadding, selectionY + textPadding)
 
     // now make the buttons clickable
@@ -6128,16 +7627,16 @@ function displayMechanicSelection() {
             }
         }
         // row -4
-        if (mouseY > selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding) {
-            if (mouseX > selectionX + textPadding + textWidth("M6S:") &&
-                mouseX < selectionX + textPadding + textWidth("M6S: Wingmark ")) {
-                rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
-                    selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding)
-                if (mousePressedButNotHeldDown()) {
-                    setupWingmark()
-                }
-            }
-        }
+        // if (mouseY > selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding) {
+        //     if (mouseX > selectionX + textPadding + textWidth("M6S:") &&
+        //         mouseX < selectionX + textPadding + textWidth("M6S: Wingmark ")) {
+        //         rect(selectionX + textPadding + textWidth("M6S:"), selectionY + mechanicSelectionHeight - 52*scalingFactor - textPadding,
+        //             selectionX + textPadding + textWidth("M6S: Wingmark "), selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding)
+        //         if (mousePressedButNotHeldDown()) {
+        //             setupWingmark()
+        //         }
+        //     }
+        // }
         // row -3
         if (mouseY > selectionY + mechanicSelectionHeight - 39*scalingFactor - textPadding && mouseY < selectionY + mechanicSelectionHeight - 26*scalingFactor - textPadding) {
             if (mouseX > selectionX + textPadding + textWidth("FRU:") &&
@@ -6422,14 +7921,6 @@ function displayDebugCorner() {
 
 //—————————————————————————————utility functions—————————————————————————————\\
 
-// wrap text around after a certain length. can add newlines, but always
-// keeps existing ones
-function wrapText(textToWrap, maxWidth) {
-    let currentText = ""
-    let currentLine = ""
-    let lines = split(split(textToWrap, " "), "\n")
-}
-
 function updateWins(winsPerCoinIncrease) {
     localStorage.setItem(currentlySelectedMechanic + " streak", parseInt(localStorage.getItem(currentlySelectedMechanic + " streak")) + 1)
     localStorage.setItem(currentlySelectedMechanic + " wins", parseInt(localStorage.getItem(currentlySelectedMechanic + " wins")) + 1)
@@ -6482,7 +7973,8 @@ function inClickingRange(position, range) {
         (mouseY - position[1])**2) < range)
 }
 
-// in range of clicking multiple things (circle radius)
+// in range of clicking multiple things (circle radius), returns the position
+// still counts as true in boolean functions
 function inClickingRanges(positions, range) {
     for (let position of positions) {
         if (inClickingRange(position, range)) return position
@@ -6497,13 +7989,13 @@ function translateToCenterOfBoard() {
 
 // translates a position from 0,0 = center of board format to 0,0 = top-left
 // of screen format
-function translateXYPositionToBoardCenterFormat(position) {
+function translateXYPositionToStandardFormat(position) {
     return [position[0] - centerOfBoard[0], position[1] - centerOfBoard[1]]
 }
 
 // translates a position from 0,0 = top-left of screen format to 0,0 =
 // center of board format
-function translateXYPositionToStandardFormat(position) {
+function translateXYPositionToBoardCenterFormat(position) {
     return [position[0] + centerOfBoard[0], position[1] + centerOfBoard[1]]
 }
 
@@ -6629,9 +8121,11 @@ function displayPuddle(puddleInfo) {
     let puddleY = puddleInfo[1]
     let millisSinceAppeared = millis() - puddleInfo[2]
     let radius = puddleInfo[3]
+    let color = [0, 0, 80, 50]
+    if (puddleInfo.length === 5) color = puddleInfo[4]
 
-    fill(0, 0, 80, 50)
-    circle(puddleX, puddleY, map(millisSinceAppeared, 0, 500, 0, radius, true))
+    fill(...color)
+    circle(puddleX, puddleY, map(millisSinceAppeared, 0, 250, 0, radius, true))
     pop()
 }
 
@@ -6718,10 +8212,11 @@ function displaySpreadMarker(x, y, d, h, s, b) {
     strokeWeight(1.5*scalingFactor)
     circle(x, y, d)
 
-    if (frameCount*1.5 % d < 2*d/3) {
+    let millisPerIteration = 1500
+    if (millis() % millisPerIteration < millisPerIteration*3/4) {
         stroke(h, s, b, 30)
         strokeWeight(3 * scalingFactor)
-        circle(x, y, (frameCount*1.5 % d)*3/2)
+        circle(x, y, (millis()%millisPerIteration)*d*4/3/millisPerIteration)
     }
 }
 
@@ -6969,6 +8464,10 @@ function yourPosition() {
     return currentPosition(role)
 }
 
+function yourRealPosition() {
+    return currentRealPosition(role)
+}
+
 function currentPosition(role) {
     switch (role) {
         case "MT":
@@ -6987,6 +8486,27 @@ function currentPosition(role) {
             return H1
         case "H2":
             return H2
+    }
+}
+
+function currentRealPosition(role) {
+    switch (role) {
+        case "MT":
+            return [realMT.x, realMT.y]
+        case "OT":
+            return [realOT.x, realOT.y]
+        case "M1":
+            return [realM1.x, realM1.y]
+        case "M2":
+            return [realM2.x, realM2.y]
+        case "R1":
+            return [realR1.x, realR1.y]
+        case "R2":
+            return [realR2.x, realR2.y]
+        case "H1":
+            return [realH1.x, realH1.y]
+        case "H2":
+            return [realH2.x, realH2.y]
     }
 }
 
@@ -7398,6 +8918,7 @@ ${updates}
 </pre>`)
 }
 
+// warning: mechanic abandoned! there is no button for this.
 function setupWingmark() {
     erase()
     rect(0, 0, width, height)
@@ -7495,17 +9016,114 @@ function setupLightRampant() {
 
     fruP2Image = loadImage('data/FRU P2/Floor.webp')
 
-    let puddles = [random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"]), random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"])]
-    while (puddles[1] === puddles[0]) {
-        print(puddles[0])
-        puddles[1] = random(["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"])
-    }
-    print(puddles)
+    puddles = []
 
-    MT = [cos(-PI/2 - PI/3)*70*scalingFactor, sin(-PI/2 - PI/3)*70*scalingFactor]
-    OT = [cos(-PI/2 - PI/9)*70*scalingFactor, sin(-PI/2 - PI/9)*70*scalingFactor]
-    H1 = [cos(-PI/2 + PI/9)*70*scalingFactor, sin(-PI/2 + PI/9)*70*scalingFactor]
-    H2 = [cos(-PI/2 + PI/3)*70*scalingFactor, sin(-PI/2 + PI/3)*70*scalingFactor]
+    // find the puddled players
+    // select two random numbers, which will correspond to players later. if
+    // they're the same, reroll the second one until they're different. make
+    // sure the first one is less than the second one, otherwise swap them.
+    // there is a priority for which player goes west or east. the eastern
+    // player has priority going east over the western player. if there's a
+    // tie, the northern player, the support, has priority.
+    let puddleNumbers = [floor(random(0, 8)), floor(random(0, 8))]
+    while (puddleNumbers[1] === puddleNumbers[0]) {
+        puddleNumbers[1] = floor(random(0, 8))
+    } if (puddleNumbers[1] < puddleNumbers[0]) puddleNumbers = [puddleNumbers[1], puddleNumbers[0]]
+    let puddlePlayers = [["R1", "H1", "R2", "H2", "M1", "MT", "M2", "OT"][puddleNumbers[0]],
+                         ["R1", "H1", "R2", "H2", "M1", "MT", "M2", "OT"][puddleNumbers[1]]]
+    westPuddlePlayer = puddlePlayers[0]
+    eastPuddlePlayer = puddlePlayers[1]
+
+    northSouthOrbSpawn = random(["N", "S"])
+
+    // for the tethers, find the 2-4 remaining supports and the 2-4
+    // remaining dps.
+    let remainingSupports = []
+    if (!(puddleNumbers.includes(1))) remainingSupports.push("H1")
+    if (!(puddleNumbers.includes(3))) remainingSupports.push("H2")
+    if (!(puddleNumbers.includes(5))) remainingSupports.push("MT")
+    if (!(puddleNumbers.includes(7))) remainingSupports.push("OT")
+
+    let remainingDPS = []
+    if (!(puddleNumbers.includes(0))) remainingDPS.push("R1")
+    if (!(puddleNumbers.includes(2))) remainingDPS.push("R2")
+    if (!(puddleNumbers.includes(4))) remainingDPS.push("M1")
+    if (!(puddleNumbers.includes(6))) remainingDPS.push("M2")
+
+    switch (remainingSupports.length) {
+        case 2:
+            lightRampantTetherOne = remainingSupports[0]
+            lightRampantTetherTwo = remainingSupports[1]
+            lightRampantTetherThree = remainingDPS[3]
+            lightRampantTetherFour = remainingDPS[2]
+            lightRampantTetherFive = remainingDPS[1]
+            lightRampantTetherSix = remainingDPS[0]
+            break
+        case 3:
+            lightRampantTetherOne = remainingSupports[1]
+            lightRampantTetherTwo = remainingSupports[2]
+            lightRampantTetherThree = remainingDPS[2]
+            lightRampantTetherFour = remainingDPS[1]
+            lightRampantTetherFive = remainingDPS[0]
+            lightRampantTetherSix = remainingSupports[0]
+            break
+        case 4:
+            lightRampantTetherOne = remainingSupports[1]
+            lightRampantTetherTwo = remainingSupports[2]
+            lightRampantTetherThree = remainingSupports[3]
+            lightRampantTetherFour = remainingDPS[1]
+            lightRampantTetherFive = remainingDPS[0]
+            lightRampantTetherSix = remainingSupports[0]
+            break
+    }
+
+    print(westPuddlePlayer,
+          eastPuddlePlayer,
+          lightRampantTetherOne,
+          lightRampantTetherTwo,
+          lightRampantTetherThree,
+          lightRampantTetherFour,
+          lightRampantTetherFive,
+          lightRampantTetherSix)
+
+    lightsteeped = {
+        "MT": 0,
+        "OT": 0,
+        "H1": 0,
+        "H2": 0,
+        "M1": 0,
+        "M2": 0,
+        "R1": 0,
+        "R2": 0,
+    }
+
+    lightsteeped[westPuddlePlayer] = 2
+    lightsteeped[eastPuddlePlayer] = 2
+
+    let oneStackTethers = [random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix]), random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix])]
+    while (oneStackTethers[1] === oneStackTethers[0]) oneStackTethers[1] = random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix])
+    lightsteeped[oneStackTethers[0]] = 1
+    lightsteeped[oneStackTethers[1]] = 1
+
+    MT = [cos(-PI/2 + PI/9)*70*scalingFactor, sin(-PI/2 + PI/9)*70*scalingFactor]
+    OT = [cos(-PI/2 + PI/3)*70*scalingFactor, sin(-PI/2 + PI/3)*70*scalingFactor]
+    H1 = [cos(-PI/2 - PI/3)*70*scalingFactor, sin(-PI/2 - PI/3)*70*scalingFactor]
+    H2 = [cos(-PI/2 - PI/9)*70*scalingFactor, sin(-PI/2 - PI/9)*70*scalingFactor]
     M1 = [cos(PI/2 - PI/9)*70*scalingFactor, sin(PI/2 - PI/9)*70*scalingFactor]
     M2 = [cos(PI/2 - PI/3)*70*scalingFactor, sin(PI/2 - PI/3)*70*scalingFactor]
     R1 = [cos(PI/2 + PI/3)*70*scalingFactor, sin(PI/2 + PI/3)*70*scalingFactor]
@@ -7515,7 +9133,7 @@ function setupLightRampant() {
     currentlySelectedMechanic = "Light Rampant"
     currentlySelectedBackground = "FRU P2"
 
-    numWinsPerCoinIncrease = 3
+    numWinsPerCoinIncrease = -1
 
     let css = select("html")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
@@ -7523,8 +9141,9 @@ function setupLightRampant() {
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
 
     textAtTop = "I couldn't find a top-down simulator for Light Rampant, so" +
-        " I implemented one here. Click on the dot in the center to" +
-        " continue."
+        " I implemented one here for my static to understand the mechanic" +
+        " better before using a 3D simulator. Click on the dot in the center" +
+        " when you're ready for tethers to appear."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
 
