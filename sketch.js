@@ -660,14 +660,18 @@ function displayLossContent() {
     // *brags about how he's had situations like these many times in the
     // past*
 
+    push()
+    textSize(7*scalingFactor*fontScalingFactor)
+
     fill(0, 0, 100)
     noStroke()
     textAlign(CENTER, CENTER)
-    textSize(12*scalingFactor*fontScalingFactor)
+    textSize(11*scalingFactor*fontScalingFactor)
     text("WIPES", redSquareX + topSquareSize/2, redSquareY + topSquareSize/5)
     textSize(7*scalingFactor*fontScalingFactor)
-    text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\nCOINS: " + coins, redSquareX +
+    text(wipes/* + "\nSTREAK\nCOINS: " + coins*/ + "\n", redSquareX +
         topSquareSize/2, redSquareY + 7*topSquareSize/12)
+    pop()
 
 }
 
@@ -6148,10 +6152,10 @@ intercardinals.`
                     stage = 4
                     puddles = []
                     textAtTop = "Check your Lightsteeped debuff, then go" +
-                        " into the center or slightly out of the tower. Your " +
-                        " Lightsteeped debuff is displayed on the right of" +
-                        " the arena—the entire party's is displayed to the" +
-                        " right of this. "
+                        " into the center or slightly out of the tower. Your" +
+                        " number of Lightsteeped stacks is displayed on the" +
+                        " right of the arena—the entire party's is displayed" +
+                        " to the right of this. "
                 }
             } if (stage === 4) {
                 // no tethers anymore!
@@ -6179,14 +6183,102 @@ intercardinals.`
                 point(dotXY, -dotXY)
                 point(-dotXY, dotXY)
 
+                // display your debuff
+                stroke(0, 0, 0)
+                strokeWeight(7)
+                fill(60, 20, 100)
+                beginShape()
+                vertex(80*scalingFactor, 50*scalingFactor)
+                vertex(80*scalingFactor, -20*scalingFactor)
+                vertex(130*scalingFactor, -20*scalingFactor)
+                vertex(130*scalingFactor, 50*scalingFactor)
+                vertex(105*scalingFactor, 75*scalingFactor)
+                endShape(CLOSE)
+
+                // text: number of stacks you have
+                fill(100)
+                // noStroke()
+                textSize(50*scalingFactor)
+                textAlign(CENTER, CENTER)
+                text(lightsteeped[role], 105*scalingFactor, 10*scalingFactor)
+
                 displayCharacterPositions()
+
+                fill(120, 100, 100)
+                textSize(40*scalingFactor)
+                stroke(0)
+                strokeWeight(scalingFactor)
+                text("Work in progress\nplease restart", 0, 0)
                 pop()
+
+                // two green dots: center + slightly outside tower.
+                let centerGreenDot = [0, 0]
+
+                let outsideGreenDotRadius = 50*scalingFactor
+                let outsideGreenDot = [
+                    cos(atan2(yourPosition()[1], yourPosition()[0]))*outsideGreenDotRadius,
+                    sin(atan2(yourPosition()[1], yourPosition()[0]))*outsideGreenDotRadius
+                ]
+
+                displayGreenDot(...centerGreenDot)
+                displayGreenDot(...outsideGreenDot)
+
+                // add the positions that can be used for checking whether
+                // you clicked on the dot
+                let centerGreenDotStandardFormat = centerOfBoard
+                let outsideGreenDotStandardFormat = translateXYPositionToBoardCenterFormat(outsideGreenDot)
+
+                if (inClickingRanges([centerGreenDotStandardFormat,
+                    outsideGreenDotStandardFormat], 10*scalingFactor) && !mousePressedButNotHeldDown()) {
+                    MT = lightsteeped["MT"] === 3 ? [
+                        cos(atan2(MT[1], MT[0]))*outsideGreenDotRadius,
+                        sin(atan2(MT[1], MT[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    OT = lightsteeped["OT"] === 3 ? [
+                        cos(atan2(OT[1], OT[0]))*outsideGreenDotRadius,
+                        sin(atan2(OT[1], OT[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    H1 = lightsteeped["H1"] === 3 ? [
+                        cos(atan2(H1[1], H1[0]))*outsideGreenDotRadius,
+                        sin(atan2(H1[1], H1[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    H2 = lightsteeped["H2"] === 3 ? [
+                        cos(atan2(H2[1], H2[0]))*outsideGreenDotRadius,
+                        sin(atan2(H2[1], H2[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    M1 = lightsteeped["M1"] === 3 ? [
+                        cos(atan2(M1[1], M1[0]))*outsideGreenDotRadius,
+                        sin(atan2(M1[1], M1[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    M2 = lightsteeped["M2"] === 3 ? [
+                        cos(atan2(M2[1], M2[0]))*outsideGreenDotRadius,
+                        sin(atan2(M2[1], M2[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    R1 = lightsteeped["R1"] === 3 ? [
+                        cos(atan2(R1[1], R1[0]))*outsideGreenDotRadius,
+                        sin(atan2(R1[1], R1[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+                    R2 = lightsteeped["R2"] === 3 ? [
+                        cos(atan2(R2[1], R2[0]))*outsideGreenDotRadius,
+                        sin(atan2(R2[1], R2[0]))*outsideGreenDotRadius
+                    ] : [0, 0]
+
+                    movePosition("MT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("OT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("H1", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("H2", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("M1", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("M2", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("R1", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                    movePosition("R2", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                }
             }
+
             for (let puddle of puddles) {
                 noStroke()
                 displayPuddle(puddle)
             }
-            if (stage > 3 && stage < 4) frameRate(100)
+            if (stage > 3.25 && stage < 4) frameRate(100)
         }
     }
     // M6S start & adds background
@@ -8344,7 +8436,7 @@ function displayGreenDot(x, y) {
         (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < 10*scalingFactor) {
         stroke(120, 100, 80)
     }
-    noFill()
+    fill(120, 100, 100, 0)
     strokeWeight(scalingFactor)
     circle(x, y, 15*scalingFactor)
     pop()
@@ -8361,7 +8453,7 @@ function displaySmallGreenDot(x, y) {
         (mouseY - y - (mainBodyY + mainBodyHeight/2))**2) < 5*scalingFactor) {
         stroke(120, 100, 80)
     }
-    noFill()
+    fill(120, 100, 100, 0)
     strokeWeight(scalingFactor)
     circle(x, y, 10*scalingFactor)
     pop()
@@ -8609,13 +8701,16 @@ numpad 1 → freeze sketch
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Utopian Sky.
-Click on any green dot to move to that location. Clicking on the green
- dot in the center at the start will automatically move you to your clock spot.
-There isn't a timing feature on this mechanic——yet, that is. There will be soon.
-You cannot track wins and losses yet. Once there is a system, wins and losses 
- from separate mechanics will be saved to local storage but counted separately.
+Click on any green dot to move to that location.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
@@ -8723,13 +8818,16 @@ This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzX
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
-Click on any green dot to move to that location. Clicking on the green
- dot in the center at the start will automatically move you to your clock spot.
-There isn't a timing feature on this mechanic——yet, that is. There will be soon.
-You cannot track wins and losses yet. Once there is a system, wins and losses 
- from separate mechanics will be saved to local storage but counted separately.
+Click on any green dot to move to—or near—that location. 
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
@@ -8822,12 +8920,16 @@ This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzX
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
-There isn't a timing feature on this mechanic——yet, that is. There will be soon.
-You cannot track wins and losses yet. Once there is a system, wins and losses 
- from separate mechanics will be saved to local storage but counted separately.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
@@ -8909,9 +9011,16 @@ This mechanic uses Murderless Fering Decay from Hector and <b>will</b> fail you 
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
@@ -8996,9 +9105,16 @@ This mechanic uses Murderless Fering Decay from Hector and <b>will</b> fail you 
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
@@ -9097,28 +9213,71 @@ function setupLightRampant() {
         "R2": 0,
     }
 
-    lightsteeped[westPuddlePlayer] = 2
-    lightsteeped[eastPuddlePlayer] = 2
+    lightsteeped[westPuddlePlayer] = 1
+    lightsteeped[eastPuddlePlayer] = 1
 
     let oneStackTethers = [random([lightRampantTetherOne,
         lightRampantTetherTwo,
         lightRampantTetherThree,
         lightRampantTetherFour,
         lightRampantTetherFive,
-        lightRampantTetherSix]), random([lightRampantTetherOne,
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer]), random([lightRampantTetherOne,
         lightRampantTetherTwo,
         lightRampantTetherThree,
         lightRampantTetherFour,
         lightRampantTetherFive,
-        lightRampantTetherSix])]
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer])]
     while (oneStackTethers[1] === oneStackTethers[0]) oneStackTethers[1] = random([lightRampantTetherOne,
         lightRampantTetherTwo,
         lightRampantTetherThree,
         lightRampantTetherFour,
         lightRampantTetherFive,
-        lightRampantTetherSix])
-    lightsteeped[oneStackTethers[0]] = 1
-    lightsteeped[oneStackTethers[1]] = 1
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer])
+
+    oneStackTethers.push(random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer]))
+    while ([oneStackTethers[0], oneStackTethers[1]].includes(oneStackTethers[2])) oneStackTethers[2] = random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer])
+
+    oneStackTethers.push(random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer]))
+    while ([oneStackTethers[0], oneStackTethers[1], oneStackTethers[2]].includes(oneStackTethers[3])) oneStackTethers[3] = random([lightRampantTetherOne,
+        lightRampantTetherTwo,
+        lightRampantTetherThree,
+        lightRampantTetherFour,
+        lightRampantTetherFive,
+        lightRampantTetherSix,
+        eastPuddlePlayer,
+        westPuddlePlayer])
+
+    lightsteeped[oneStackTethers[0]] += 1
+    lightsteeped[oneStackTethers[1]] += 1
+    lightsteeped[oneStackTethers[2]] += 1
+    lightsteeped[oneStackTethers[3]] += 1
 
     MT = [cos(-PI/2 + PI/9)*70*scalingFactor, sin(-PI/2 + PI/9)*70*scalingFactor]
     OT = [cos(-PI/2 + PI/3)*70*scalingFactor, sin(-PI/2 + PI/3)*70*scalingFactor]
@@ -9156,12 +9315,16 @@ So it's 4/4 light rampant.
 Click on one of the buttons at the top to do what it says.
     Purge Data will purge the win/loss data for this mechanic and only the currently
      selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
 Click on any green dot to move to—or near—that location.
-There isn't a timing feature on this mechanic——yet, that is. There will be soon.
-You cannot track wins and losses yet. Once there is a system, wins and losses 
- from separate mechanics will be saved to local storage but counted separately.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
 This is a quiz, so make sure you've studied.
 
 ${updates}
