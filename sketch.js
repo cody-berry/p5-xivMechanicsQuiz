@@ -3006,9 +3006,11 @@ intercardinals.`
                     ((abs(realR1.x - R1[0]) < scalingFactor*2) && (abs(realR1.y - R1[1]) < scalingFactor*2)) &&
                     ((abs(realR2.x - R2[0]) < scalingFactor*2) && (abs(realR2.y - R2[1]) < scalingFactor*2))) {
                     stage = 4
-                    textAtTop = "The knockback has resolved. Where do " +
-                        "you rotate to? \nSelect the spot you will end up at" +
-                        " the END, not which way you're rotating."
+                    textAtTop = "The knockback has resolved. Where do" +
+                        " you rotate to? \nIMPORTANT — Select the spot" +
+                        " you will end up at the END, not which way you're" +
+                        " rotating. If it's a cursed pattern, please select" +
+                        " the dot counterclockwise of Shiva to rotate there."
 
                     // display expanded star AoEs
                     if (inOrOut === "in") {
@@ -3152,6 +3154,17 @@ intercardinals.`
                                 " you can."
                             textAtBottom = "You rotated 90º clockwise. \n" +
                                 "[FAIL] — Shiva is not counterclockwise of you."
+
+                            // if it's a cursed pattern, tell the user that
+                            // you should have rotated to almost behind Shiva
+                            if ((angleDiffFromShiva > -22.5 && angleDiffFromShiva < 22.5) ||
+                                angleDiffFromShiva < -157.5 || angleDiffFromShiva > 157.5) {
+                                textAtBottom = "You rotated 90º clockwise. \n" +
+                                    "[FAIL] — It's a cursed pattern. You are" +
+                                    " supposed to select the dot that's much" +
+                                    " closer to Shiva (the one just" +
+                                    " counterclockwise of the other group)."
+                            }
                         }
                     } if (inClickingRange([positions[1][0], positions[1][1]], 15*scalingFactor)) {
                         if ((angleDiffFromShiva > -22.5 && angleDiffFromShiva < 22.5) ||
@@ -3279,19 +3292,6 @@ intercardinals.`
                 // image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
                 //     mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
 
-                // attempt at shine
-                // fill(0, 0, 100, 20)
-                // noStroke()
-                // beginShape()
-                // let topLeft = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100) - 100*scalingFactor, 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
-                // let bottomRight = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100), 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
-                //
-                // vertex(topLeft + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
-                // vertex(centerOfBoard[0] - mainBodyWidth/2, topLeft + centerOfBoard[1] - mainBodyWidth/2)
-                // vertex(centerOfBoard[0] - mainBodyWidth/2, bottomRight + centerOfBoard[1] - mainBodyWidth/2)
-                // vertex(bottomRight + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
-                // endShape(CLOSE)
-
                 // also display Shiva at one of the positions
                 displayShiva([cos(radians(spawnAngle))*mainBodyWidth/4, sin(radians(spawnAngle))*mainBodyWidth/4],
                     "clone", "", 15*scalingFactor)
@@ -3334,17 +3334,17 @@ intercardinals.`
                     let H2Angle = atan2(H2[1], H2[0])
                     if (abs(H1Angle - H2Angle) % 360 > radians(90) &&
                         abs(H1Angle - H2Angle) % 360 < radians(270)) {
-                        let distanceToSlide = mainBodyWidth*23/32
+                        let distanceToSlide = mainBodyWidth*3/4
                         if (abs((H1Angle - radians(spawnAngle) + radians(540)) % radians(360) - radians(180)) < abs((H2Angle - radians(spawnAngle) + radians(540)) % radians(360) - radians(180))) {
-                            H1 = [H1[0] + -cos(-radians(spawnAngle))*distanceToSlide, H1[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            R1 = [R1[0] + -cos(-radians(spawnAngle))*distanceToSlide, R1[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            M1 = [M1[0] + -cos(-radians(spawnAngle))*distanceToSlide, M1[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            MT = [MT[0] + -cos(-radians(spawnAngle))*distanceToSlide, MT[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            H1 = [H1[0] + -cos(-atan2(H1[1], H1[0]))*distanceToSlide, H1[1] + -sin(atan2(H1[1], H1[0]))*distanceToSlide]
+                            R1 = [R1[0] + -cos(-atan2(R1[1], R1[0]))*distanceToSlide, R1[1] + -sin(atan2(R1[1], R1[0]))*distanceToSlide]
+                            M1 = [M1[0] + -cos(-atan2(M1[1], M1[0]))*distanceToSlide, M1[1] + -sin(atan2(M1[1], M1[0]))*distanceToSlide]
+                            MT = [MT[0] + -cos(-atan2(MT[1], MT[0]))*distanceToSlide, MT[1] + -sin(atan2(MT[1], MT[0]))*distanceToSlide]
                         } else {
-                            H2 = [H2[0] + -cos(-radians(spawnAngle))*distanceToSlide, H2[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            R2 = [R2[0] + -cos(-radians(spawnAngle))*distanceToSlide, R2[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            M2 = [M2[0] + -cos(-radians(spawnAngle))*distanceToSlide, M2[1] + sin(-radians(spawnAngle))*distanceToSlide]
-                            OT = [OT[0] + -cos(-radians(spawnAngle))*distanceToSlide, OT[1] + sin(-radians(spawnAngle))*distanceToSlide]
+                            H2 = [H2[0] + -cos(-atan2(H2[1], H2[0]))*distanceToSlide, H2[1] + -sin(atan2(H2[1], H2[0]))*distanceToSlide]
+                            R2 = [R2[0] + -cos(-atan2(R2[1], R2[0]))*distanceToSlide, R2[1] + -sin(atan2(R2[1], R2[0]))*distanceToSlide]
+                            M2 = [M2[0] + -cos(-atan2(M2[1], M2[0]))*distanceToSlide, M2[1] + -sin(atan2(M2[1], M2[0]))*distanceToSlide]
+                            OT = [OT[0] + -cos(-atan2(OT[1], OT[0]))*distanceToSlide, OT[1] + -sin(atan2(OT[1], OT[0]))*distanceToSlide]
                         }
                     }
 
@@ -3374,8 +3374,7 @@ intercardinals.`
                     textAtTop = "Look at the message box on Shiva's head to" +
                         " figure out where to go. You're on thin ice" +
                         " here—so be careful!"
-                    textAtBottom = "Everyone's finished sliding. Speaking of" +
-                        " which, have you ever tripped on ice before?"
+                    textAtBottom = "Everyone's finished sliding."
                     puddles = [puddles[2], puddles[3]]
                 }
             } if (stage === 5) {
@@ -3383,6 +3382,20 @@ intercardinals.`
                 tint(0, 0, 100, 10)
                 image(fruP2IceFloor, centerOfBoard[0] - mainBodyWidth/2 + 20*scalingFactor, centerOfBoard[1] - mainBodyWidth/2 + 20*scalingFactor,
                     mainBodyWidth - 40*scalingFactor, mainBodyWidth - 40*scalingFactor)
+
+
+                // // attempt at shine
+                // fill(0, 0, 100, 20)
+                // noStroke()
+                // beginShape()
+                // let topLeft = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100) - 100*scalingFactor, 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
+                // let bottomRight = map((frameCount/scalingFactor*6) % (mainBodyWidth*2 + 100), 0, mainBodyWidth*2, 0, mainBodyWidth*2, true)
+                //
+                // vertex(topLeft + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(centerOfBoard[0] - mainBodyWidth/2, topLeft + centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(centerOfBoard[0] - mainBodyWidth/2, bottomRight + centerOfBoard[1] - mainBodyWidth/2)
+                // vertex(bottomRight + centerOfBoard[0] - mainBodyWidth/2, centerOfBoard[1] - mainBodyWidth/2)
+                // endShape(CLOSE)
 
                 // also display Shiva at one of the positions
                 // the possible things she can say are "Sink into silence!"
@@ -6229,7 +6242,7 @@ intercardinals.`
                 let outsideGreenDotStandardFormat = translateXYPositionToBoardCenterFormat(outsideGreenDot)
 
                 if (inClickingRanges([centerGreenDotStandardFormat,
-                    outsideGreenDotStandardFormat], 10*scalingFactor) && !mousePressedButNotHeldDown()) {
+                    outsideGreenDotStandardFormat], 10*scalingFactor) && mousePressedButNotHeldDown()) {
                     MT = lightsteeped["MT"] === 3 ? [
                         cos(atan2(MT[1], MT[0]))*outsideGreenDotRadius,
                         sin(atan2(MT[1], MT[0]))*outsideGreenDotRadius
@@ -6262,6 +6275,10 @@ intercardinals.`
                         cos(atan2(R2[1], R2[0]))*outsideGreenDotRadius,
                         sin(atan2(R2[1], R2[0]))*outsideGreenDotRadius
                     ] : [0, 0]
+
+                    let correctPosition = yourPosition()
+                    let clickedPosition = inClickingRanges([centerGreenDotStandardFormat,
+                        outsideGreenDotStandardFormat], 10*scalingFactor)
 
                     movePosition("MT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
                     movePosition("OT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
@@ -7990,7 +8007,7 @@ function displayBottomWindowContent() {
     rect(bottomWindowX, bottomWindowY, bottomWindowX + bottomWidth, bottomWindowY + bottomHeight, cornerRounding)
 
     fill(0, 0, 100)
-    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding, bottomWindowX + bottomWidth - textPadding)
+    text(textAtBottom, bottomWindowX + textPadding, bottomWindowY + textPadding, bottomWidth - textPadding*2)
 }
 
 function displayScalingAdjustContent() {
@@ -8998,6 +9015,10 @@ function setupDiamondDust() {
             fourthCircles = [[-sqrt(2)*radius, -sqrt(2)*radius], [sqrt(2)*radius, sqrt(2)*radius]]
         }
     }
+
+    // testing: ensure it's cursed pattern!
+    // let temp = random(firstCircles)
+    // spawnAngle = degrees(atan2(temp[1], temp[0]))
 
     let css = select("html")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
