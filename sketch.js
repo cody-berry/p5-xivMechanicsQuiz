@@ -10018,21 +10018,22 @@ function setupLightRampant() {
     R1 = [cos(PI/2 + PI/3)*70*scalingFactor, sin(PI/2 + PI/3)*70*scalingFactor]
     R2 = [cos(PI/2 + PI/9)*70*scalingFactor, sin(PI/2 + PI/9)*70*scalingFactor]
 
-    stage = 4
+    stage = 0
     currentlySelectedMechanic = "Light Rampant"
     currentlySelectedBackground = "FRU P2"
 
-    numWinsPerCoinIncrease = -1
+    numWinsPerCoinIncrease = 2
 
     let css = select("html")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
     css = select("body")
     css.style("background-image", "url(\"data/FRU P2/Floor.webp\")")
 
-    textAtTop = "I couldn't find a top-down simulator for Light Rampant, so" +
-        " I implemented one here for my static to understand the mechanic" +
-        " better before using a 3D simulator. Click on the dot in the center" +
-        " when you're ready for tethers to appear."
+    textAtTop = "This simulator is intended to help you understand Light" +
+        " Rampant via a top-down view before jumping into a 3d sim like" +
+        " xivsim.com/fru or the real mechanic. Click on the dot in the" +
+        " center when you're ready. \nTo the right of this is a list of" +
+        " debuffs. The # of stacks is in the middle."
     textAtBottom = "You went to your default starting spot for this" +
         " simulation. \n[PASS] — You got to this page."
 
