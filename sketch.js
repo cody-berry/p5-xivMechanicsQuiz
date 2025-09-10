@@ -340,6 +340,7 @@ let westPuddlePlayer
 let eastPuddlePlayer
 let northSouthOrbSpawn
 let lightsteeped
+let banishIIISpreadStack
 
 // Wingmark (M6S)
 let m6sP1Image
@@ -6160,7 +6161,6 @@ intercardinals.`
                 displayCharacterPositions()
                 pop()
                 // final puddles disappear!
-                print(puddles)
                 if (millis() - puddles[puddles.length-1][2] > 1000) {
                     stage = 4
                     puddles = []
@@ -6217,11 +6217,6 @@ intercardinals.`
 
                 displayCharacterPositions()
 
-                fill(120, 100, 100)
-                textSize(40*scalingFactor)
-                stroke(0)
-                strokeWeight(scalingFactor)
-                text("Work in progress\nplease restart", 0, 0)
                 pop()
 
                 // two green dots: center + slightly outside tower.
@@ -6276,9 +6271,45 @@ intercardinals.`
                         sin(atan2(R2[1], R2[0]))*outsideGreenDotRadius
                     ] : [0, 0]
 
-                    let correctPosition = yourPosition()
-                    let clickedPosition = inClickingRanges([centerGreenDotStandardFormat,
-                        outsideGreenDotStandardFormat], 10*scalingFactor)
+                    let correctPosition = int(yourPosition())
+                    let clickedPosition = int(translateXYPositionToStandardFormat(inClickingRanges([centerGreenDotStandardFormat,
+                        outsideGreenDotStandardFormat], 10*scalingFactor)))
+
+                    if (clickedPosition[0] !== correctPosition[0] || clickedPosition[1] !== correctPosition[1]) {
+                        stage = 100
+                        if (lightsteeped[role] === 3) {
+                            textAtTop = "People with 3 lightsteeped stacks" +
+                                " should stay out of the tower because they get" +
+                                " another stack at the end of the mechanic and" +
+                                " we don't want them to explode."
+                            textAtBottom = "You soaked the tower. \n[FAIL]" +
+                                " — You have 3 lightsteeped stacks."
+                        }
+                        if (lightsteeped[role] === 2) {
+                            textAtTop = "People with 2 lightsteeped stacks" +
+                                " should soak the tower because the" +
+                                " 3-lightsteeped players get another stack" +
+                                " at the end of the mechanic and we don't" +
+                                " want them to explode."
+                            textAtBottom = "You stayed out of the tower." +
+                                " \n[FAIL] — You have 2 lightsteeped stacks."
+                        }
+                        updateLosses(0)
+                    }
+                    else {
+                        stage = 4.25
+                        textAtTop = "Please wait for the tower to be soaked."
+                        if (lightsteeped[role] === 2) {
+                            textAtBottom = "You soaked the tower. \n[PASS]" +
+                                " — You have 2 lightsteeped stacks."
+                        }
+                        if (lightsteeped[role] === 3) {
+                            textAtBottom = "You stayed out of the tower." +
+                                " \n[PASS] — You have 3 lightsteeped stacks."
+                        }
+                    }
+
+                    setPosition(role, ...clickedPosition)
 
                     movePosition("MT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
                     movePosition("OT", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
@@ -6288,6 +6319,433 @@ intercardinals.`
                     movePosition("M2", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
                     movePosition("R1", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
                     movePosition("R2", random(-10*scalingFactor, 10*scalingFactor), random(-10*scalingFactor, 10*scalingFactor))
+                }
+            } if (stage === 4.25) {
+                // no tethers anymore!
+
+                // display 4-person tower in the center
+                // light blue color! basically the same as display in stages
+                // 1-2, but tower only in center and there are 4 dots in the
+                // center to represent a 4-person tower
+                stroke(200, 20, 100)
+                strokeWeight(5)
+                noFill()
+                push()
+                translateToCenterOfBoard()
+                circle(0, 0, 50*scalingFactor)
+
+                strokeWeight(15)
+
+                // the dots will be placed dotXY away from the center in
+                // both x and y. This is a customization variable designed
+                // so that it's easier to make these slightly further or
+                // closer during development :)
+                let dotXY = 8*scalingFactor
+                point(-dotXY, -dotXY)
+                point(dotXY, dotXY)
+                point(dotXY, -dotXY)
+                point(-dotXY, dotXY)
+
+                displayCharacterPositions()
+
+                pop()
+
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 4.75
+                    puddles.push([0, 0, millis(), 50*scalingFactor, [60, 10, 100, 50]])
+
+                    lightsteeped[lightRampantTetherOne] = 3
+                    lightsteeped[lightRampantTetherTwo] = 3
+                    lightsteeped[lightRampantTetherThree] = 3
+                    lightsteeped[lightRampantTetherFour] = 3
+                    lightsteeped[lightRampantTetherFive] = 3
+                    lightsteeped[lightRampantTetherSix] = 3
+                    lightsteeped[eastPuddlePlayer] = 3
+                    lightsteeped[westPuddlePlayer] = 3
+                }
+            } if (stage === 4.75) {
+                // no tethers anymore!
+
+                noFill()
+                push()
+                translateToCenterOfBoard()
+
+                displayCharacterPositions()
+                pop()
+
+                if (millis() - puddles[0][2] > 1000) {
+                    stage = 5
+
+                    // destroy the tower explosion puddle
+                    puddles = []
+                    textAtTop = "Resolve spread/stacks on Banish III. The" +
+                        " halo with orbs on it is in the center. \n" +
+                        " IMPORTANT — Stacks are resolved on the" +
+                        " intercardinals, as per all other sims. This means" +
+                        " DPS don't have to worry about stack/spread."
+                }
+            } if (stage === 5) {
+                // no tethers anymore!
+
+                // display Shiva + Banish III halo
+                noFill()
+                displayShiva([0, 0], "clone", null, 15*scalingFactor)
+
+                push()
+                translateToCenterOfBoard()
+                displayCharacterPositions()
+                noFill()
+                glowCircle(0, 0, 50, 5, 10*scalingFactor, 0, 0, 50*scalingFactor)
+                stroke(0, 0, 100)
+                circle(0, 0, 50*scalingFactor)
+
+                let rotation = millis()/1000
+                fill(0, 0, 100)
+                for (let i = 0; i < TWO_PI; i += PI/2) {
+                    let angle = i + rotation
+                    let x = cos(angle)*25*scalingFactor
+                    let y = sin(angle)*25*scalingFactor
+                    if (banishIIISpreadStack === "stack") {
+                        glowCircle(0, 0, 50, 5, 20*scalingFactor, x, y, 20*scalingFactor)
+                        break
+                    }
+                    glowCircle(0, 0, 50, 5, 10*scalingFactor, x, y, 15*scalingFactor)
+                }
+                pop()
+
+                let Bdot     = [cos(0)*70*scalingFactor, sin(0)*70*scalingFactor]
+                let Threedot = [cos(PI/4)*70*scalingFactor, sin(PI/4)*70*scalingFactor]
+                let Cdot     = [cos(PI/2)*70*scalingFactor, sin(PI/2)*70*scalingFactor]
+                let Fourdot  = [cos(3*PI/4)*70*scalingFactor, sin(3*PI/4)*70*scalingFactor]
+                let Ddot     = [cos(PI)*70*scalingFactor, sin(PI)*70*scalingFactor]
+                let Onedot   = [cos(5*PI/4)*70*scalingFactor, sin(5*PI/4)*70*scalingFactor]
+                let Adot     = [cos(3*PI/2)*70*scalingFactor, sin(3*PI/2)*70*scalingFactor]
+                let Twodot   = [cos(7*PI/4)*70*scalingFactor, sin(7*PI/4)*70*scalingFactor]
+
+                displayGreenDot(...Bdot)
+                displayGreenDot(...Threedot)
+                displayGreenDot(...Cdot)
+                displayGreenDot(...Fourdot)
+                displayGreenDot(...Ddot)
+                displayGreenDot(...Onedot)
+                displayGreenDot(...Adot)
+                displayGreenDot(...Twodot)
+
+                if (inBoardCenterFormatClickingRanges([Bdot, Threedot, Cdot, Fourdot, Ddot, Onedot, Adot, Twodot], 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    setPosition("M1", ...Fourdot)
+                    setPosition("M2", ...Threedot)
+                    setPosition("R2", ...Twodot)
+                    setPosition("R1", ...Onedot)
+
+                    if (banishIIISpreadStack === "stack") {
+                        setPosition("H1", ...Fourdot)
+                        setPosition("H2", ...Threedot)
+                        setPosition("OT", ...Twodot)
+                        setPosition("MT", ...Onedot)
+                    } else {
+                        setPosition("H1", ...Ddot)
+                        setPosition("H2", ...Cdot)
+                        setPosition("OT", ...Bdot)
+                        setPosition("MT", ...Adot)
+                    }
+
+                    let clickedPosition = inBoardCenterFormatClickingRanges([Bdot, Threedot, Cdot, Fourdot, Ddot, Onedot, Adot, Twodot], 10*scalingFactor)
+                    let correctPosition = yourPosition()
+
+                    if (banishIIISpreadStack === "stack") {
+                        setPosition("H1", Fourdot[0]*3/4, Fourdot[1]*3/4)
+                        setPosition("H2", Threedot[0]*3/4, Threedot[1]*3/4)
+                        setPosition("OT", Twodot[0]*3/4, Twodot[1]*3/4)
+                        setPosition("MT", Onedot[0]*3/4, Onedot[1]*3/4)
+                    }
+
+                    let clickedWaymark = "A"
+                    let clickedColor = "red"
+                    if (inBoardCenterFormatClickingRanges([Onedot], 10*scalingFactor)) {clickedWaymark = "1"; clickedColor = "red"}
+                    if (inBoardCenterFormatClickingRanges([Ddot], 10*scalingFactor)) {clickedWaymark = "D"; clickedColor = "purple"}
+                    if (inBoardCenterFormatClickingRanges([Fourdot], 10*scalingFactor)) {clickedWaymark = "4"; clickedColor = "purple"}
+                    if (inBoardCenterFormatClickingRanges([Cdot], 10*scalingFactor)) {clickedWaymark = "C"; clickedColor = "blue"}
+                    if (inBoardCenterFormatClickingRanges([Threedot], 10*scalingFactor)) {clickedWaymark = "3"; clickedColor = "blue"}
+                    if (inBoardCenterFormatClickingRanges([Bdot], 10*scalingFactor)) {clickedWaymark = "B"; clickedColor = "yellow"}
+                    if (inBoardCenterFormatClickingRanges([Twodot], 10*scalingFactor)) {clickedWaymark = "2"; clickedColor = "yellow"}
+
+                    if (int(clickedPosition[0] + 0.5) === int(correctPosition[0] + 0.5) &&
+                        int(clickedPosition[1] + 0.5) === int(correctPosition[1] + 0.5)) {
+                        stage = 5.25
+
+                        let yourColor = FRUColor(role)
+                        textAtTop = "Please wait for stacks and spreads to" +
+                            " resolve. You're almost there!"
+
+                        if (DPSOrSupports(role) === "DPS") {
+                            textAtBottom = "You went to the " + clickedWaymark +
+                                " waymark. \n[PASS] — Your waymark color is " +
+                                yourColor + ". \n[PASS] — You went to an" +
+                                " intercardinal, and you're a DPS."
+                        } else {
+                            if (banishIIISpreadStack === "stack") {
+                                textAtBottom = "You went to the " + clickedWaymark +
+                                    " waymark. \n[PASS] — Your waymark color is " +
+                                    yourColor + ". \n[PASS] — You went to an" +
+                                    " intercardinal, and it's pairs."
+                            } else {
+                                textAtBottom = "You went to the " + clickedWaymark +
+                                    " waymark. \n[PASS] — Your waymark color is " +
+                                    yourColor + ". \n[PASS] — You went to a" +
+                                    " cardinal, and it's spreads."
+                            }
+                        }
+                    } else {
+                        setPosition(role, clickedPosition[0]*5/4, clickedPosition[1]*5/4)
+                        stage = 100
+                        updateLosses(0)
+
+                        let yourColor = FRUColor(role)
+                        if (clickedColor !== yourColor) {
+                            textAtBottom = "You went to the " + clickedWaymark +
+                                " waymark. \n[FAIL] — Your waymark color is " +
+                                yourColor + ", but you clicked on a " +
+                                clickedColor + " waymark."
+                            textAtTop = "Your waymark color is " + yourColor
+                                + ", not " + clickedColor + "."
+                        } else {
+                            if (DPSOrSupports(role) === "DPS") {
+                                textAtBottom = "You went to the " + clickedWaymark +
+                                    " waymark. \n[PASS] — Your waymark color is " +
+                                    yourColor + ". \n[FAIL] — You went to a" +
+                                    " cardinal, but you're a DPS."
+                                textAtTop = "Since NAUR resolves pairs on" +
+                                    " intercardinals, DPS don't have to" +
+                                    " worry about stack or spread unless" +
+                                    " they're calling it out. "
+                            } else {
+                                if (banishIIISpreadStack === "stack") {
+                                    textAtBottom = "You went to the " + clickedWaymark +
+                                        " waymark. \n[PASS] — Your waymark color is " +
+                                        yourColor + ". \n[FAIL] — You went to a" +
+                                        " cardinal, but it's pairs."
+                                    textAtTop = "Pairs are resolved on" +
+                                        " intercardinals. 1 orb = pairs," +
+                                        " which is confusing because I would" +
+                                        " have thought that could at least" +
+                                        " mean 1 person per attack!"
+                                } else {
+                                    textAtBottom = "You went to the " + clickedWaymark +
+                                        " waymark. \n[PASS] — Your waymark color is " +
+                                        yourColor + ". \n[PASS] — You went" +
+                                        " to an" +
+                                        " intercardinal, but it's spreads."
+                                    textAtTop = "Support clock spot is" +
+                                        " cardinals. 4 orb = spreads, which" +
+                                        " is confusing because I would have" +
+                                        " thought that means 4 attacks," +
+                                        " which is what pairs is!"
+                                }
+                            }
+                        }
+                    }
+                }
+            } if (stage === 5.25) {
+                // display Shiva + Banish III halo
+                noFill()
+                displayShiva([0, 0], "clone", null, 15*scalingFactor)
+
+                push()
+                translateToCenterOfBoard()
+                displayCharacterPositions()
+                noFill()
+                glowCircle(0, 0, 50, 5, 10*scalingFactor, 0, 0, 50*scalingFactor)
+                stroke(0, 0, 100)
+                circle(0, 0, 50*scalingFactor)
+
+                let rotation = millis()/1000
+                fill(0, 0, 100)
+                for (let i = 0; i < TWO_PI; i += PI/2) {
+                    let angle = i + rotation
+                    let x = cos(angle)*25*scalingFactor
+                    let y = sin(angle)*25*scalingFactor
+                    if (banishIIISpreadStack === "stack") {
+                        glowCircle(0, 0, 50, 5, 20*scalingFactor, x, y, 20*scalingFactor)
+                        break
+                    }
+                    glowCircle(0, 0, 50, 5, 10*scalingFactor, x, y, 15*scalingFactor)
+                }
+                pop()
+
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 5.75
+
+                    // display AoEs on DPS always (stack AoEs will always go
+                    // on DPS in this sim)
+                    // display AoEs on supports only if it's spreads, we
+                    // don't want 8 stack AoEs. if it's stacks, we will want
+                    // to display another AoE on DPS so that it's more opaque
+                    if (banishIIISpreadStack === "spread") {
+                        puddles.push([...MT, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                        puddles.push([...OT, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                        puddles.push([...H1, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                        puddles.push([...H2, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                    } else {
+                        puddles.push([...M1, millis(), 50 * scalingFactor, [60, 10, 100, 50]])
+                        puddles.push([...M2, millis(), 50 * scalingFactor, [60, 10, 100, 50]])
+                        puddles.push([...R1, millis(), 50 * scalingFactor, [60, 10, 100, 50]])
+                        puddles.push([...R2, millis(), 50 * scalingFactor, [60, 10, 100, 50]])
+                    }
+                    puddles.push([...M1, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                    puddles.push([...M2, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                    puddles.push([...R1, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                    puddles.push([...R2, millis(), 50 * scalingFactor, [60, 0, 80, 20]])
+                }
+            } if (stage === 5.75) {
+                // display Shiva, no banish III halo or anything.
+                noFill()
+                displayShiva([0, 0], "clone", null, 15*scalingFactor)
+                if (millis() - puddles[0][2] > 1000) {
+                    stage = 6
+
+                    // destroy the Banish III AoEs
+                    puddles = []
+                    textAtTop = "Don't forget House of Light (proteans) at" +
+                        " the end! This is what gives everyone the last" +
+                        " Lightsteeped stack they can have. Banish III" +
+                        " doesn't give any stacks."
+                }
+            } if (stage === 6) {
+                // display Shiva, no banish III halo or anything.
+                noFill()
+                displayShiva([0, 0], "clone", null, 15*scalingFactor)
+
+
+                // display the same dots as Banish III
+                let radius = 55*scalingFactor
+                let Bdot     = [cos(0)*radius, sin(0)*radius]
+                let Threedot = [cos(PI/4)*radius, sin(PI/4)*radius]
+                let Cdot     = [cos(PI/2)*radius, sin(PI/2)*radius]
+                let Fourdot  = [cos(3*PI/4)*radius, sin(3*PI/4)*radius]
+                let Ddot     = [cos(PI)*radius, sin(PI)*radius]
+                let Onedot   = [cos(5*PI/4)*radius, sin(5*PI/4)*radius]
+                let Adot     = [cos(3*PI/2)*radius, sin(3*PI/2)*radius]
+                let Twodot   = [cos(7*PI/4)*radius, sin(7*PI/4)*radius]
+
+                displayGreenDot(...Bdot)
+                displayGreenDot(...Threedot)
+                displayGreenDot(...Cdot)
+                displayGreenDot(...Fourdot)
+                displayGreenDot(...Ddot)
+                displayGreenDot(...Onedot)
+                displayGreenDot(...Adot)
+                displayGreenDot(...Twodot)
+
+
+                if (inBoardCenterFormatClickingRanges([Bdot, Threedot, Cdot, Fourdot, Ddot, Onedot, Adot, Twodot], 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    setPosition("M1", ...Fourdot)
+                    setPosition("M2", ...Threedot)
+                    setPosition("R2", ...Twodot)
+                    setPosition("R1", ...Onedot)
+                    setPosition("H1", ...Ddot)
+                    setPosition("H2", ...Cdot)
+                    setPosition("OT", ...Bdot)
+                    setPosition("MT", ...Adot)
+
+                    let clickedPosition = inBoardCenterFormatClickingRanges([Bdot, Threedot, Cdot, Fourdot, Ddot, Onedot, Adot, Twodot], 10*scalingFactor)
+                    let correctPosition = yourPosition()
+                    let clickedWaymark = "A"
+                    let clickedColor = "red"
+                    let correctWaymark = FRUWaymark(role)
+                    if (inBoardCenterFormatClickingRanges([Onedot], 10*scalingFactor)) {clickedWaymark = "1"; clickedColor = "red"}
+                    if (inBoardCenterFormatClickingRanges([Ddot], 10*scalingFactor)) {clickedWaymark = "D"; clickedColor = "purple"}
+                    if (inBoardCenterFormatClickingRanges([Fourdot], 10*scalingFactor)) {clickedWaymark = "4"; clickedColor = "purple"}
+                    if (inBoardCenterFormatClickingRanges([Cdot], 10*scalingFactor)) {clickedWaymark = "C"; clickedColor = "blue"}
+                    if (inBoardCenterFormatClickingRanges([Threedot], 10*scalingFactor)) {clickedWaymark = "3"; clickedColor = "blue"}
+                    if (inBoardCenterFormatClickingRanges([Bdot], 10*scalingFactor)) {clickedWaymark = "B"; clickedColor = "yellow"}
+                    if (inBoardCenterFormatClickingRanges([Twodot], 10*scalingFactor)) {clickedWaymark = "2"; clickedColor = "yellow"}
+
+                    if (int(clickedPosition[0] + 0.5) === int(correctPosition[0] + 0.5) &&
+                        int(clickedPosition[1] + 0.5) === int(correctPosition[1] + 0.5)) {
+                        stage = 6.25
+                        textAtBottom = "You went to the " + clickedWaymark +
+                            " waymark. \n[PASS] — That's your clock spot."
+                        textAtTop = "You're almost done! 1-2 seconds left."
+                    } else {
+                        stage = 100
+                        updateLosses(0)
+                        textAtBottom = "You went to the " + clickedWaymark +
+                            " waymark. \n[FAIL] — Your clock spot is " +
+                            correctWaymark + ", but you clicked on the " +
+                            clickedWaymark + " waymark."
+                        textAtTop = "Your clock spot is " + correctWaymark
+                            + ", not " + clickedWaymark + "."
+                    }
+
+                    setPosition(role, ...clickedPosition)
+                }
+            } if (stage === 6.25) {
+                // once everyone's gotten close enough, advance to the next
+                // stage
+                if (((abs(realMT.x - MT[0]) < scalingFactor/2) && (abs(realMT.y - MT[1]) < scalingFactor/2)) &&
+                    ((abs(realOT.x - OT[0]) < scalingFactor/2) && (abs(realOT.y - OT[1]) < scalingFactor/2)) &&
+                    ((abs(realH1.x - H1[0]) < scalingFactor/2) && (abs(realH1.y - H1[1]) < scalingFactor/2)) &&
+                    ((abs(realH2.x - H2[0]) < scalingFactor/2) && (abs(realH2.y - H2[1]) < scalingFactor/2)) &&
+                    ((abs(realM1.x - M1[0]) < scalingFactor/2) && (abs(realM1.y - M1[1]) < scalingFactor/2)) &&
+                    ((abs(realM2.x - M2[0]) < scalingFactor/2) && (abs(realM2.y - M2[1]) < scalingFactor/2)) &&
+                    ((abs(realR1.x - R1[0]) < scalingFactor/2) && (abs(realR1.y - R1[1]) < scalingFactor/2)) &&
+                    ((abs(realR2.x - R2[0]) < scalingFactor/2) && (abs(realR2.y - R2[1]) < scalingFactor/2))) {
+                    stage = 6.75
+                    puddles.push([0, 0, millis(), 350*scalingFactor, [60, 10, 100, 50]])
+
+                    lightsteeped[lightRampantTetherOne] = 4
+                    lightsteeped[lightRampantTetherTwo] = 4
+                    lightsteeped[lightRampantTetherThree] = 4
+                    lightsteeped[lightRampantTetherFour] = 4
+                    lightsteeped[lightRampantTetherFive] = 4
+                    lightsteeped[lightRampantTetherSix] = 4
+                    lightsteeped[eastPuddlePlayer] = 4
+                    lightsteeped[westPuddlePlayer] = 4
+                }
+            } if (stage === 6.75) {
+                if (millis() - puddles[0][2] > 1000) {
+                    stage = 99
+                    updateWins(0)
+
+                    // destroy the protean puddle
+                    puddles = []
+                    textAtTop = "Yay you made it! Good luck on enrage!"
+                    textAtBottom = `[CLEARED, ${formatSeconds((millis() - mechanicStarted)/1000)}]`
+                } else {
+                    stroke(0, 0, 100)
+                    strokeWeight(5)
+                    noFill()
+                    let lineRadius = min(350*scalingFactor*(millis()-puddles[0][2])/500, 350*scalingFactor/2)
+                    push()
+                    translateToCenterOfBoard()
+                    line(0, 0, cos(0)*lineRadius, sin(0)*lineRadius)
+                    line(0, 0, cos(PI/4)*lineRadius, sin(PI/4)*lineRadius)
+                    line(0, 0, cos(PI/2)*lineRadius, sin(PI/2)*lineRadius)
+                    line(0, 0, cos(3*PI/4)*lineRadius, sin(3*PI/4)*lineRadius)
+                    line(0, 0, cos(PI)*lineRadius, sin(PI)*lineRadius)
+                    line(0, 0, cos(5*PI/4)*lineRadius, sin(5*PI/4)*lineRadius)
+                    line(0, 0, cos(3*PI/2)*lineRadius, sin(3*PI/2)*lineRadius)
+                    line(0, 0, cos(7*PI/4)*lineRadius, sin(7*PI/4)*lineRadius)
+                    circle(0, 0, lineRadius*2)
+                    pop()
                 }
             }
 
@@ -7196,8 +7654,6 @@ intercardinals.`
                         // convert it back to xy format
                         let modifiedPosition = translateRθPositionToXYFormat(modifiedPositionRθ)
 
-                        print(selectedPosition, selectedPositionRθ, modifiedPositionRθ, modifiedPosition)
-
                         // if the x is within 3*mainBodyWidth/26 of the
                         // center, then tell them
                         if (modifiedPosition[0] > -3*mainBodyWidth/26 && modifiedPosition[0] < 3*mainBodyWidth/26) {
@@ -7559,8 +8015,6 @@ intercardinals.`
                         // convert it back to xy format
                         let modifiedPosition = translateRθPositionToXYFormat(modifiedPositionRθ)
 
-                        print(selectedPosition, selectedPositionRθ, modifiedPositionRθ, modifiedPosition)
-
                         // if the x is within 3*mainBodyWidth/26 of the
                         // center, then tell them
                         if (modifiedPosition[0] > -3*mainBodyWidth/26 && modifiedPosition[0] < 3*mainBodyWidth/26) {
@@ -7833,7 +8287,7 @@ function displayMechanicSelection() {
     textSize(10*scalingFactor)
     // Utopian Sky
     push()
-    translate(0, scalingFactor)
+    translate(0, 3*scalingFactor)
     fill(60, sin(frameCount/100)*3, 30)
     rect(selectionX + textPadding + currentX, rowTop,
         selectionX + textPadding + currentX + textWidth(" Utopian Sky "), rowBottom, cornerRounding/2)
@@ -7861,7 +8315,7 @@ function displayMechanicSelection() {
 
     // Diamond Dust
     push()
-    translate(0, scalingFactor)
+    translate(0, 3*scalingFactor)
     fill(200, sin(frameCount/100)*3, 30)
     rect(selectionX + textPadding + currentX, rowTop,
         selectionX + textPadding + currentX + textWidth(" Diamond Dust "), rowBottom, cornerRounding/2)
@@ -7889,7 +8343,7 @@ function displayMechanicSelection() {
 
     // Mirror Mirror
     push()
-    translate(0, scalingFactor)
+    translate(0, 3*scalingFactor)
     fill(230, sin(frameCount/100)*3, 30)
     rect(selectionX + textPadding + currentX, rowTop,
         selectionX + textPadding + currentX + textWidth(" Mirror Mirror "), rowBottom, cornerRounding/2)
@@ -7917,7 +8371,7 @@ function displayMechanicSelection() {
 
     // Light Rampant
     push()
-    translate(0, scalingFactor)
+    translate(0, 3*scalingFactor)
     fill(70, sin(frameCount/100)*3, cos(frameCount/100)*3 + 32)
     rect(selectionX + textPadding + currentX, rowTop,
         selectionX + textPadding + currentX + textWidth(" Light Rampant "), rowBottom, cornerRounding/2)
@@ -7961,7 +8415,7 @@ function displayMechanicSelection() {
     textSize(10*scalingFactor)
     // Millenial Decay
     push()
-    translate(0, scalingFactor)
+    translate(0, 3*scalingFactor)
     fill(120, sin(frameCount/100)*3, 30)
     rect(selectionX + textPadding + currentX, rowTop,
         selectionX + textPadding + currentX + textWidth(" Millennial Decay "), rowBottom, cornerRounding/2)
@@ -8288,6 +8742,15 @@ function inClickingRange(position, range) {
 function inClickingRanges(positions, range) {
     for (let position of positions) {
         if (inClickingRange(position, range)) return position
+    }
+    return false
+}
+
+// inClickingRanges but everything is in 0,0 = center of board format. still
+// returns original position, not translated one
+function inBoardCenterFormatClickingRanges(positions, range) {
+    for (let position of positions) {
+        if (inClickingRange(translateXYPositionToBoardCenterFormat(position), range)) return position
     }
     return false
 }
@@ -8768,6 +9231,58 @@ function lightParty() {
     if (role === "MT" || role === "R1" || role === "H1" || role === "M1") {return 1}
     return 2
 } // 1/2
+
+// FRU color:
+// MT, R1 = red
+// OT, R2 = yellow
+// H2, M2 = blue
+// M1, H1 = purple
+//     OT
+//   R1  R2
+// MT      H2
+//   M1  M2
+//     H1
+function FRUColor(role) {
+    switch (role) {
+        case "MT":
+            return "red"
+        case "OT":
+            return "yellow"
+        case "M1":
+            return "purple"
+        case "M2":
+            return "blue"
+        case "R1":
+            return "red"
+        case "R2":
+            return "yellow"
+        case "H1":
+            return "purple"
+        case "H2":
+            return "blue"
+    }
+} // red/yellow/blue/purple (FRU)
+
+function FRUWaymark(role) {
+    switch (role) {
+        case "MT":
+            return "A"
+        case "OT":
+            return "B"
+        case "M1":
+            return "4"
+        case "M2":
+            return "3"
+        case "R1":
+            return "1"
+        case "R2":
+            return "2"
+        case "H1":
+            return "D"
+        case "H2":
+            return "C"
+    }
+} // any waymark (FRU)
 
 // because it's super annoying when you have to write a switch statement
 function yourPosition() {
@@ -9356,6 +9871,8 @@ function setupLightRampant() {
 
     puddles = []
 
+    banishIIISpreadStack = random(["spread", "stack"])
+
     // find the puddled players
     // select two random numbers, which will correspond to players later. if
     // they're the same, reroll the second one until they're different. make
@@ -9414,15 +9931,6 @@ function setupLightRampant() {
             lightRampantTetherSix = remainingSupports[0]
             break
     }
-
-    print(westPuddlePlayer,
-          eastPuddlePlayer,
-          lightRampantTetherOne,
-          lightRampantTetherTwo,
-          lightRampantTetherThree,
-          lightRampantTetherFour,
-          lightRampantTetherFive,
-          lightRampantTetherSix)
 
     lightsteeped = {
         "MT": 0,
@@ -9510,7 +10018,7 @@ function setupLightRampant() {
     R1 = [cos(PI/2 + PI/3)*70*scalingFactor, sin(PI/2 + PI/3)*70*scalingFactor]
     R2 = [cos(PI/2 + PI/9)*70*scalingFactor, sin(PI/2 + PI/9)*70*scalingFactor]
 
-    stage = 0
+    stage = 4
     currentlySelectedMechanic = "Light Rampant"
     currentlySelectedBackground = "FRU P2"
 
