@@ -342,6 +342,11 @@ let northSouthOrbSpawn
 let lightsteeped
 let banishIIISpreadStack
 
+// Ultimate Relativity (FRU P3/4)
+let fruP3Image
+let ultimateRelativityDebuffList
+
+
 // Wingmark (M6S)
 let m6sP1Image
 let m6sP1Bomb
@@ -406,7 +411,7 @@ function preload() {
 
 
 function setup() {
-    let bonusWidth = 200*scalingFactor
+    let bonusWidth = 400*scalingFactor
     cnv = createCanvas(topSquareSize*2 + holeSize*4 + topWidth + bonusWidth,
         topSquareSize + mechanicSelectionHeight + middleTopHeight + mainBodyHeight + bottomHeight + scalingAdjustHeight + holeSize*7)
     cnv.parent('#canvas')
@@ -554,7 +559,12 @@ function draw() {
     // rect(mainBodyX, mainBodyY, mainBodyX + mainBodyWidth, mainBodyY + mainBodyHeight, cornerRounding)
     displayMainBodyContent()
 
-    // the green square at the top-left TODO
+    // party list!!! this only gets displayed sometimes
+    fill(234, 34, 24)
+    noStroke()
+    displayPartyList()
+
+    // the green square at the top-left
     fill(120, 80, 50)
     noStroke()
     rect(greenSquareX, greenSquareY, greenSquareX + topSquareSize, greenSquareY + topSquareSize, cornerRounding)
@@ -566,13 +576,13 @@ function draw() {
     rect(topWindowX, topWindowY, topWindowX + topWidth, topWindowY + topSquareSize, cornerRounding)
     displayTopWindowContent()
 
-    // the red square at the top-right TODO
+    // the red square at the top-right
     fill(350, 80, 50)
     noStroke()
     rect(redSquareX, redSquareY, redSquareX + topSquareSize, redSquareY + topSquareSize, cornerRounding)
     displayLossContent()
 
-    // the mechanic section window
+    // the mechanic selection window
     fill(234, 34, 24)
     noStroke()
     rect(selectionX, selectionY, selectionX + selectionWidth, selectionY + mechanicSelectionHeight, cornerRounding)
@@ -6756,6 +6766,48 @@ intercardinals.`
             if (stage > 3.25 && stage < 4) frameRate(100)
         }
     }
+    // Futures Rewritten Ultimate phase 3/4 background
+    if (currentlySelectedBackground === "FRU P3/4") {
+        tint(0, 0, 100, 10)
+        let sizeIncrease = 17*scalingFactor // size is a bit wonky x.x
+        image(fruP3Image, -mainBodyWidth/2 - sizeIncrease/2, -mainBodyWidth/2 - sizeIncrease/2,
+            mainBodyWidth + sizeIncrease, mainBodyWidth + sizeIncrease)
+
+        // death wall
+        noStroke()
+        fill(240, 100, 50, 10)
+        beginShape()
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 500) {
+            vertex(cos(i) * mainBodyWidth / 2,
+                sin(i) * mainBodyWidth / 2)
+        }
+        beginContour()
+        for (let i = TWO_PI; i > 0; i -= TWO_PI / 500) {
+            vertex(cos(i) * (mainBodyWidth / 2 - 20*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 20*scalingFactor))
+        }
+        endContour()
+        endShape(CLOSE)
+
+
+        // notches
+        noStroke()
+        fill(0, 0, 100)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 72) {
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 3*scalingFactor)
+        }
+
+        // big notches on cardinals and intercardinals
+        fill(120, 100, 50)
+        for (let i = 0; i < TWO_PI; i += TWO_PI / 8) {
+            circle(cos(i) * (mainBodyWidth / 2 - 15*scalingFactor),
+                sin(i) * (mainBodyWidth / 2 - 15*scalingFactor), 7*scalingFactor)
+        }
+
+        displayCharacterPositions()
+        pop()
+    }
     // M6S start & adds background
     if (currentlySelectedBackground === "M6S Start & Adds") {
         angleMode(DEGREES)
@@ -8124,6 +8176,78 @@ intercardinals.`
     }
 }
 
+function displayPartyList() {
+    // party list is automatically placed to the right of main body window.
+    let partyListX = mainBodyX + mainBodyWidth + holeSize
+    let partyListWidth = 150*scalingFactor
+    let partyListHeight = 200*scalingFactor
+    let partyListY = mainBodyY + mainBodyWidth/2 - partyListHeight/2
+
+    if (currentlySelectedMechanic === "Ultimate Relativity") {
+        rect(partyListX, partyListY, partyListX + partyListWidth,
+            partyListY + partyListHeight, cornerRounding)
+        fill(0, 0, 100)
+        textAlign(LEFT, TOP)
+        textSize(30*fontScalingFactor*scalingFactor)
+        text("Party List", partyListX + textPadding, partyListY)
+
+        for (let i = 0; i < 8; i++) {
+            let y = partyListY + 35*scalingFactor + i*20*scalingFactor
+
+            let playerName = ""
+            if (i === 0) {
+                playerName = "MT"
+                fill(220, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 1) {
+                playerName = "OT"
+                fill(220, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 2) {
+                playerName = "H1"
+                fill(120, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 3) {
+                playerName = "H2"
+                fill(120, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 4) {
+                playerName = "M1"
+                fill(0, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 5) {
+                playerName = "M2"
+                fill(0, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 6) {
+                playerName = "R1"
+                fill(0, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            } if (i === 7) {
+                playerName = "R2"
+                fill(0, 70, 80)
+                noStroke()
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            }
+            textAlign(CENTER, CENTER)
+            fill(0, 0, 100)
+            textSize(7.5*fontScalingFactor*scalingFactor)
+            stroke(0, 0, 100)
+            strokeWeight(0.25)
+            text(playerName, partyListX + textPadding + 10*scalingFactor, y + 9*scalingFactor)
+
+            let currentX = partyListX + textPadding + 20*scalingFactor
+        }
+    }
+}
+
 // this version of displayMechanicSelection got a little bad when I added
 // buttons
 
@@ -8262,7 +8386,7 @@ function displayMechanicSelection() {
     let rowTop = mechanicSelectionHeight + selectionY - textPadding - 18*scalingFactor
 
     // variable used to track how far we are in to the mechanics window
-    let currentX
+    let currentX = 0
 
     push()
     // row 1
@@ -8270,7 +8394,37 @@ function displayMechanicSelection() {
     fill(0, 0, 100)
     textSize(12*scalingFactor)
     textAlign(LEFT, CENTER)
-    text("Ultimate Relativity is coming soon! After I finish LR.", selectionX + textPadding, rowBottom/2 + rowTop/2 - scalingFactor)
+    currentX += textWidth("FRU: ")
+
+    textSize(10*scalingFactor)
+    // Ultimate Relativity
+    push()
+    translate(0, 3*scalingFactor)
+    fill(280, sin(frameCount/100)*3, 30)
+    rect(selectionX + textPadding + currentX, rowTop,
+        selectionX + textPadding + currentX + textWidth(" Ultimate Relativity "), rowBottom, cornerRounding/2)
+
+    push()
+    translate(0, -3*scalingFactor)
+
+    fill(280, sin(frameCount/100)*3, 50)
+    if (mouseInBoundingBox(selectionX + textPadding + currentX, rowTop - 2*scalingFactor,
+        selectionX + textPadding + currentX + textWidth(" Ultimate Relativity "),
+        rowBottom + scalingFactor, cornerRounding/2)) {
+        if (mousePressedButNotHeldDown()) setupUltimateRelativity()
+        if (mouseIsPressed) translate(0, scalingFactor)
+    }
+
+    rect(selectionX + textPadding + currentX, rowTop,
+        selectionX + textPadding + currentX + textWidth(" Ultimate Relativity "), rowBottom, cornerRounding/2)
+
+    fill(0, 0, 100)
+    translate(0, -1.2*scalingFactor)
+    text(" Ultimate Relativity ", selectionX + textPadding + currentX, rowBottom/2 + rowTop/2)
+    pop()
+    pop()
+    currentX += textWidth(" Ultimate Relativity  ")
+
 
     // row 2
     // FRU: Utopian Sky; Diamond Dust; Mirror Mirror; Light Rampant
@@ -10053,6 +10207,69 @@ Want your coin count back?
 Coins are still affecting your favicon. 
         
 You are currently on the mechanic Diamond Dust.
+Click on any green dot to move to—or near—that location.
+Your time can be found at the bottom of the rectangle just above the simulation arena.
+The time that you cleared can be found on the bottom window after you have cleared.
+This is a quiz, so make sure you've studied.
+
+${updates}
+</pre>`)
+}
+
+function setupUltimateRelativity() {
+    erase()
+    rect(0, 0, width, height)
+    noErase()
+
+    setMovementMode(defaultMovementMode)
+
+    mechanicStarted = millis()
+
+    fruP3Image = loadImage('data/FRU P3/Floor.png')
+
+    MT = [0, -20*scalingFactor]
+    OT = [20*scalingFactor, 0]
+    H1 = [-20*scalingFactor, 0]
+    H2 = [0, 20*scalingFactor]
+    M1 = [-20*scalingFactor, 20*scalingFactor]
+    M2 = [20*scalingFactor, 20*scalingFactor]
+    R1 = [-20*scalingFactor, -20*scalingFactor]
+    R2 = [20*scalingFactor, -20*scalingFactor]
+
+    stage = 0
+    currentlySelectedMechanic = "Ultimate Relativity"
+    currentlySelectedBackground = "FRU P3/4"
+
+    numWinsPerCoinIncrease = 2
+
+    let css = select("html")
+    css.style("background-image", "url(\"data/FRU P3/floor with notches.png\")")
+    css = select("body")
+    css.style("background-image", "url(\"data/FRU P3/floor with notches.png\")")
+
+    textAtTop = "This mechanic is actually easier than you might have" +
+        " initially thought. You only ever have to manage 3 things: your" +
+        " traffic light, your rewind, and your fire. If you are not managing" +
+        " one of those three things in 5 seconds or less, you AFK mid. "
+    textAtBottom = "You went to your default starting spot for this" +
+        " simulation. \n[PASS] — You got to this page."
+
+    instructions.html(`<pre>
+numpad 1 → freeze sketch
+        
+This mechanic uses <a href="https://docs.google.com/presentation/d/1VqIifgNf8RzXIWb8EGGVdKvOtKk0HmhPcHIMpizYuig/edit#slide=id.g31ad41a9148_0_79" target="_blank">NAUR strats</a>
+So it's 4/4 light rampant.
+
+Click on one of the buttons at the top to do what it says.
+    Purge Data will purge the win/loss data for this mechanic and only the currently
+     selected mechanic.
+     
+Want your coin count back?
+1. Open Devtools with F12 (on Windows, please search if using Mac)
+2. Use the command "localStorage.getItem("coins")". I won't tell you how to set coins. 
+Coins are still affecting your favicon. 
+        
+You are currently on the mechanic Ultimate Relativity.
 Click on any green dot to move to—or near—that location.
 Your time can be found at the bottom of the rectangle just above the simulation arena.
 The time that you cleared can be found on the bottom window after you have cleared.
