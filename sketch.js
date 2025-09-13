@@ -102,8 +102,8 @@ modes:
 */
 class ArrivingVector {
     constructor(x, y, targetX, targetY, speed, slowdown) {
-        this.x = x;
-        this.y = y;
+        this.x = x
+        this.y = y
         this.targetX = targetX
         this.targetY = targetY
         this.speed = speed
@@ -345,6 +345,18 @@ let banishIIISpreadStack
 // Ultimate Relativity (FRU P3/4)
 let fruP3Image
 let ultimateRelativityDebuffList
+let ultimateRelativityDebuffIcons
+let DPSFirst10sFire
+let DPSSecond10sFire
+let DPS20sFire
+let DPS30sFireOrIce
+let SupFirst30sFire
+let SupSecond30sFire
+let Sup20sFire
+let Sup10sFireOrIce
+let iceRole
+let trafficLightImage
+let unholyDarknessStacks
 
 
 // Wingmark (M6S)
@@ -6807,6 +6819,27 @@ intercardinals.`
 
         displayCharacterPositions()
         pop()
+
+        if (currentlySelectedMechanic === "Ultimate Relativity") {
+            if (stage === 0) {
+                displayGreenDot(0, 0)
+
+                if (inClickingRange(centerOfBoard, 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    stage = 0.001
+                    textAtTop = "Please select your clock spot. This is the" +
+                        " most important part of the mechanic—afterwards," +
+                        " you can mostly chill in your clock spot." +
+                        " \n[IMPORTANT] — The Y of the yellow tether is" +
+                        " always north in this simulation, but you will need" +
+                        " to make sure you orient manually in the actual pull."
+                    textAtBottom = "[PASS] — You are waiting in your spot."
+                    return
+                }
+            } if (stage > 0 && stage < 6) {
+                stage += 1/frameRate()
+                stage = min(stage, 5.99999)
+            }
+        }
     }
     // M6S start & adds background
     if (currentlySelectedBackground === "M6S Start & Adds") {
@@ -8240,11 +8273,62 @@ function displayPartyList() {
             fill(0, 0, 100)
             textSize(7.5*fontScalingFactor*scalingFactor)
             stroke(0, 0, 100)
-            strokeWeight(0.25)
+            strokeWeight(0.25*scalingFactor)
             text(playerName, partyListX + textPadding + 10*scalingFactor, y + 9*scalingFactor)
 
             let currentX = partyListX + textPadding + 20*scalingFactor
+            let debuffs = ultimateRelativityDebuffList[playerName]
+            for (let debuff of debuffs) {
+                if ((stage%100) >= debuff.application && (stage%100) <= debuff.resolves) {
+                    switch (debuff.name) {
+                        case "Dark Eruption":
+                            image(ultimateRelativityDebuffIcons[0], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[0].height/ultimateRelativityDebuffIcons[0].width)
+                            break
+                        case "Dark Fire III":
+                            image(ultimateRelativityDebuffIcons[1], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[1].height/ultimateRelativityDebuffIcons[1].width)
+                            break
+                        case "Dark Ice III":
+                            image(ultimateRelativityDebuffIcons[2], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[2].height/ultimateRelativityDebuffIcons[2].width)
+                            break
+                        case "Dark Water III":
+                            image(ultimateRelativityDebuffIcons[3], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[3].height/ultimateRelativityDebuffIcons[3].width)
+                            break
+                        case "Return":
+                            image(ultimateRelativityDebuffIcons[4], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[4].height/ultimateRelativityDebuffIcons[4].width)
+                            break
+                        case "Rewind":
+                            image(ultimateRelativityDebuffIcons[5], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[5].height/ultimateRelativityDebuffIcons[5].width)
+                            break
+                        case "Shadoweye":
+                            image(ultimateRelativityDebuffIcons[6], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[6].height/ultimateRelativityDebuffIcons[6].width)
+                            break
+                        case "Stun":
+                            image(ultimateRelativityDebuffIcons[7], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[7].height/ultimateRelativityDebuffIcons[7].width)
+                            break
+                        case "Unholy Darkness":
+                            image(ultimateRelativityDebuffIcons[8], currentX - 2.5*scalingFactor, y, 15*scalingFactor,
+                                15*scalingFactor*ultimateRelativityDebuffIcons[8].height/ultimateRelativityDebuffIcons[8].width)
+                            break
+                    }
+                    fill(0, 0, 100)
+                    stroke(0, 0, 100)
+                    strokeWeight(scalingFactor/2)
+                    textSize(8*fontScalingFactor*scalingFactor)
+                    textAlign(CENTER, CENTER)
+                    if (debuff.resolves - (stage%100) > 0.5) text(round(debuff.resolves - stage%100), currentX + 5*scalingFactor, y + 16*scalingFactor)
+                    currentX += 15*scalingFactor
+                }
+            }
         }
+        // stage = ((millis() - mechanicStarted)/1000)
     }
 }
 
@@ -10226,6 +10310,7 @@ function setupUltimateRelativity() {
     mechanicStarted = millis()
 
     fruP3Image = loadImage('data/FRU P3/Floor.png')
+    trafficLightImage = loadImage('data/FRU P3/Traffic light.png')
 
     MT = [0, -20*scalingFactor]
     OT = [20*scalingFactor, 0]
@@ -10235,6 +10320,317 @@ function setupUltimateRelativity() {
     M2 = [20*scalingFactor, 20*scalingFactor]
     R1 = [-20*scalingFactor, -20*scalingFactor]
     R2 = [20*scalingFactor, -20*scalingFactor]
+
+    ultimateRelativityDebuffIcons = [
+        loadImage('data/FRU P3/dark eruption.png'),
+        loadImage('data/FRU P3/dark fire.png'),
+        loadImage('data/FRU P3/dark ice.png'),
+        loadImage('data/FRU P3/dark water.png'),
+        loadImage('data/FRU P3/return.png'),
+        loadImage('data/FRU P3/rewind.png'),
+        loadImage('data/FRU P3/shadoweye.png'),
+        loadImage('data/FRU P3/stun.png'),
+        loadImage('data/FRU P3/unholy darkness.png'),
+    ]
+
+    ultimateRelativityDebuffList = {
+        "MT": [],
+        "OT": [],
+        "H1": [],
+        "H2": [],
+        "M1": [],
+        "M2": [],
+        "R1": [],
+        "R2": []
+    }
+
+    // since all the DPS have to be different, we need to keep track of the
+    // possible remaining ones
+    let remainingDPS = ["M1", "M2", "R1", "R2"]
+
+    // same for supports
+    let remainingSupports = ["MT", "OT", "H1", "H2"]
+
+
+    let DPSConfiguration = random([0, 1, 2, 3, 4, 5])
+
+    if (DPSConfiguration === 0) {
+        DPSFirst10sFire = "M1"
+        DPSSecond10sFire = "M2"
+    } if (DPSConfiguration === 1) {
+        DPSFirst10sFire = "M1"
+        DPSSecond10sFire = "R1"
+    } if (DPSConfiguration === 2) {
+        DPSFirst10sFire = "M1"
+        DPSSecond10sFire = "R2"
+    } if (DPSConfiguration === 3) {
+        DPSFirst10sFire = "M2"
+        DPSSecond10sFire = "R1"
+    } if (DPSConfiguration === 4) {
+        DPSFirst10sFire = "M2"
+        DPSSecond10sFire = "R2"
+    } if (DPSConfiguration === 5) {
+        DPSFirst10sFire = "R1"
+        DPSSecond10sFire = "R2"
+    }
+
+    ultimateRelativityDebuffList[DPSFirst10sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 11
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 16
+        }, {
+            "name": "Rewind",
+            "application": 16,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Dark Eruption",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    ultimateRelativityDebuffList[DPSSecond10sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 11
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 16
+        }, {
+            "name": "Rewind",
+            "application": 16,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Dark Eruption",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    remainingDPS.splice(remainingDPS.indexOf(DPSFirst10sFire), 1)
+    remainingDPS.splice(remainingDPS.indexOf(DPSSecond10sFire), 1)
+
+    DPS20sFire = random(remainingDPS)
+    remainingDPS.splice(remainingDPS.indexOf(DPS20sFire), 1)
+
+    ultimateRelativityDebuffList[DPS20sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 21
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 16
+        }, {
+            "name": "Rewind",
+            "application": 16,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Dark Water III",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    DPS30sFireOrIce = random(remainingDPS)
+    remainingDPS.splice(remainingDPS.indexOf(DPS30sFireOrIce), 1)
+
+    iceRole = random(["support", "DPS"])
+
+    ultimateRelativityDebuffList[DPS30sFireOrIce] = [
+        {
+            "name": iceRole === "DPS" ? "Dark Ice III" : "Dark Fire III",
+            "application": 0.00001,
+            "resolves": iceRole === "DPS" ? 21 : 31
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 26
+        }, {
+            "name": "Rewind",
+            "application": 26,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Shadoweye",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    let SupConfiguration = random([0, 1, 2, 3, 4, 5])
+
+    if (SupConfiguration === 0) {
+        SupFirst30sFire = "MT"
+        SupSecond30sFire = "OT"
+    } if (SupConfiguration === 1) {
+        SupFirst30sFire = "MT"
+        SupSecond30sFire = "H1"
+    } if (SupConfiguration === 2) {
+        SupFirst30sFire = "MT"
+        SupSecond30sFire = "H2"
+    } if (SupConfiguration === 3) {
+        SupFirst30sFire = "OT"
+        SupSecond30sFire = "H1"
+    } if (SupConfiguration === 4) {
+        SupFirst30sFire = "OT"
+        SupSecond30sFire = "H2"
+    } if (SupConfiguration === 5) {
+        SupFirst30sFire = "H1"
+        SupSecond30sFire = "H2"
+    }
+
+    ultimateRelativityDebuffList[SupFirst30sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 31
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 26
+        }, {
+            "name": "Rewind",
+            "application": 26,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Shadoweye",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    ultimateRelativityDebuffList[SupSecond30sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 31
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 26
+        }, {
+            "name": "Rewind",
+            "application": 26,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Shadoweye",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    remainingSupports.splice(remainingSupports.indexOf(SupFirst30sFire), 1)
+    remainingSupports.splice(remainingSupports.indexOf(SupSecond30sFire), 1)
+
+    Sup20sFire = random(remainingSupports)
+    remainingSupports.splice(remainingSupports.indexOf(Sup20sFire), 1)
+
+    ultimateRelativityDebuffList[Sup20sFire] = [
+        {
+            "name": "Dark Fire III",
+            "application": 0.00001,
+            "resolves": 21
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 16
+        }, {
+            "name": "Rewind",
+            "application": 16,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Dark Eruption",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+    Sup10sFireOrIce = random(remainingSupports)
+    remainingSupports.splice(remainingSupports.indexOf(Sup10sFireOrIce), 1)
+
+    ultimateRelativityDebuffList[Sup10sFireOrIce] = [
+        {
+            "name": iceRole === "DPS" ? "Dark Fire III" : "Dark Ice III",
+            "application": 0.00001,
+            "resolves": iceRole === "DPS" ? 11 : 21
+        }, {
+            "name": "Return",
+            "application": 0.00001,
+            "resolves": 16
+        }, {
+            "name": "Rewind",
+            "application": 16,
+            "resolves": 40
+        }, {
+            "name": "Stun",
+            "application": 40,
+            "resolves": 44
+        }, {
+            "name": "Dark Eruption",
+            "application": 0.00001,
+            "resolves": 43
+        }
+    ]
+
+
+    // assign unholy darkness stacks
+    let remainingPlayers = [
+        "MT", "OT", "H1", "H2", "R1", "R2", "M1", "M2"
+    ]
+    unholyDarknessStacks = [random(remainingPlayers)]
+    remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[0]), 1)
+
+    unholyDarknessStacks.push(random(remainingPlayers))
+    remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[1]), 1)
+
+    unholyDarknessStacks.push(random(remainingPlayers))
+    remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[2]), 1)
+
+    let time = 11
+    for (let player of unholyDarknessStacks) {
+        ultimateRelativityDebuffList[player].push({
+            "name": "Unholy Darkness",
+            "application": 0.00001,
+            "resolves": time
+        })
+        time += 10
+    }
 
     stage = 0
     currentlySelectedMechanic = "Ultimate Relativity"
