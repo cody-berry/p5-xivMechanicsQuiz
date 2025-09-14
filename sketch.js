@@ -6821,6 +6821,8 @@ intercardinals.`
         pop()
 
         if (currentlySelectedMechanic === "Ultimate Relativity") {
+            let trafficLightRadius = 90*scalingFactor
+            let trafficLightSize = 50*scalingFactor
             if (stage === 0) {
                 displayGreenDot(0, 0)
 
@@ -6838,6 +6840,406 @@ intercardinals.`
             } if (stage > 0 && stage < 6) {
                 stage += 1/frameRate()
                 stage = min(stage, 5.99999)
+
+                push()
+                translateToCenterOfBoard()
+
+                noFill()
+                stroke(60, 100, 100)
+                strokeWeight(5)
+                line(0, 0, trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2)
+                line(0, 0, -trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2)
+                line(0, 0, 0, trafficLightRadius)
+
+                stroke(280, 100, 70)
+                line(-trafficLightRadius, 0, trafficLightRadius, 0)
+
+                push()
+                translate(-scalingFactor*2, 0)
+
+                imageMode(CENTER)
+                image(trafficLightImage, 0, -trafficLightRadius, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, trafficLightRadius, 0, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, 0, trafficLightRadius, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius, 0, trafficLightSize, trafficLightSize)
+
+
+                image(trafficLightImage, trafficLightRadius*sqrt(2)/2, trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius*sqrt(2)/2, trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                pop()
+
+                displayCharacterPositions()
+                pop()
+
+                let greenDotRadius = 70*scalingFactor
+                let DPSFirst10sFireDot = [-greenDotRadius*sqrt(2)/2, greenDotRadius*sqrt(2)/2]
+                let DPSSecond10sFireDot = [greenDotRadius*sqrt(2)/2, greenDotRadius*sqrt(2)/2]
+                let DPS20sFireDot = [greenDotRadius, 0]
+                let DPS30sFireOrIceDot = [0, greenDotRadius]
+
+                let SupFirst30sFireDot = [-greenDotRadius*sqrt(2)/2, -greenDotRadius*sqrt(2)/2]
+                let SupSecond30sFireDot = [greenDotRadius*sqrt(2)/2, -greenDotRadius*sqrt(2)/2]
+                let Sup20sFireDot = [-greenDotRadius, 0]
+                let Sup10sFireOrIceDot = [0, -greenDotRadius]
+
+                displayGreenDot(...DPSFirst10sFireDot)
+                displayGreenDot(...DPSSecond10sFireDot)
+                displayGreenDot(...DPS20sFireDot)
+                displayGreenDot(...DPS30sFireOrIceDot)
+
+
+                displayGreenDot(...SupFirst30sFireDot)
+                displayGreenDot(...SupSecond30sFireDot)
+                displayGreenDot(...Sup20sFireDot)
+                displayGreenDot(...Sup10sFireOrIceDot)
+
+                if (inBoardCenterFormatClickingRanges([
+                    DPSFirst10sFireDot,
+                    DPSSecond10sFireDot,
+                    DPS20sFireDot,
+                    DPS30sFireOrIceDot,
+                    SupFirst30sFireDot,
+                    SupSecond30sFireDot,
+                    Sup20sFireDot,
+                    Sup10sFireOrIceDot
+                ], 10*scalingFactor) && mousePressedButNotHeldDown()) {
+                    setPosition(DPSFirst10sFire, ...DPSFirst10sFireDot)
+                    setPosition(DPSSecond10sFire, ...DPSSecond10sFireDot)
+                    setPosition(DPS20sFire, ...DPS20sFireDot)
+                    setPosition(DPS30sFireOrIce, ...DPS30sFireOrIceDot)
+
+                    setPosition(SupFirst30sFire, ...SupFirst30sFireDot)
+                    setPosition(SupSecond30sFire, ...SupSecond30sFireDot)
+                    setPosition(Sup20sFire, ...Sup20sFireDot)
+                    setPosition(Sup10sFireOrIce, ...Sup10sFireOrIceDot)
+
+                    let clickedPosition = inBoardCenterFormatClickingRanges([
+                        DPSFirst10sFireDot,
+                        DPSSecond10sFireDot,
+                        DPS20sFireDot,
+                        DPS30sFireOrIceDot,
+                        SupFirst30sFireDot,
+                        SupSecond30sFireDot,
+                        Sup20sFireDot,
+                        Sup10sFireOrIceDot
+                    ], 10*scalingFactor)
+                    let correctPosition = yourPosition()
+
+                    let clickedPositionID = ""
+                    if (inBoardCenterFormatClickingRanges([DPSFirst10sFireDot], 10*scalingFactor)) clickedPositionID = "SW 10s fire position"
+                    if (inBoardCenterFormatClickingRanges([DPSSecond10sFireDot], 10*scalingFactor)) clickedPositionID = "SE 10s fire position"
+                    if (inBoardCenterFormatClickingRanges([DPS20sFireDot], 10*scalingFactor)) clickedPositionID = "E 20s fire position"
+                    if (inBoardCenterFormatClickingRanges([DPS30sFireOrIceDot], 10*scalingFactor)) clickedPositionID = "S 30s fire/ice position"
+                    if (inBoardCenterFormatClickingRanges([SupFirst30sFireDot], 10*scalingFactor)) clickedPositionID = "NW 30s fire position"
+                    if (inBoardCenterFormatClickingRanges([SupSecond30sFireDot], 10*scalingFactor)) clickedPositionID = "NE 30s fire position"
+                    if (inBoardCenterFormatClickingRanges([Sup20sFireDot], 10*scalingFactor)) clickedPositionID = "W 20s fire position"
+                    if (inBoardCenterFormatClickingRanges([Sup10sFireOrIceDot], 10*scalingFactor)) clickedPositionID = "N 10s fire/ice position"
+
+                    let correctPositionID = ""
+                    switch (role) {
+                        case DPSFirst10sFire: correctPositionID = "SW 10s fire position"; break
+                        case DPSSecond10sFire: correctPositionID = "SE 10s fire position"; break
+                        case DPS20sFire: correctPositionID = "E 20s fire position"; break
+                        case DPS30sFireOrIce: correctPositionID = "S 30s fire/ice position"; break
+                        case SupFirst30sFire: correctPositionID = "NW 30s fire position"; break
+                        case SupSecond30sFire: correctPositionID = "NE 30s fire position"; break
+                        case Sup20sFire: correctPositionID = "W 20s fire position"; break
+                        case Sup10sFireOrIce: correctPositionID = "N 10s fire/ice position"; break
+                    }
+
+                    if (clickedPosition[0] === correctPosition[0] && clickedPosition[1] === correctPosition[1]) {
+                        stage = 6
+                        switch (correctPositionID) {
+                            case "SW 10s fire position":
+                                switch (role) {
+                                    case "R2":
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — R2 always goes SW."
+                                        break
+                                    case "R1":
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — R2 didn't also have 10s fire."
+                                        break
+                                    case "M1":
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — M2 also had 10s fire."
+                                }
+                                break
+                            case "SE 10s fire position":
+                                switch (role) {
+                                    case "M2":
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — M2 always goes SE."
+                                        break
+                                    case "M1":
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — M2 didn't also have 10s fire."
+                                        break
+                                    case "R1":
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[PASS]" +
+                                            " — R2 also had 10s fire."
+                                }
+                                break
+                            case "E 20s fire position":
+                                textAtBottom = "You went to the E 20s fire" +
+                                    " position. \n[PASS] — You have a 20s" +
+                                    " fire debuff."
+                                break
+                            case "S 30s fire/ice position":
+                                textAtBottom = "You went to the S 30s" +
+                                    " fire/ice position. \n[PASS] — You have" +
+                                    " a" + (iceRole === "DPS" ? "n ice" +
+                                    " debuff." : " 30s fire debuff.")
+                                break
+
+                            case "NW 30s fire position":
+                                switch (role) {
+                                    case "H2":
+                                        textAtBottom = "You went to the NW" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — H2 always goes NW."
+                                        break
+                                    case "H1":
+                                        textAtBottom = "You went to the NW" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — H2 didn't also have 30s fire."
+                                        break
+                                    case "MT":
+                                        textAtBottom = "You went to the NW" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — OT also had 30s fire."
+                                }
+                                break
+                            case "NE 30s fire position":
+                                switch (role) {
+                                    case "OT":
+                                        textAtBottom = "You went to the NE" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — OT always goes NE."
+                                        break
+                                    case "MT":
+                                        textAtBottom = "You went to the NE" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — OT didn't also have 30s fire."
+                                        break
+                                    case "H1":
+                                        textAtBottom = "You went to the NE" +
+                                            " 30s fire position. \n[PASS]" +
+                                            " — H2 also had 30s fire."
+                                }
+                                break
+                            case "W 20s fire position":
+                                textAtBottom = "You went to the W 20s fire" +
+                                    " position. \n[PASS] — You have a 20s" +
+                                    " fire debuff."
+                                break
+                            case "N 10s fire/ice position":
+                                textAtBottom = "You went to the N 10s" +
+                                    " fire/ice position. \n[PASS] — You have" +
+                                    " a" + (iceRole === "support" ? "n ice" +
+                                        " debuff." : " 10s fire debuff.")
+                                break
+                        }
+                        textAtTop = "The first fire & stack debuffs are" +
+                            " resolving right now. Where are you going?"
+                    } else {
+                        stage += 100
+
+                        setPosition(role, ...clickedPosition)
+
+                        // check if mixing up support/dps
+                        if (inBoardCenterFormatClickingRanges([
+                            SupFirst30sFireDot,
+                            SupSecond30sFireDot,
+                            Sup20sFireDot,
+                            Sup10sFireOrIceDot
+                        ], 10*scalingFactor) && DPSOrSupports(role) === "DPS") {
+                            textAtTop = "DPS should take the southwest," +
+                                " south, southeast, and east spots, not the" +
+                                " west, northwest, north, or northeast spots."
+                            textAtBottom = "You went to a support spot." +
+                                " \n[FAIL] — You are a DPS."
+                            return
+                        }
+
+                        if (inBoardCenterFormatClickingRanges([
+                            DPSFirst10sFireDot,
+                            DPSSecond10sFireDot,
+                            DPS20sFireDot,
+                            DPS30sFireOrIceDot
+                        ], 10*scalingFactor) && DPSOrSupports(role) === "supports") {
+                            textAtTop = "Supports should take the west," +
+                                " northwest, north, and northeast spots, not" +
+                                " the southwest, south, southeast, or east" +
+                                " spots."
+                            textAtBottom = "You went to a DPS spot." +
+                                " \n[FAIL] — You are a support."
+                            return
+                        }
+
+                        // DPS checks
+                        if (DPSOrSupports(role) === "DPS") { print("good")
+                            if (role === DPS30sFireOrIce) {
+                                textAtTop = "You were a" + (iceRole === "DPS" ? "n ice" +
+                                    " debuff." : " 30s fire debuff.")
+                                textAtBottom = "You went to the " + clickedPositionID +
+                                    ".\n[FAIL] — You have a" + (iceRole ===
+                                    "DPS" ? "n ice" + " debuff." : " 30s" +
+                                        " fire debuff.")
+                            } if (role === DPS20sFire) {
+                                textAtTop = "You were a 20s fire debuff."
+                                textAtBottom = "You went to the " + clickedPositionID +
+                                    ".\n[FAIL] — You have a 20s fire debuff."
+                            } if (role === DPSFirst10sFire) {
+                                if (clickedPositionID !== "SE 10s fire" +
+                                    " position") {
+                                    textAtTop = "You were a 10s fire debuff."
+                                    textAtBottom = "You went to the " + clickedPositionID +
+                                        ".\n[FAIL] — You have a 10s fire" +
+                                        " debuff."
+                                    return
+                                }
+
+                                switch (role) {
+                                    case "R2":
+                                        textAtTop = "Light party 2 doesn't" +
+                                            " have to deal with flexing."
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — R2 always goes SW."
+                                        break
+                                    case "R1":
+                                        textAtTop = "You should only flex if" +
+                                            " R2 has the same debuff as you."
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — R2 didn't also have 10s fire."
+                                        break
+                                    case "M1":
+                                        textAtTop = "You should flex if M2" +
+                                            " has the same debuff as you."
+                                        textAtBottom = "You went to the SE" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — M2 also had 10s fire."
+                                        break
+                                }
+                            } if (role === DPSSecond10sFire) {
+                                if (clickedPositionID !== "SW 10s fire" +
+                                    " position") {
+                                    textAtTop = "You were a 10s fire debuff."
+                                    textAtBottom = "You went to the " + clickedPositionID +
+                                        ".\n[FAIL] — You have a 10s fire" +
+                                        " debuff."
+                                    return
+                                }
+
+                                switch (role) {
+                                    case "M2":
+                                        textAtTop = "Light party 2 doesn't" +
+                                            " have to deal with flexing."
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — M2 always goes SE."
+                                        break
+                                    case "M1":
+                                        textAtTop = "You should only flex if" +
+                                            " M2 has the same debuff as you."
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — M2 didn't also have 10s fire."
+                                        break
+                                    case "R1":
+                                        textAtTop = "You should only flex if" +
+                                            " R2 has the same debuff as you."
+                                        textAtBottom = "You went to the SW" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — R2 also had 10s fire."
+                                }
+                            }
+                        }
+
+                        // support checks
+                        if (DPSOrSupports(role) === "supports") {
+                            if (role === Sup10sFireOrIce) {
+                                textAtTop = "You were a" + (iceRole === "support" ? "n ice" +
+                                    " debuff." : " 10s fire debuff.")
+                                textAtBottom = "You went to the " + clickedPositionID +
+                                    ".\n[FAIL] — You have a" + (iceRole ===
+                                    "support" ? "n ice" + " debuff." : " 10s" +
+                                        " fire debuff.")
+                            } if (role === Sup20sFire) {
+                                textAtTop = "You were a 20s fire debuff."
+                                textAtBottom = "You went to the " + clickedPositionID +
+                                    ".\n[FAIL] — You have a 20s fire debuff."
+                            } if (role === SupFirst30sFire) {
+                                if (clickedPositionID !== "NE 30s fire" +
+                                    " position") {
+                                    textAtTop = "You were a 30s fire debuff."
+                                    textAtBottom = "You went to the " + clickedPositionID +
+                                        ".\n[FAIL] — You have a 30s fire" +
+                                        " debuff."
+                                    return
+                                }
+
+                                switch (role) {
+                                    case "H2":
+                                        textAtTop = "Light party 2 doesn't" +
+                                            " have to deal with flexing."
+                                        textAtBottom = "You went to the NE" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — H2 always goes NW."
+                                        break
+                                    case "H1":
+                                        textAtBottom = "You went to the NE" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — H2 didn't also have 30s fire."
+                                        break
+                                    case "MT":
+                                        textAtBottom = "You went to the NE" +
+                                            " 30s fire position. \n[FAIL]" +
+                                            " — OT also had 30s fire."
+                                        break
+                                }
+                            } if (role === SupSecond30sFire) {
+                                if (clickedPositionID !== "NW 30s fire" +
+                                    " position") {
+                                    textAtTop = "You were a 30s fire debuff."
+                                    textAtBottom = "You went to the " + clickedPositionID +
+                                        ".\n[FAIL] — You have a 30s fire" +
+                                        " debuff."
+                                    return
+                                }
+
+                                switch (role) {
+                                    case "OT":
+                                        textAtTop = "Light party 2 doesn't" +
+                                            " have to deal with flexing."
+                                        textAtBottom = "You went to the NW" +
+                                            " 10s fire position. \n[FAIL]" +
+                                            " — OT always goes NE."
+                                        break
+                                    case "MT":
+                                        textAtBottom = "You went to the NW" +
+                                            " 30s fire position. \n[FAIL]" +
+                                            " — OT didn't also have 30s fire."
+                                        break
+                                    case "H1":
+                                        textAtBottom = "You went to the SW" +
+                                            " 30s fire position. \n[FAIL]" +
+                                            " — H2 also had 30s fire."
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -8269,6 +8671,13 @@ function displayPartyList() {
                 noStroke()
                 circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
             }
+            if (playerName === role) {
+                fill(50, 100, 60)
+                stroke(0, 0, 100)
+                strokeWeight(1.5*scalingFactor)
+                circle(partyListX + textPadding + 10*scalingFactor, y + 10*scalingFactor, 15*scalingFactor)
+            }
+
             textAlign(CENTER, CENTER)
             fill(0, 0, 100)
             textSize(7.5*fontScalingFactor*scalingFactor)
@@ -10310,7 +10719,7 @@ function setupUltimateRelativity() {
     mechanicStarted = millis()
 
     fruP3Image = loadImage('data/FRU P3/Floor.png')
-    trafficLightImage = loadImage('data/FRU P3/Traffic light.png')
+    trafficLightImage = loadImage('data/FRU P3/Traffic light 2.png')
 
     MT = [0, -20*scalingFactor]
     OT = [20*scalingFactor, 0]
@@ -10355,23 +10764,23 @@ function setupUltimateRelativity() {
     let DPSConfiguration = random([0, 1, 2, 3, 4, 5])
 
     if (DPSConfiguration === 0) {
+        DPSFirst10sFire = "R2"
+        DPSSecond10sFire = "R1"
+    } if (DPSConfiguration === 1) {
+        DPSFirst10sFire = "R2"
+        DPSSecond10sFire = "M1"
+    } if (DPSConfiguration === 2) {
+        DPSFirst10sFire = "R2"
+        DPSSecond10sFire = "M2"
+    } if (DPSConfiguration === 3) {
+        DPSFirst10sFire = "R1"
+        DPSSecond10sFire = "M1"
+    } if (DPSConfiguration === 4) {
+        DPSFirst10sFire = "R1"
+        DPSSecond10sFire = "M2"
+    } if (DPSConfiguration === 5) {
         DPSFirst10sFire = "M1"
         DPSSecond10sFire = "M2"
-    } if (DPSConfiguration === 1) {
-        DPSFirst10sFire = "M1"
-        DPSSecond10sFire = "R1"
-    } if (DPSConfiguration === 2) {
-        DPSFirst10sFire = "M1"
-        DPSSecond10sFire = "R2"
-    } if (DPSConfiguration === 3) {
-        DPSFirst10sFire = "M2"
-        DPSSecond10sFire = "R1"
-    } if (DPSConfiguration === 4) {
-        DPSFirst10sFire = "M2"
-        DPSSecond10sFire = "R2"
-    } if (DPSConfiguration === 5) {
-        DPSFirst10sFire = "R1"
-        DPSSecond10sFire = "R2"
     }
 
     ultimateRelativityDebuffList[DPSFirst10sFire] = [
@@ -10484,23 +10893,23 @@ function setupUltimateRelativity() {
     let SupConfiguration = random([0, 1, 2, 3, 4, 5])
 
     if (SupConfiguration === 0) {
+        SupFirst30sFire = "H2"
+        SupSecond30sFire = "H1"
+    } if (SupConfiguration === 1) {
+        SupFirst30sFire = "H2"
+        SupSecond30sFire = "MT"
+    } if (SupConfiguration === 2) {
+        SupFirst30sFire = "H2"
+        SupSecond30sFire = "OT"
+    } if (SupConfiguration === 3) {
+        SupFirst30sFire = "H1"
+        SupSecond30sFire = "MT"
+    } if (SupConfiguration === 4) {
+        SupFirst30sFire = "H1"
+        SupSecond30sFire = "OT"
+    } if (SupConfiguration === 5) {
         SupFirst30sFire = "MT"
         SupSecond30sFire = "OT"
-    } if (SupConfiguration === 1) {
-        SupFirst30sFire = "MT"
-        SupSecond30sFire = "H1"
-    } if (SupConfiguration === 2) {
-        SupFirst30sFire = "MT"
-        SupSecond30sFire = "H2"
-    } if (SupConfiguration === 3) {
-        SupFirst30sFire = "OT"
-        SupSecond30sFire = "H1"
-    } if (SupConfiguration === 4) {
-        SupFirst30sFire = "OT"
-        SupSecond30sFire = "H2"
-    } if (SupConfiguration === 5) {
-        SupFirst30sFire = "H1"
-        SupSecond30sFire = "H2"
     }
 
     ultimateRelativityDebuffList[SupFirst30sFire] = [
