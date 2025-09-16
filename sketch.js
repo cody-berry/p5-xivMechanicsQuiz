@@ -357,6 +357,7 @@ let Sup10sFireOrIce
 let iceRole
 let trafficLightImage
 let unholyDarknessStacks
+let URClockSpotAngles = {}
 
 
 // Wingmark (M6S)
@@ -7050,6 +7051,7 @@ intercardinals.`
                         }
                         textAtTop = "The first fire & stack debuffs are" +
                             " resolving right now. Where are you going?"
+                        return
                     } else {
                         stage += 100
 
@@ -7086,7 +7088,7 @@ intercardinals.`
                         }
 
                         // DPS checks
-                        if (DPSOrSupports(role) === "DPS") { print("good")
+                        if (DPSOrSupports(role) === "DPS") {
                             if (role === DPS30sFireOrIce) {
                                 textAtTop = "You were a" + (iceRole === "DPS" ? "n ice" +
                                     " debuff." : " 30s fire debuff.")
@@ -7157,7 +7159,7 @@ intercardinals.`
                                             " — M2 didn't also have 10s fire."
                                         break
                                     case "R1":
-                                        textAtTop = "You should only flex if" +
+                                        textAtTop = "You should flex if" +
                                             " R2 has the same debuff as you."
                                         textAtBottom = "You went to the SW" +
                                             " 10s fire position. \n[FAIL]" +
@@ -7198,6 +7200,7 @@ intercardinals.`
                                             " — H2 always goes NW."
                                         break
                                     case "H1":
+                                        textAtTop = ""
                                         textAtBottom = "You went to the NE" +
                                             " 10s fire position. \n[FAIL]" +
                                             " — H2 didn't also have 30s fire."
@@ -7239,6 +7242,191 @@ intercardinals.`
                             }
                         }
                     }
+                }
+            } if (stage >= 6 && stage < 9) {
+                stage += 1/frameRate()
+                stage = min(stage, 8.999)
+
+                push()
+                translateToCenterOfBoard()
+
+                noFill()
+                push()
+                translate(-scalingFactor*2, 0)
+
+                imageMode(CENTER)
+                image(trafficLightImage, 0, -trafficLightRadius, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, trafficLightRadius, 0, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, 0, trafficLightRadius, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius, 0, trafficLightSize, trafficLightSize)
+
+
+                image(trafficLightImage, trafficLightRadius*sqrt(2)/2, trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius*sqrt(2)/2, -trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                image(trafficLightImage, -trafficLightRadius*sqrt(2)/2, trafficLightRadius*sqrt(2)/2, trafficLightSize, trafficLightSize)
+                pop()
+
+                displayCharacterPositions()
+                pop()
+
+                let yourClockSpot = radians(URClockSpotAngles[role])
+                let xMult = cos(yourClockSpot) // we have saved ourselves tons
+                let yMult = sin(yourClockSpot) // of cos() and sin()s right here
+
+                // calculate the ones directly on your angle—traffic light,
+                // spread
+                let centerGreenDot = [10*xMult*scalingFactor, 10*yMult*scalingFactor]
+                let spreadRewindGreenDot = [trafficLightRadius*xMult*39/40, trafficLightRadius*yMult*39/40]
+                let spreadGreenDot = [150*xMult*scalingFactor, 150*yMult*scalingFactor]
+
+                yourClockSpot -= 0.175
+                xMult = cos(yourClockSpot)
+                yMult = sin(yourClockSpot)
+                let clockwiseTrafficBait = [trafficLightRadius*xMult*41/40, trafficLightRadius*yMult*41/40]
+
+                yourClockSpot += 0.35
+                xMult = cos(yourClockSpot)
+                yMult = sin(yourClockSpot)
+                let counterclockwiseTrafficBait = [trafficLightRadius*xMult*41/40, trafficLightRadius*yMult*41/40]
+
+
+                displayGreenDot(...centerGreenDot)
+                displayGreenDot(...spreadRewindGreenDot)
+                displayGreenDot(...spreadGreenDot)
+                displayGreenDot(...clockwiseTrafficBait)
+                displayGreenDot(...counterclockwiseTrafficBait)
+
+                if (inBoardCenterFormatClickingRanges(
+                    [centerGreenDot,
+                    spreadRewindGreenDot,
+                    spreadGreenDot,
+                    clockwiseTrafficBait,
+                    counterclockwiseTrafficBait], 10*scalingFactor
+                ) && mousePressedButNotHeldDown()) {
+                    setPosition(DPSFirst10sFire,
+                        cos(radians(URClockSpotAngles[DPSFirst10sFire]))*150*scalingFactor,
+                        sin(radians(URClockSpotAngles[DPSFirst10sFire]))*150*scalingFactor
+                    )
+                    setPosition(DPSSecond10sFire,
+                        cos(radians(URClockSpotAngles[DPSSecond10sFire]))*150*scalingFactor,
+                        sin(radians(URClockSpotAngles[DPSSecond10sFire]))*150*scalingFactor
+                    )
+                    setPosition(DPS20sFire,
+                        cos(radians(URClockSpotAngles[DPS20sFire]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[DPS20sFire]))*10*scalingFactor
+                    )
+                    setPosition(DPS30sFireOrIce,
+                        cos(radians(URClockSpotAngles[DPS30sFireOrIce]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[DPS30sFireOrIce]))*10*scalingFactor
+                    )
+                    setPosition(SupFirst30sFire,
+                        cos(radians(URClockSpotAngles[SupFirst30sFire]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[SupFirst30sFire]))*10*scalingFactor
+                    )
+                    setPosition(SupSecond30sFire,
+                        cos(radians(URClockSpotAngles[SupSecond30sFire]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[SupSecond30sFire]))*10*scalingFactor
+                    )
+                    setPosition(Sup20sFire,
+                        cos(radians(URClockSpotAngles[Sup20sFire]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[Sup20sFire]))*10*scalingFactor
+                    )
+                    setPosition(Sup10sFireOrIce,
+                        cos(radians(URClockSpotAngles[Sup10sFireOrIce]))*10*scalingFactor,
+                        sin(radians(URClockSpotAngles[Sup10sFireOrIce]))*10*scalingFactor
+                    )
+
+                    // support 10s fire might need to spread if they're not ice
+                    if (iceRole === "DPS") {
+                        setPosition(Sup10sFireOrIce,
+                            cos(radians(URClockSpotAngles[Sup10sFireOrIce]))*150*scalingFactor,
+                            sin(radians(URClockSpotAngles[Sup10sFireOrIce]))*150*scalingFactor
+                        )
+                    }
+
+                    // get positions
+                    let clickedPosition = inBoardCenterFormatClickingRanges(
+                        [centerGreenDot,
+                            spreadRewindGreenDot,
+                            spreadGreenDot,
+                            clockwiseTrafficBait,
+                            counterclockwiseTrafficBait], 10*scalingFactor
+                    )
+                    let correctPosition = yourPosition()
+                    
+                    let correctPositionID = "middle stack spot"
+                    if (radius(...correctPosition) > 100*scalingFactor) {
+                        correctPositionID = "spread spot"
+                    }
+
+                    let clickedPositionID = "middle stack spot"
+                    if (radius(...clickedPosition) > 30*scalingFactor) {
+                        clickedPositionID = "incorrect traffic light spot"
+                    }
+                    if (radius(...clickedPosition) > 130*scalingFactor) {
+                        clickedPositionID = "spread spot"
+                    }
+
+                    if (clickedPositionID === "incorrect traffic light spot") {
+                        textAtTop = "The 3 dots near the traffic light are" +
+                            " for baiting traffic light + dropping rewinds" +
+                            " later. The spread spot is farther out than the" +
+                            " traffic light."
+                        textAtBottom = "You went to a traffic light spot." +
+                            " \n[FAIL] — You should either stack with the" +
+                            " group or spread away (farther than traffic" +
+                            " light), not go in between."
+                        stage += 100
+                    }
+
+                    if (correctPositionID === "middle stack spot") {
+                        if (clickedPositionID === "middle stack spot") {
+                            textAtTop = "Please wait for debuffs to resolve."
+                            textAtBottom = "You went to stack with the" +
+                                " group. \n[PASS] — You are not currently" +
+                                " resolving a spread."
+                            stage = 9
+                        } if (clickedPositionID === "spread spot") {
+                            textAtTop = "You don't have a 10s fire debuff."
+                            textAtBottom = "You went to spread for fire." +
+                                " \n[FAIL] — You are not currently resolving" +
+                                " a spread."
+                            stage += 100
+
+                            if (role === Sup10sFireOrIce && iceRole === "support") {
+                                textAtTop = "Even though you are supposed to" +
+                                    " have a 10s fire debuff, try to stack" +
+                                    " with the group when you can for more" +
+                                    " leeway if one person spreads when" +
+                                    " they're not supposed to, or goes" +
+                                    " barely out of the stack."
+                                textAtBottom = "You went to spread for fire." +
+                                    " \n[FAIL] — You are supposed to be the" +
+                                    " 10s fire support, but you have an ice" +
+                                    " debuff instead and should stack with" +
+                                    " the group."
+                            }
+                        }
+                    }
+                    if (correctPositionID === "spread spot") {
+                        if (clickedPositionID === "middle stack spot") {
+                            textAtTop = "You have a 10s fire debuff."
+                            textAtBottom = "You went to stack with the group." +
+                                " \n[FAIL] — You are currently resolving a" +
+                                " spread."
+                            stage += 100
+                        } if (clickedPositionID === "spread spot") {
+                            textAtTop = "Please wait for debuffs to resolve."
+                            textAtBottom = "You went to spread for fire." +
+                                " \n[PASS] — You are currently resolving a" +
+                                " spread."
+                            stage = 9
+                        }
+                    }
+
+
+                    setPosition(role, ...clickedPosition)
                 }
             }
         }
@@ -9345,6 +9533,18 @@ function updateLosses(winsPerCoinIncrease) {
     localStorage.setItem(currentlySelectedMechanic + " wipes", parseInt(localStorage.getItem(currentlySelectedMechanic + " wipes")) + 1)
 }
 
+// aside from it being easy to mess up with this, it's more convenient to
+// call a short function
+function radius(x, y) {
+    return sqrt(x**2 + y**2)
+}
+
+// did you know that atan2 uses [y, x] so you can't ... a position onto it?
+// it's annoying
+function goodAtan2(x, y) {
+    return atan2(y, x)
+}
+
 function formatSeconds(s) {
     let seconds = floor(s) % 60
     let minutes = floor(s/60) % 60
@@ -11023,13 +11223,32 @@ function setupUltimateRelativity() {
         "MT", "OT", "H1", "H2", "R1", "R2", "M1", "M2"
     ]
     unholyDarknessStacks = [random(remainingPlayers)]
+    while (checkEqualities(unholyDarknessStacks[0], [DPSFirst10sFire, DPSSecond10sFire, Sup10sFireOrIce])) {
+        unholyDarknessStacks[0] = random(remainingPlayers)
+    }
     remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[0]), 1)
 
     unholyDarknessStacks.push(random(remainingPlayers))
+    while (checkEqualities(unholyDarknessStacks[1], [DPS20sFire, Sup20sFire, DPS30sFireOrIce, Sup10sFireOrIce])) {
+        unholyDarknessStacks[1] = random(remainingPlayers)
+    }
     remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[1]), 1)
 
     unholyDarknessStacks.push(random(remainingPlayers))
+    while (checkEqualities(unholyDarknessStacks[2], [SupFirst30sFire, SupSecond30sFire, DPS30sFireOrIce])) {
+        unholyDarknessStacks[2] = random(remainingPlayers)
+    }
     remainingPlayers.splice(remainingPlayers.indexOf(unholyDarknessStacks[2]), 1)
+
+
+    URClockSpotAngles[DPSFirst10sFire] = 135
+    URClockSpotAngles[DPSSecond10sFire] = 45
+    URClockSpotAngles[DPS20sFire] = 0
+    URClockSpotAngles[DPS30sFireOrIce] = 90
+    URClockSpotAngles[SupFirst30sFire] = 225
+    URClockSpotAngles[SupSecond30sFire] = 315
+    URClockSpotAngles[Sup20sFire] = 180
+    URClockSpotAngles[Sup10sFireOrIce] = 270
 
     let time = 11
     for (let player of unholyDarknessStacks) {
@@ -11041,7 +11260,7 @@ function setupUltimateRelativity() {
         time += 10
     }
 
-    stage = 0
+    stage = 1
     currentlySelectedMechanic = "Ultimate Relativity"
     currentlySelectedBackground = "FRU P3/4"
 
